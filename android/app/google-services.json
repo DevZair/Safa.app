@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "889199537687",
+    "project_id": "safa-az-app",
+    "storage_bucket": "safa-az-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:889199537687:android:3578cff1b656725e613652",
+        "android_client_info": {
+          "package_name": "com.example.safa_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJEp3_jZ-TgfFrMoR1JYgG9o6l1SIcrQk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
