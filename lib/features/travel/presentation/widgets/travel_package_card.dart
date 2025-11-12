@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
 import 'package:safa_app/features/travel/presentation/widgets/travel_badge.dart';
 import 'package:safa_app/features/travel/presentation/widgets/travel_meta_item.dart';
 
 class TravelPackage {
+  final String id;
   final String title;
   final String location;
   final String imagePath;
@@ -16,6 +18,7 @@ class TravelPackage {
   final String durationLabel;
 
   const TravelPackage({
+    required this.id,
     required this.title,
     required this.location,
     required this.imagePath,
@@ -37,28 +40,33 @@ class TravelBadgeData {
   const TravelBadgeData(
     this.text,
     this.background, [
-    this.foreground = Colors.white,
+    this.foreground = AppColors.white,
   ]);
 }
 
 class TravelPackageCard extends StatelessWidget {
   final TravelPackage package;
+  final bool isFavorite;
+  final VoidCallback onFavoriteToggle;
 
   const TravelPackageCard({
     super.key,
     required this.package,
+    required this.isFavorite,
+    required this.onFavoriteToggle,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 26),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: AppColors.black.withValues(alpha: 0.05),
             blurRadius: 20,
             offset: const Offset(0, 12),
           ),
@@ -67,7 +75,11 @@ class TravelPackageCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _PackageImage(package: package),
+          _PackageImage(
+            package: package,
+            isFavorite: isFavorite,
+            onFavoriteToggle: onFavoriteToggle,
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
             child: Column(
@@ -75,35 +87,41 @@ class TravelPackageCard extends StatelessWidget {
               children: [
                 Text(
                   package.title,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF0F172A),
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.place_outlined,
-                        size: 18, color: Color(0xFF64748B)),
+                    const Icon(
+                      Icons.place_outlined,
+                      size: 18,
+                      color: AppColors.iconLocation,
+                    ),
                     const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        package.location,
-                        style: const TextStyle(
-                          color: Color(0xFF475569),
-                          fontSize: 14,
-                        ),
+                   Expanded(
+                     child: Text(
+                       package.location,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontSize: 14,
+                              color: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.color
+                                  ?.withValues(alpha: 0.75),
+                            ),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
-                const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                Divider(height: 1, color: Theme.of(context).dividerColor),
                 const SizedBox(height: 16),
-                _GuideRow(package: package),
+          _GuideRow(package: package),
                 const SizedBox(height: 16),
-                const Divider(height: 1, color: Color(0xFFE2E8F0)),
+                Divider(height: 1, color: Theme.of(context).dividerColor),
                 const SizedBox(height: 16),
                 Row(
                   children: [
@@ -131,8 +149,14 @@ class TravelPackageCard extends StatelessWidget {
 
 class _PackageImage extends StatelessWidget {
   final TravelPackage package;
+  final bool isFavorite;
+  final VoidCallback onFavoriteToggle;
 
-  const _PackageImage({required this.package});
+  const _PackageImage({
+    required this.package,
+    required this.isFavorite,
+    required this.onFavoriteToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -142,33 +166,40 @@ class _PackageImage extends StatelessWidget {
         children: [
           AspectRatio(
             aspectRatio: 16 / 11,
-            child: Image.asset(
-              package.imagePath,
-              fit: BoxFit.cover,
-            ),
+            child: Image.asset(package.imagePath, fit: BoxFit.cover),
           ),
           Positioned(
             left: 16,
             top: 16,
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                for (final tag in package.tags) ...[
-                  TravelBadge(
-                    label: tag.text,
-                    backgroundColor: tag.background,
-                    foregroundColor: tag.foreground,
-                  ),
-                  const SizedBox(width: 8),
-                ],
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 6,
+                  children: [
+                    for (final tag in package.tags)
+                      TravelBadge(
+                        label: tag.text,
+                        backgroundColor: tag.background,
+                        foregroundColor: tag.foreground,
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                TravelBadge(
+                  label: package.availabilityLabel,
+                  backgroundColor: AppColors.badgeDanger,
+                ),
               ],
             ),
           ),
           Positioned(
             right: 16,
             top: 16,
-            child: TravelBadge(
-              label: package.availabilityLabel,
-              backgroundColor: const Color(0xFFE11D48),
+            child: _FavoriteButton(
+              isFavorite: isFavorite,
+              onTap: onFavoriteToggle,
             ),
           ),
         ],
@@ -184,12 +215,13 @@ class _GuideRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         CircleAvatar(
           radius: 24,
-          backgroundColor: const Color(0xFFD1FAE5),
+          backgroundColor: AppColors.surfaceAvatar,
           child: Icon(Icons.person, color: AppColors.primary),
         ),
         const SizedBox(width: 14),
@@ -199,21 +231,30 @@ class _GuideRow extends StatelessWidget {
             children: [
               Text(
                 package.guideName,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF1F2937),
+                  color:
+                      Theme.of(context).textTheme.titleMedium?.color ??
+                          AppColors.headingDeep,
                 ),
               ),
               Row(
                 children: [
-                  const Icon(Icons.star_rounded,
-                      size: 16, color: Color(0xFFF59E0B)),
+                  const Icon(
+                    Icons.star_rounded,
+                    size: 16,
+                    color: AppColors.ratingStar,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     package.guideRating.toStringAsFixed(1),
-                    style: const TextStyle(
-                      color: Color(0xFF475569),
+                    style: TextStyle(
+                      color: Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.color
+                          ?.withValues(alpha: 0.7),
                       fontSize: 13,
                       fontWeight: FontWeight.w500,
                     ),
@@ -234,10 +275,14 @@ class _GuideRow extends StatelessWidget {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const Text(
-              'per person',
+            Text(
+              l10n.t('travel.book.perPerson'),
               style: TextStyle(
-                color: Color(0xFF94A3B8),
+                color: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.color
+                    ?.withValues(alpha: 0.7),
                 fontSize: 12,
               ),
             ),
@@ -255,6 +300,7 @@ class _BookButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return GestureDetector(
       onTap: () {},
       child: Container(
@@ -262,10 +308,7 @@ class _BookButton extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(24),
           gradient: const LinearGradient(
-            colors: [
-              AppColors.primary,
-              Color(0xFF2BB7A0),
-            ],
+            colors: [AppColors.primary, AppColors.buttonGradientEnd],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -279,12 +322,52 @@ class _BookButton extends StatelessWidget {
         ),
         alignment: Alignment.center,
         child: Text(
-          'Book Tour - \$$price',
+          l10n.t(
+            'travel.book.cta',
+            params: {'price': '$price'},
+          ),
           style: const TextStyle(
-            color: Colors.white,
+            color: AppColors.white,
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FavoriteButton extends StatelessWidget {
+  final bool isFavorite;
+  final VoidCallback onTap;
+
+  const _FavoriteButton({required this.isFavorite, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 42,
+        height: 42,
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.black.withValues(alpha: 0.12),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Icon(
+          isFavorite ? Icons.favorite : Icons.favorite_border,
+          color: isFavorite
+              ? AppColors.primary
+              : Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white
+                  : AppColors.favoriteInactive,
         ),
       ),
     );

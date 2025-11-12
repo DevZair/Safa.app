@@ -13,6 +13,7 @@ class SettingsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final cardColor = Theme.of(context).cardColor;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -20,15 +21,22 @@ class SettingsSection extends StatelessWidget {
         Text(
           title,
           style: textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: Colors.grey.shade700,
-            letterSpacing: 0.1,
-          ),
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.1,
+                color: textTheme.titleSmall?.color?.withValues(alpha: 0.8),
+              ) ??
+              TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.64),
+              ),
         ),
         const SizedBox(height: 12),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: cardColor,
             borderRadius: BorderRadius.circular(26),
             boxShadow: const [
               BoxShadow(

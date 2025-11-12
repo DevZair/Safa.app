@@ -13,14 +13,24 @@ class TravelMetaItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textColor = Theme.of(context)
+            .textTheme
+            .bodyMedium
+            ?.color
+            ?.withValues(alpha: 0.8) ??
+        AppColors.textGrey;
     return Row(
       children: [
-        Icon(icon, size: 18, color: AppColors.primary),
+        Icon(
+          icon,
+          size: 18,
+          color: Theme.of(context).colorScheme.primary,
+        ),
         const SizedBox(width: 6),
         Text(
           label,
-          style: const TextStyle(
-            color: Color(0xFF475569),
+          style: TextStyle(
+            color: textColor,
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),

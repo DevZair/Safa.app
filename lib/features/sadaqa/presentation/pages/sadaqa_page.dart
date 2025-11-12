@@ -1,126 +1,152 @@
 import 'package:flutter/material.dart';
-import 'package:safa_app/features/sadaqa/presentation/pages/request_help.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:safa_app/core/localization/app_localizations.dart';
+import 'package:safa_app/core/navigation/app_router.dart';
+import 'package:safa_app/features/sadaqa/presentation/cubit/sadaqa_cubit.dart';
 import 'package:safa_app/features/sadaqa/presentation/pages/sadaqa_detail.dart';
-import 'package:safa_app/features/sadaqa/presentation/widgets/build_sement_tabs_sadaqa.dart';
 import 'package:safa_app/features/sadaqa/presentation/widgets/builde_favorites_sadaqa.dart';
 import 'package:safa_app/features/sadaqa/presentation/widgets/cause_card_sadaqa.dart';
 import 'package:safa_app/widgets/gradient_header.dart';
+import 'package:safa_app/widgets/segmented_tabs.dart';
 
-class SadaqaPage extends StatefulWidget {
+class SadaqaPage extends StatelessWidget {
   const SadaqaPage({super.key});
 
   @override
-  State<SadaqaPage> createState() => _SadaqaPageState();
-}
-
-class _SadaqaPageState extends State<SadaqaPage> {
-  int _selectedTabIndex = 0;
-  final int _favoritesCount = 0;
-
-  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: SafeArea(
-        child: Stack(
-          children: [
-            const GradientHeader(
-              icon: Icons.favorite,
-              title: 'Садака',
-              subtitle: 'Отдавайте с открытым сердцем',
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return BlocProvider(
+      create: (_) => SadaqaCubit(),
+      child: BlocBuilder<SadaqaCubit, SadaqaState>(
+        builder: (context, state) {
+          final cubit = context.read<SadaqaCubit>();
+          final causes = state.visibleCauses;
+          final l10n = context.l10n;
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 32),
+            child: SafeArea(
+              child: Stack(
                 children: [
-                  const SizedBox(height: 200),
-                  _AssistanceCard(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Assistance request feature coming soon',
+                  GradientHeader(
+                    icon: Icons.favorite,
+                    title: l10n.t('sadaqa.header.title'),
+                    subtitle: l10n.t('sadaqa.header.subtitle'),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 200),
+                        _AssistanceCard(
+                          title: l10n.t('sadaqa.assistance.title'),
+                          subtitle: l10n.t('sadaqa.assistance.subtitle'),
+                          buttonLabel: l10n.t('sadaqa.assistance.button'),
+                          onPressed: () =>
+                              context.pushNamed(AppRoute.requestHelp.name),
+                        ),
+                        const SizedBox(height: 16),
+                        buildSegmentedTabs(
+                          context: context,
+                          tabs: [
+                            SegmentedTabConfig(
+                              label: l10n.t('sadaqa.tabs.all'),
+                            ),
+                            SegmentedTabConfig(
+                              label: l10n.t(
+                                'sadaqa.tabs.favorites',
+                                params: {'count': '${state.favoritesCount}'},
+                              ),
+                              icon: Icons.star_border,
+                              activeIcon: Icons.star,
+                            ),
+                          ],
+                          selectedIndex: state.activeTab.index,
+                          onTabSelected: (index) {
+                            cubit.selectTab(SadaqaTab.values[index]);
+                          },
+                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          state.activeTab == SadaqaTab.all
+                              ? l10n.t('sadaqa.section.current')
+                              : l10n.t('sadaqa.section.favorites'),
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontFamily: 'Poppins',
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.82),
                           ),
                         ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  buildSegmentedTabs(
-                    selectedTabIndex: _selectedTabIndex,
-                    favoritesCount: _favoritesCount,
-                    onTabSelected: (index) {
-                      setState(() {
-                        _selectedTabIndex = index;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                  if (_selectedTabIndex == 0) ...[
-                    Text(
-                      'Актуальные фонды',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontFamily: 'Poppins',
-                        color: Colors.grey[800],
-                      ),
-                    ),
-                    CauseCard(
-                      imagePath: 'assets/images/font1.jpeg',
-                      icon: Icons.favorite_border,
-                      title: 'Набор деньги для детей Газа',
-                      subtitle: 'Соберите деньги для детей в Газе',
-                      amount: 50,
-                      onDonate: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SadaqaDetail(),
+                        const SizedBox(height: 12),
+                        if (causes.isEmpty)
+                          buildFavoritesPlaceholder(context)
+                        else
+                          ...causes.map(
+                            (cause) => CauseCard(
+                              imagePath: cause.imagePath,
+                              title: cause.title,
+                              subtitle: cause.subtitle,
+                              amount: cause.amount,
+                              isFavorite: state.isFavorite(cause.id),
+                              recommendedLabel:
+                                  l10n.t('sadaqa.cause.recommendedAmount'),
+                              donateLabel: l10n.t('sadaqa.cause.donate'),
+                              onFavoriteToggle: () =>
+                                  cubit.toggleFavorite(cause.id),
+                              onDonate: () {
+                                context.pushNamed(
+                                  AppRoute.sadaqaDetail.name,
+                                  extra: SadaqaDetailArgs(
+                                    cause: cause,
+                                    isFavorite: state.isFavorite(cause.id),
+                                    onFavoriteChanged: (_) =>
+                                        cubit.toggleFavorite(cause.id),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
-                        );
-                      },
+                      ],
                     ),
-                    CauseCard(
-                      imagePath: 'assets/images/font2.jpg',
-                      icon: Icons.favorite_border,
-                      title: 'Набор деньги для детей в детском доме',
-                      subtitle: 'Соберите деньги для детей в детском доме',
-                      amount: 200,
-                      onDonate: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SadaqaDetail(),
-                          ),
-                        );
-                      },
-                    ),
-                  ] else
-                    buildFavoritesPlaceholder(),
+                  ),
                 ],
               ),
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 }
 
 class _AssistanceCard extends StatelessWidget {
-  const _AssistanceCard({required this.onPressed});
+  const _AssistanceCard({
+    required this.title,
+    required this.subtitle,
+    required this.buttonLabel,
+    required this.onPressed,
+  });
 
+  final String title;
+  final String subtitle;
+  final String buttonLabel;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     const gradientColors = [Color(0xFF1FAB82), Color(0xFF1A9CCB)];
 
+    final cardColor = Theme.of(context).cardColor;
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 16),
       padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(28),
         boxShadow: const [
           BoxShadow(
@@ -140,11 +166,13 @@ class _AssistanceCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Нуждаетесь в помощи ?',
+                  title,
                   style: TextStyle(
-                    color: Color(0xFF1A2B4F),
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : const Color(0xFF1A2B4F),
                     fontSize: 19,
                     fontWeight: FontWeight.w600,
                   ),
@@ -154,7 +182,7 @@ class _AssistanceCard extends StatelessWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: cardColor,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: gradientColors.first, width: 1.5),
                   boxShadow: const [
@@ -168,6 +196,17 @@ class _AssistanceCard extends StatelessWidget {
                 child: const Icon(Icons.help_outline, color: Color(0xFF1FAB82)),
               ),
             ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            subtitle,
+            style: TextStyle(
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurface
+                  .withValues(alpha: 0.72),
+              fontSize: 14,
+            ),
           ),
           const SizedBox(height: 24),
           DecoratedBox(
@@ -190,20 +229,13 @@ class _AssistanceCard extends StatelessWidget {
               color: Colors.transparent,
               child: InkWell(
                 borderRadius: BorderRadius.circular(28),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const RequestHelpPage(),
-                    ),
-                  );
-                },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12),
+                onTap: onPressed,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                   child: Center(
                     child: Text(
-                      'Оставить заявку на помощь',
-                      style: TextStyle(
+                      buttonLabel,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.w600,

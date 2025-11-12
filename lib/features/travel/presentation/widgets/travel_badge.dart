@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:safa_app/core/styles/app_colors.dart';
 
 class TravelBadge extends StatelessWidget {
   final String label;
@@ -9,16 +10,16 @@ class TravelBadge extends StatelessWidget {
     super.key,
     required this.label,
     required this.backgroundColor,
-    this.foregroundColor = Colors.white,
+    this.foregroundColor = AppColors.white,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
       ),
       child: Text(
         label,
@@ -26,7 +27,6 @@ class TravelBadge extends StatelessWidget {
           color: foregroundColor,
           fontSize: 12,
           fontWeight: FontWeight.w600,
-          letterSpacing: 0.2,
         ),
       ),
     );

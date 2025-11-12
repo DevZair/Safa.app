@@ -1,49 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
 import 'package:safa_app/core/styles/app_icon.dart';
-import 'package:safa_app/features/sadaqa/presentation/pages/sadaqa_page.dart';
-import 'package:safa_app/features/settings/presentation/pages/settings_page.dart';
-import 'package:safa_app/features/travel/presentation/pages/travel_page.dart';
 
-class AppShell extends StatefulWidget {
-  const AppShell({super.key});
+class AppShell extends StatelessWidget {
+  const AppShell({super.key, required this.navigationShell});
 
-  @override
-  State<AppShell> createState() => _AppShellState();
-}
+  final StatefulNavigationShell navigationShell;
 
-class _AppShellState extends State<AppShell> {
-  int _selectedIndex = 0;
+  void _onDestinationSelected(int index) {
+    navigationShell.goBranch(
+      index,
+      initialLocation: index == navigationShell.currentIndex,
+    );
+  }
 
-  static const _pages = [SadaqaPage(), TravelPage(), SettingsPage()];
-
-  static final _destinations = [
-    const NavigationDestination(
-      icon: Icon(Icons.favorite_outline),
-      selectedIcon: Icon(Icons.favorite, color: AppColors.primary),
-      label: 'Sadaqa',
-    ),
-    NavigationDestination(
-      icon: AppIcon(appIcons['travel']!, color: Colors.grey),
-      selectedIcon: AppIcon(appIcons['travel']!, color: AppColors.primary),
-      label: 'Travel',
-    ),
-    NavigationDestination(
-      icon: AppIcon(appIcons['settings']!, color: Colors.grey),
-      selectedIcon: AppIcon(appIcons['settings']!, color: AppColors.primary),
-      label: 'Settings',
-    ),
-  ];
+  List<NavigationDestination> _buildDestinations(BuildContext context) {
+    final l10n = context.l10n;
+    final theme = Theme.of(context);
+    final mutedIcon =
+        theme.colorScheme.onSurface.withValues(alpha: 0.6);
+    return [
+      NavigationDestination(
+        icon: Icon(Icons.favorite_outline, color: mutedIcon),
+        selectedIcon: const Icon(Icons.favorite, color: AppColors.primary),
+        label: l10n.t('nav.sadaqa'),
+      ),
+      NavigationDestination(
+        icon: AppIcon(appIcons['travel']!, color: mutedIcon),
+        selectedIcon: AppIcon(appIcons['travel']!, color: AppColors.primary),
+        label: l10n.t('nav.travel'),
+      ),
+      NavigationDestination(
+        icon: AppIcon(appIcons['settings']!, color: mutedIcon),
+        selectedIcon: AppIcon(appIcons['settings']!, color: AppColors.primary),
+        label: l10n.t('nav.settings'),
+      ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: IndexedStack(index: _selectedIndex, children: _pages),
-      ),
+      body: navigationShell,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           border: const Border(
             top: BorderSide(color: Color(0xFFE0E0E0), width: 1),
           ),
@@ -55,12 +58,11 @@ class _AppShellState extends State<AppShell> {
             ),
           ),
           child: NavigationBar(
-            backgroundColor: Colors.white,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             indicatorColor: AppColors.primary.withAlpha(31),
-            selectedIndex: _selectedIndex,
-            onDestinationSelected: (index) =>
-                setState(() => _selectedIndex = index),
-            destinations: _destinations,
+            selectedIndex: navigationShell.currentIndex,
+            onDestinationSelected: _onDestinationSelected,
+            destinations: _buildDestinations(context),
           ),
         ),
       ),

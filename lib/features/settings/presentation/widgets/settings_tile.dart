@@ -22,6 +22,7 @@ class SettingsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Material(
       color: Colors.transparent,
@@ -37,7 +38,7 @@ class SettingsTile extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: iconColor.withOpacity(0.18),
+                  color: iconColor.withValues(alpha: 0.18),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: iconColor, size: 24),
@@ -51,17 +52,22 @@ class SettingsTile extends StatelessWidget {
                     Text(
                       title,
                       style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.onSurface,
+                          ) ??
+                          TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: colorScheme.onSurface,
+                          ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       subtitle,
                       style: textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey.shade600,
-                        height: 1.2,
-                      ),
+                            color:
+                                colorScheme.onSurface.withValues(alpha: 0.65),
+                            height: 1.2,
+                          ),
                     ),
                   ],
                 ),
@@ -71,8 +77,9 @@ class SettingsTile extends StatelessWidget {
                   Container(
                     width: 38,
                     height: 38,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFEFF2F6),
+                    decoration: BoxDecoration(
+                      color: colorScheme.surfaceContainerHighest
+                          .withValues(alpha: 0.4),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -117,7 +124,7 @@ class SettingsSwitchTile extends StatelessWidget {
       trailing: Switch(
         value: value,
         onChanged: onChanged,
-        activeColor: Colors.white,
+        activeThumbColor: Colors.white,
         activeTrackColor: AppColors.primary,
         inactiveThumbColor: Colors.white,
         inactiveTrackColor: Colors.grey.shade400,

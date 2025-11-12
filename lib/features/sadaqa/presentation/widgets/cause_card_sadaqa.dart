@@ -3,20 +3,26 @@ import 'package:safa_app/core/styles/app_colors.dart';
 
 class CauseCard extends StatelessWidget {
   final String imagePath;
-  final IconData icon;
   final String title;
   final String subtitle;
   final int amount;
+  final bool isFavorite;
+  final String recommendedLabel;
+  final String donateLabel;
   final VoidCallback onDonate;
+  final VoidCallback onFavoriteToggle;
 
   const CauseCard({
     super.key,
     required this.imagePath,
-    required this.icon,
     required this.title,
     required this.subtitle,
     required this.amount,
+    required this.isFavorite,
+    required this.recommendedLabel,
+    required this.donateLabel,
     required this.onDonate,
+    required this.onFavoriteToggle,
   });
 
   @override
@@ -26,11 +32,11 @@ class CauseCard extends StatelessWidget {
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
@@ -55,18 +61,34 @@ class CauseCard extends StatelessWidget {
                 Positioned(
                   top: 12,
                   right: 12,
-                  child: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
+                  child: GestureDetector(
+                    onTap: onFavoriteToggle,
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).cardColor,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.14),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: isFavorite
+                            ? AppColors.primary
+                            : Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : AppColors.iconColor,
+                      ),
                     ),
-                    child: Icon(icon, color: AppColors.primary),
                   ),
                 ),
               ],
             ),
-
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 16.0,
@@ -77,16 +99,23 @@ class CauseCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
+                    style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.w600) ??
+                        const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     subtitle,
-                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                    style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(color: Colors.grey) ??
+                        const TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                   const SizedBox(height: 16),
                   Row(
@@ -95,9 +124,16 @@ class CauseCard extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Рекомендуемая сумма',
-                            style: TextStyle(fontSize: 13, color: Colors.grey),
+                          Text(
+                            recommendedLabel,
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.color
+                                  ?.withValues(alpha: 0.7),
+                            ),
                           ),
                           Text(
                             '$amount₸',
@@ -120,11 +156,10 @@ class CauseCard extends StatelessWidget {
                             vertical: 10,
                           ),
                         ),
-                        onPressed: () {},
-
-                        child: const Text(
-                          'Донат',
-                          style: TextStyle(
+                        onPressed: onDonate,
+                        child: Text(
+                          donateLabel,
+                          style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
                           ),

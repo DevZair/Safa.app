@@ -1,7 +1,16 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:safa_app/core/navigation/app_shell.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:safa_app/core/localization/app_localizations.dart';
+import 'package:safa_app/core/navigation/app_router.dart';
+import 'package:safa_app/core/settings/app_settings_cubit.dart';
+import 'package:safa_app/core/settings/app_settings_state.dart';
+import 'package:safa_app/core/styles/app_theme.dart';
+import 'package:safa_app/features/travel/presentation/cubit/travel_cubit.dart';
 import 'package:safa_app/firebase_options.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -16,21 +25,34 @@ Future<void> main() async {
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  runApp(const SafaApp());
+  final preferences = await SharedPreferences.getInstance();
+
+  runApp(SafaApp(prefs: preferences));
 }
 
 class SafaApp extends StatefulWidget {
-  const SafaApp({super.key});
+  const SafaApp({
+    super.key,
+    required this.prefs,
+    this.enableMessaging = true,
+  });
+
+  final bool enableMessaging;
+  final SharedPreferences prefs;
 
   @override
   State<SafaApp> createState() => _SafaAppState();
 }
 
 class _SafaAppState extends State<SafaApp> {
+  late final GoRouter _router = AppRouter.instance.router;
+
   @override
   void initState() {
     super.initState();
-    _initFirebaseMessaging();
+    if (widget.enableMessaging) {
+      _initFirebaseMessaging();
+    }
   }
 
   Future<void> _initFirebaseMessaging() async {
@@ -64,14 +86,31 @@ class _SafaAppState extends State<SafaApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Safa',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2C7A7B)),
-        useMaterial3: true,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => TravelCubit()),
+        BlocProvider(create: (_) => AppSettingsCubit(widget.prefs)),
+      ],
+      child: BlocBuilder<AppSettingsCubit, AppSettingsState>(
+        builder: (context, settingsState) {
+          return MaterialApp.router(
+            debugShowCheckedModeBanner: false,
+            title: 'Safa',
+            locale: settingsState.locale,
+            themeMode: settingsState.themeMode,
+            theme: AppTheme.light(),
+            darkTheme: AppTheme.dark(),
+            supportedLocales: AppLocalizations.supportedLocales,
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+            routerConfig: _router,
+          );
+        },
       ),
-      home: const AppShell(),
     );
   }
 }

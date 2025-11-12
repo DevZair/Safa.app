@@ -16,6 +16,8 @@ class SettingsUserCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final cardColor = Theme.of(context).cardColor;
+    final onSurface = Theme.of(context).colorScheme.onSurface;
 
     return Material(
       color: Colors.transparent,
@@ -25,7 +27,7 @@ class SettingsUserCard extends StatelessWidget {
         child: Ink(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: cardColor,
             borderRadius: BorderRadius.circular(26),
             boxShadow: const [],
           ),
@@ -53,16 +55,16 @@ class SettingsUserCard extends StatelessWidget {
                     Text(
                       name,
                       style: textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black87,
-                      ),
+                            fontWeight: FontWeight.w600,
+                            color: onSurface,
+                          ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       email,
                       style: textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey.shade600,
-                      ),
+                            color: onSurface.withValues(alpha: 0.65),
+                          ),
                     ),
                   ],
                 ),
@@ -71,7 +73,7 @@ class SettingsUserCard extends StatelessWidget {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.12),
+                  color: AppColors.primary.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
