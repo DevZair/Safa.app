@@ -1,8 +1,7 @@
 // ignore_for_file: deprecated_member_use
-
-import 'package:flutter/material.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
+import 'package:flutter/material.dart';
 
 String _formatCurrency(double value) => '${value.toStringAsFixed(0)}₸';
 

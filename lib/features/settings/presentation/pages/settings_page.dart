@@ -1,13 +1,14 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:safa_app/core/localization/app_localizations.dart';
-import 'package:safa_app/core/settings/app_settings_cubit.dart';
-import 'package:safa_app/core/settings/app_settings_state.dart';
-import 'package:safa_app/core/styles/app_colors.dart';
-import 'package:safa_app/features/settings/presentation/widgets/settings_header.dart';
-import 'package:safa_app/features/settings/presentation/widgets/settings_section.dart';
-import 'package:safa_app/features/settings/presentation/widgets/settings_tile.dart';
 import 'package:safa_app/features/settings/presentation/widgets/settings_user_card.dart';
+import 'package:safa_app/features/settings/presentation/widgets/settings_section.dart';
+import 'package:safa_app/features/settings/presentation/widgets/settings_header.dart';
+import 'package:safa_app/features/settings/presentation/widgets/settings_tile.dart';
+import 'package:safa_app/core/localization/app_localizations.dart';
+import 'package:safa_app/core/settings/app_settings_state.dart';
+import 'package:safa_app/core/settings/app_settings_cubit.dart';
+import 'package:safa_app/core/styles/app_colors.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/material.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -157,7 +158,21 @@ class _SettingsPageState extends State<SettingsPage> {
                               subtitle: l10n.t(
                                 'settings.account.privacy.subtitle',
                               ),
-                              onTap: () {},
+                              onTap: () async {
+                                final Uri url = Uri.parse(
+                                  "https://YOUR-SITE.com/privacy.html",
+                                );
+
+                                final bool supported = await canLaunchUrl(url);
+                                if (!supported) {
+                                  return;
+                                }
+
+                                await launchUrl(
+                                  url,
+                                  mode: LaunchMode.externalApplication,
+                                );
+                              },
                             ),
                           ],
                         ),

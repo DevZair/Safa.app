@@ -1,18 +1,19 @@
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:go_router/go_router.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:safa_app/features/travel/presentation/cubit/travel_cubit.dart';
+import 'package:safa_app/features/travel/data/travel_repository.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
-import 'package:safa_app/core/navigation/app_router.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:safa_app/core/settings/app_settings_cubit.dart';
 import 'package:safa_app/core/settings/app_settings_state.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:safa_app/core/navigation/app_router.dart';
+import 'package:safa_app/core/service/db_service.dart';
 import 'package:safa_app/core/styles/app_theme.dart';
-import 'package:safa_app/features/travel/presentation/cubit/travel_cubit.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:safa_app/firebase_options.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -23,6 +24,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await DBService.initialize();
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
@@ -87,32 +89,40 @@ class _SafaAppState extends State<SafaApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
+    return MultiRepositoryProvider(
       providers: [
-        BlocProvider(create: (_) => TravelCubit()),
-        BlocProvider(create: (_) => AppSettingsCubit(widget.prefs)),
+        RepositoryProvider(create: (_) => TravelRepository()),
       ],
-      child: BlocBuilder<AppSettingsCubit, AppSettingsState>(
-        builder: (context, settingsState) {
-          return MaterialApp.router(
-            debugShowCheckedModeBanner: false,
-            title: 'Safa',
-            locale: settingsState.locale,
-            themeMode: settingsState.themeMode,
-            theme: AppTheme.light(),
-            darkTheme: AppTheme.dark(),
-            supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-            ],
-            routerConfig: _router,
-          );
-        },
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => TravelCubit(
+              repository: context.read<TravelRepository>(),
+            ),
+          ),
+          BlocProvider(create: (_) => AppSettingsCubit(widget.prefs)),
+        ],
+        child: BlocBuilder<AppSettingsCubit, AppSettingsState>(
+          builder: (context, settingsState) {
+            return MaterialApp.router(
+              debugShowCheckedModeBanner: false,
+              title: 'Safa',
+              locale: settingsState.locale,
+              themeMode: settingsState.themeMode,
+              theme: AppTheme.light(),
+              darkTheme: AppTheme.dark(),
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+              ],
+              routerConfig: _router,
+            );
+          },
+        ),
       ),
     );
   }
 }
-

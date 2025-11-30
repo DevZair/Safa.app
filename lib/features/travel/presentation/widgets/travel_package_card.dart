@@ -1,11 +1,13 @@
-import 'package:flutter/material.dart';
+import 'package:safa_app/features/travel/presentation/widgets/travel_meta_item.dart';
+import 'package:safa_app/features/travel/presentation/widgets/travel_badge.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
-import 'package:safa_app/features/travel/presentation/widgets/travel_badge.dart';
-import 'package:safa_app/features/travel/presentation/widgets/travel_meta_item.dart';
+import 'package:flutter/material.dart';
 
 class TravelPackage {
   final String id;
+  final String companyId;
+  final String categoryId;
   final String title;
   final String location;
   final String imagePath;
@@ -19,6 +21,8 @@ class TravelPackage {
 
   const TravelPackage({
     required this.id,
+    required this.companyId,
+    required this.categoryId,
     required this.title,
     required this.location,
     required this.imagePath,
@@ -30,6 +34,30 @@ class TravelPackage {
     required this.startDateLabel,
     required this.durationLabel,
   });
+
+  factory TravelPackage.fromJson(Map<String, Object?> json) {
+    final price = json['price_usd'] ?? json['price'] ?? 0;
+    final guideRatingRaw = json['guide_rating'] ?? json['guideRating'];
+    final guideRating = guideRatingRaw is num
+        ? guideRatingRaw.toDouble()
+        : double.tryParse('$guideRatingRaw') ?? 0;
+    return TravelPackage(
+      id: '${json['id'] ?? ''}',
+      companyId: '${json['company_id'] ?? json['companyId'] ?? ''}',
+      categoryId: '${json['category_id'] ?? json['categoryId'] ?? 'all'}',
+      title: '${json['title'] ?? ''}',
+      location: '${json['location'] ?? ''}',
+      imagePath: '${json['image'] ?? json['imagePath'] ?? ''}',
+      guideName: '${json['guide_name'] ?? json['guideName'] ?? ''}',
+      guideRating: guideRating,
+      priceUsd: price is num ? price.toInt() : int.tryParse('$price') ?? 0,
+      availabilityLabel:
+          '${json['availability_label'] ?? json['availability'] ?? ''}',
+      startDateLabel: '${json['start_date_label'] ?? json['start_date'] ?? ''}',
+      durationLabel: '${json['duration_label'] ?? json['duration'] ?? ''}',
+      tags: const [],
+    );
+  }
 }
 
 class TravelBadgeData {
@@ -166,7 +194,7 @@ class _PackageImage extends StatelessWidget {
         children: [
           AspectRatio(
             aspectRatio: 16 / 11,
-            child: Image.asset(package.imagePath, fit: BoxFit.cover),
+            child: _TravelImage(imagePath: package.imagePath),
           ),
           Positioned(
             left: 16,
@@ -186,11 +214,13 @@ class _PackageImage extends StatelessWidget {
                       ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                TravelBadge(
-                  label: package.availabilityLabel,
-                  backgroundColor: AppColors.badgeDanger,
-                ),
+                if (package.availabilityLabel.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  TravelBadge(
+                    label: package.availabilityLabel,
+                    backgroundColor: AppColors.badgeDanger,
+                  ),
+                ],
               ],
             ),
           ),
@@ -369,6 +399,37 @@ class _FavoriteButton extends StatelessWidget {
                   ? Colors.white
                   : AppColors.favoriteInactive,
         ),
+      ),
+    );
+  }
+}
+
+class _TravelImage extends StatelessWidget {
+  final String imagePath;
+
+  const _TravelImage({required this.imagePath});
+
+  @override
+  Widget build(BuildContext context) {
+    if (imagePath.startsWith('http')) {
+      return Image.network(
+        imagePath,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Container(
+          color: AppColors.surfaceLight,
+          alignment: Alignment.center,
+          child: const Icon(Icons.image_not_supported_outlined),
+        ),
+      );
+    }
+
+    return Image.asset(
+      imagePath,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => Container(
+        color: AppColors.surfaceLight,
+        alignment: Alignment.center,
+        child: const Icon(Icons.image_not_supported_outlined),
       ),
     );
   }

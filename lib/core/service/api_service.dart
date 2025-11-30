@@ -16,9 +16,16 @@ enum Method { get, post, put, patch, delete }
 class ApiService {
   const ApiService._();
 
+  static String get _resolvedBaseUrl {
+    final stored = DBService.baseUrl;
+    final base = stored.isNotEmpty ? stored : ApiConstants.baseUrl;
+    if (base.startsWith('http')) return base;
+    return 'https://$base';
+  }
+
   static final Dio _dio = Dio()
     ..options = BaseOptions(
-      baseUrl: ApiConstants.baseUrl,
+      baseUrl: _resolvedBaseUrl,
       contentType: Headers.jsonContentType,
       responseType: ResponseType.json,
       followRedirects: false,
@@ -131,4 +138,3 @@ class ApiService {
     StackTrace.current,
   );
 }
-

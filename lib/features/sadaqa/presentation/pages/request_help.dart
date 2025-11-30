@@ -1,6 +1,5 @@
-// ignore_for_file: deprecated_member_use
-
 import 'package:flutter/material.dart';
+import 'package:safa_app/features/sadaqa/data/request_help_repository.dart';
 
 class RequestHelpPage extends StatefulWidget {
   const RequestHelpPage({super.key});
@@ -10,6 +9,8 @@ class RequestHelpPage extends StatefulWidget {
 }
 
 class _RequestHelpPageState extends State<RequestHelpPage> {
+  final _repository = RequestHelpRepository();
+
   final _formKey = GlobalKey<FormState>();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
@@ -30,6 +31,8 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
 
   String? _selectedCategory;
   int _storyLength = 0;
+  bool _isSubmitting = false;
+  String? _submitError;
 
   @override
   void initState() {
@@ -91,173 +94,180 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
               child: Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 720),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const _HeroCard(),
-                      const SizedBox(height: 28),
-                      Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _SectionCard(
-                              title: 'Личные данные',
-                              subtitle:
-                                  'Ваша контактная информация поможет нам подтвердить заявку.',
-                              child: Column(
-                                children: [
-                                  _ResponsiveFieldsRow(
-                                    children: [
-                                      _LabeledField(
-                                        label: 'Имя *',
-                                        child: _RequestTextField(
-                                          controller: _firstNameController,
-                                          hintText: 'Введите имя',
-                                          validator: _requiredValidator,
-                                        ),
-                                      ),
-                                      _LabeledField(
-                                        label: 'Фамилия *',
-                                        child: _RequestTextField(
-                                          controller: _lastNameController,
-                                          hintText: 'Введите фамилию',
-                                          validator: _requiredValidator,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 16),
-                                  _ResponsiveFieldsRow(
-                                    children: [
-                                      _LabeledField(
-                                        label: 'Телефон *',
-                                        child: _RequestTextField(
-                                          controller: _phoneController,
-                                          hintText: '+7 700 123 45 67',
-                                          keyboardType: TextInputType.phone,
-                                          validator: _requiredValidator,
-                                          prefixIcon: Icons.phone_outlined,
-                                        ),
-                                      ),
-                                      _LabeledField(
-                                        label: 'Электронная почта',
-                                        child: _RequestTextField(
-                                          controller: _emailController,
-                                          hintText: 'you@example.com',
-                                          keyboardType:
-                                              TextInputType.emailAddress,
-                                          prefixIcon: Icons.email_outlined,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            _SectionCard(
-                              title: 'Местоположение',
-                              subtitle:
-                                  'Эта информация помогает волонтёрам лучше координировать помощь.',
-                              child: Column(
-                                children: [
-                                  _LabeledField(
-                                    label: 'Город / регион *',
-                                    child: _RequestTextField(
-                                      controller: _cityController,
-                                      hintText: 'Астана, Казахстан',
-                                      validator: _requiredValidator,
-                                      prefixIcon: Icons.location_on_outlined,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  _LabeledField(
-                                    label: 'Полный адрес *',
-                                    child: _RequestTextField(
-                                      controller: _addressController,
-                                      hintText: 'Улица, дом, квартира',
-                                      validator: _requiredValidator,
-                                      maxLines: 2,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            _SectionCard(
-                              title: 'Детали запроса',
-                              subtitle:
-                                  'Опишите ситуацию, чтобы доноры могли понять, чем помочь.',
-                              child: Column(
-                                children: [
-                                  _LabeledField(
-                                    label: 'Категория помощи *',
-                                    child: _RequestDropdown(
-                                      value: _selectedCategory,
-                                      hintText: 'Выберите категорию',
-                                      items: _categories,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _selectedCategory = value;
-                                        });
-                                      },
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  _LabeledField(
-                                    label: 'Необходимая сумма (ТГ) *',
-                                    child: _RequestTextField(
-                                      controller: _amountController,
-                                      hintText: '0',
-                                      keyboardType: TextInputType.number,
-                                      validator: _requiredValidator,
-                                      prefixIcon: Icons.attach_money,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  _LabeledField(
-                                    label: 'Ваша история *',
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        _RequestTextField(
-                                          controller: _storyController,
-                                          hintText:
-                                              'Опишите вашу историю как можно подробнее.',
-                                          maxLines: 6,
-                                          maxLength: 600,
-                                          validator: _requiredValidator,
-                                        ),
-                                        const SizedBox(height: 6),
-                                        Text(
-                                          '$_storyLength / 600 символов',
-                                          style: theme.textTheme.bodySmall
-                                              ?.copyWith(
-                                                color: const Color(0xFF8E9BB3),
-                                              ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  _LabeledField(
-                                    label: 'Загрузите фото (необязательно)',
-                                    child: _UploadTile(onTap: () {}),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 28),
-                            _SubmitButton(onPressed: _submit),
-                            const SizedBox(height: 18),
-                            const _FooterNote(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (_submitError != null) ...[
+                            _SubmitError(message: _submitError!),
+                            const SizedBox(height: 16),
                           ],
-                        ),
+                          const _HeroCard(),
+                          const SizedBox(height: 28),
+                          Form(
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _SectionCard(
+                                  title: 'Личные данные',
+                                  subtitle:
+                                      'Ваша контактная информация поможет нам подтвердить заявку.',
+                                  child: Column(
+                                    children: [
+                                      _ResponsiveFieldsRow(
+                                        children: [
+                                          _LabeledField(
+                                            label: 'Имя *',
+                                            child: _RequestTextField(
+                                              controller: _firstNameController,
+                                              hintText: 'Введите имя',
+                                              validator: _requiredValidator,
+                                            ),
+                                          ),
+                                          _LabeledField(
+                                            label: 'Фамилия *',
+                                            child: _RequestTextField(
+                                              controller: _lastNameController,
+                                              hintText: 'Введите фамилию',
+                                              validator: _requiredValidator,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 16),
+                                      _ResponsiveFieldsRow(
+                                        children: [
+                                          _LabeledField(
+                                            label: 'Телефон *',
+                                            child: _RequestTextField(
+                                              controller: _phoneController,
+                                              hintText: '+7 700 123 45 67',
+                                              keyboardType: TextInputType.phone,
+                                              validator: _requiredValidator,
+                                              prefixIcon: Icons.phone_outlined,
+                                            ),
+                                          ),
+                                          _LabeledField(
+                                            label: 'Электронная почта',
+                                            child: _RequestTextField(
+                                              controller: _emailController,
+                                              hintText: 'you@example.com',
+                                              keyboardType:
+                                                  TextInputType.emailAddress,
+                                              prefixIcon: Icons.email_outlined,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                _SectionCard(
+                                  title: 'Местоположение',
+                                  subtitle:
+                                      'Эта информация помогает волонтёрам лучше координировать помощь.',
+                                  child: Column(
+                                    children: [
+                                      _LabeledField(
+                                        label: 'Город / регион *',
+                                        child: _RequestTextField(
+                                          controller: _cityController,
+                                          hintText: 'Астана, Казахстан',
+                                          validator: _requiredValidator,
+                                          prefixIcon: Icons.location_on_outlined,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      _LabeledField(
+                                        label: 'Полный адрес *',
+                                        child: _RequestTextField(
+                                          controller: _addressController,
+                                          hintText: 'Улица, дом, квартира',
+                                          validator: _requiredValidator,
+                                          maxLines: 2,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                                _SectionCard(
+                                  title: 'Детали запроса',
+                                  subtitle:
+                                      'Опишите ситуацию, чтобы доноры могли понять, чем помочь.',
+                                  child: Column(
+                                    children: [
+                                      _LabeledField(
+                                        label: 'Категория помощи *',
+                                        child: _RequestDropdown(
+                                          value: _selectedCategory,
+                                          hintText: 'Выберите категорию',
+                                          items: _categories,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              _selectedCategory = value;
+                                            });
+                                          },
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      _LabeledField(
+                                        label: 'Необходимая сумма (ТГ) *',
+                                        child: _RequestTextField(
+                                          controller: _amountController,
+                                          hintText: '0',
+                                          keyboardType: TextInputType.number,
+                                          validator: _requiredValidator,
+                                          prefixIcon: Icons.attach_money,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      _LabeledField(
+                                        label: 'Ваша история *',
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            _RequestTextField(
+                                              controller: _storyController,
+                                              hintText:
+                                                  'Опишите вашу историю как можно подробнее.',
+                                              maxLines: 6,
+                                              maxLength: 600,
+                                              validator: _requiredValidator,
+                                            ),
+                                            const SizedBox(height: 6),
+                                            Text(
+                                              '$_storyLength / 600 символов',
+                                              style: theme.textTheme.bodySmall
+                                                  ?.copyWith(
+                                                    color: const Color(0xFF8E9BB3),
+                                                  ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+                                      _LabeledField(
+                                        label: 'Загрузите фото (необязательно)',
+                                        child: _UploadTile(onTap: () {}),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 28),
+                                _SubmitButton(
+                                  onPressed: _submit,
+                                  isLoading: _isSubmitting,
+                                ),
+                                const SizedBox(height: 18),
+                                const _FooterNote(),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
                 ),
               ),
             );
@@ -274,15 +284,65 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
   }
 
   void _submit() {
+    if (_isSubmitting) return;
     final isValid = _formKey.currentState?.validate() ?? false;
     if (!isValid) {
       return;
     }
+    if (_selectedCategory == null || _selectedCategory!.isEmpty) {
+      setState(() {
+        _submitError = 'Пожалуйста, выберите категорию помощи.';
+      });
+      return;
+    }
+
+    final payload = RequestHelpPayload(
+      firstName: _firstNameController.text.trim(),
+      lastName: _lastNameController.text.trim(),
+      phone: _phoneController.text.trim(),
+      email: _emailController.text.trim().isEmpty
+          ? null
+          : _emailController.text.trim(),
+      city: _cityController.text.trim(),
+      address: _addressController.text.trim(),
+      category: _selectedCategory ?? '',
+      amount: _amountController.text.trim(),
+      story: _storyController.text.trim(),
+    );
 
     FocusScope.of(context).unfocus();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Ваш запрос отправлен на проверку.')),
-    );
+    setState(() {
+      _isSubmitting = true;
+      _submitError = null;
+    });
+
+    _repository.send(payload).then((_) {
+      if (!mounted) return;
+      setState(() {
+        _isSubmitting = false;
+        _submitError = null;
+        _selectedCategory = null;
+        _storyLength = 0;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Ваш запрос отправлен на проверку.')),
+      );
+      _formKey.currentState?.reset();
+      _storyController.clear();
+      _amountController.clear();
+      _addressController.clear();
+      _cityController.clear();
+      _emailController.clear();
+      _phoneController.clear();
+      _lastNameController.clear();
+      _firstNameController.clear();
+    }).catchError((error) {
+      if (!mounted) return;
+      setState(() {
+        _isSubmitting = false;
+        _submitError = error.toString();
+      });
+    });
   }
 }
 
@@ -414,13 +474,14 @@ class _UploadTile extends StatelessWidget {
 }
 
 class _SubmitButton extends StatelessWidget {
-  const _SubmitButton({required this.onPressed});
+  const _SubmitButton({required this.onPressed, required this.isLoading});
   final VoidCallback onPressed;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
     return FilledButton(
-      onPressed: onPressed,
+      onPressed: isLoading ? null : onPressed,
       style: FilledButton.styleFrom(
         backgroundColor: const Color(0xFF1EBE92),
         minimumSize: const Size.fromHeight(56),
@@ -428,14 +489,23 @@ class _SubmitButton extends StatelessWidget {
         shadowColor: const Color.fromRGBO(30, 190, 146, 0.4),
         elevation: 6,
       ),
-      child: const Text(
-        'Отправить запрос',
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: Colors.white,
-        ),
-      ),
+      child: isLoading
+          ? const SizedBox(
+              width: 22,
+              height: 22,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.4,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            )
+          : const Text(
+              'Отправить запрос',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
+            ),
     );
   }
 }
@@ -462,6 +532,38 @@ String? _requiredValidator(String? value) {
     return 'Обязательное поле';
   }
   return null;
+}
+
+class _SubmitError extends StatelessWidget {
+  const _SubmitError({required this.message});
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFE8E8),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE57373)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline, color: Color(0xFFD32F2F)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(
+                color: Color(0xFFD32F2F),
+                fontSize: 13,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _SectionCard extends StatelessWidget {

@@ -5,9 +5,17 @@ import 'package:safa_app/features/sadaqa/presentation/pages/request_help.dart';
 import 'package:safa_app/features/sadaqa/presentation/pages/sadaqa_detail.dart';
 import 'package:safa_app/features/sadaqa/presentation/pages/sadaqa_page.dart';
 import 'package:safa_app/features/settings/presentation/pages/settings_page.dart';
+import 'package:safa_app/features/travel/presentation/pages/travel_company_page.dart';
 import 'package:safa_app/features/travel/presentation/pages/travel_page.dart';
 
-enum AppRoute { sadaqa, sadaqaDetail, requestHelp, travel, settings }
+enum AppRoute {
+  sadaqa,
+  sadaqaDetail,
+  requestHelp,
+  travel,
+  travelCompany,
+  settings
+}
 
 class AppRouter {
   AppRouter._();
@@ -67,6 +75,21 @@ class AppRouter {
                 path: '/travel',
                 name: AppRoute.travel.name,
                 builder: (context, state) => const TravelPage(),
+                routes: [
+                  GoRoute(
+                    path: 'company',
+                    name: AppRoute.travelCompany.name,
+                    builder: (context, state) {
+                      final args = state.extra;
+                      if (args is! TravelCompanyDetailArgs) {
+                        throw ArgumentError(
+                          'Expected TravelCompanyDetailArgs, but got $args',
+                        );
+                      }
+                      return TravelCompanyPage(company: args.company);
+                    },
+                  ),
+                ],
               ),
             ],
           ),

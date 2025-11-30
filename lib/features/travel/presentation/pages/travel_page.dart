@@ -1,11 +1,15 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:safa_app/core/localization/app_localizations.dart';
-import 'package:safa_app/core/styles/app_colors.dart';
-import 'package:safa_app/features/travel/presentation/cubit/travel_cubit.dart';
 import 'package:safa_app/features/travel/presentation/widgets/travel_package_card.dart';
+import 'package:safa_app/features/travel/presentation/pages/travel_company_page.dart';
+import 'package:safa_app/features/travel/presentation/cubit/travel_cubit.dart';
+import 'package:safa_app/features/travel/models/travel_company.dart';
+import 'package:safa_app/core/localization/app_localizations.dart';
+import 'package:safa_app/core/navigation/app_router.dart';
 import 'package:safa_app/widgets/gradient_header.dart';
+import 'package:safa_app/core/styles/app_colors.dart';
 import 'package:safa_app/widgets/segmented_tabs.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:flutter/material.dart';
 
 class TravelPage extends StatelessWidget {
   const TravelPage({super.key});
@@ -24,99 +28,130 @@ class _TravelView extends StatelessWidget {
     return BlocBuilder<TravelCubit, TravelState>(
       builder: (context, state) {
         final cubit = context.read<TravelCubit>();
-        final packages = state.activeTab == TravelTab.saved
-            ? state.packages
-                  .where((p) => state.favoritePackageIds.contains(p.id))
-                  .toList()
-            : state.packages;
-        final favoritesCount = state.favoritePackageIds.length;
         final l10n = context.l10n;
         final theme = Theme.of(context);
+        final packages = state.packages;
+        final favorites = packages
+            .where((p) => state.favoritePackageIds.contains(p.id))
+            .toList();
+        final favoritesCount = favorites.length;
         return Scaffold(
           backgroundColor: theme.scaffoldBackgroundColor,
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 40),
-            child: SafeArea(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _HeroHeader(
-                    title: state.heroTitle,
-                    subtitle: state.heroSubtitle,
-                    metrics: state.metrics,
-                  ),
-                  const SizedBox(height: 90),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _SectionHeader(title: l10n.t('travel.section.categories')),
-                        const SizedBox(height: 14),
-                        _CategoriesChips(
-                          categories: state.categories,
-                          selectedId: state.selectedCategoryId,
-                        ),
-                        const SizedBox(height: 26),
-                        buildSegmentedTabs(
-                          context: context,
-                          tabs: [
-                            SegmentedTabConfig(
-                              label: l10n.t('travel.tabs.all'),
-                            ),
-                            SegmentedTabConfig(
-                              label: l10n.t(
-                                'travel.tabs.saved',
-                                params: {'count': '$favoritesCount'},
+          body: Builder(
+            builder: (context) {
+              if (state.isLoading &&
+                  state.companies.isEmpty &&
+                  state.packages.isEmpty) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              return SingleChildScrollView(
+                padding: const EdgeInsets.only(bottom: 40),
+                child: SafeArea(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _HeroHeader(
+                        title: state.heroTitle,
+                        subtitle: state.heroSubtitle,
+                        metrics: state.metrics,
+                      ),
+                      const SizedBox(height: 90),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (state.errorMessage != null)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 14),
+                                child: _ErrorBanner(message: state.errorMessage!),
                               ),
-                              icon: Icons.favorite_border_rounded,
-                              activeIcon: Icons.favorite_rounded,
+                            buildSegmentedTabs(
+                              context: context,
+                              tabs: [
+                                SegmentedTabConfig(
+                                  label: l10n.t('travel.tabs.companies'),
+                                  icon: Icons.apartment_rounded,
+                                ),
+                                SegmentedTabConfig(
+                                  label: l10n.t(
+                                    'travel.tabs.saved',
+                                    params: {'count': '$favoritesCount'},
+                                  ),
+                                  icon: Icons.favorite_border_rounded,
+                                  activeIcon: Icons.favorite_rounded,
+                                ),
+                              ],
+                              selectedIndex: state.activeTab.index,
+                              onTabSelected: (index) =>
+                                  cubit.selectTab(TravelTab.values[index]),
                             ),
+                            const SizedBox(height: 28),
+                            if (state.activeTab == TravelTab.all) ...[
+                              _SectionHeader(
+                                title: l10n.t('travel.section.companies'),
+                              ),
+                              const SizedBox(height: 18),
+                              if (state.companies.isEmpty)
+                                _PlaceholderText(
+                                  text: l10n.t('travel.section.noCompanies'),
+                                )
+                              else
+                                for (final company in state.companies) ...[
+                                  _CompanyCard(
+                                    company: company,
+                                    onTap: () => context.pushNamed(
+                                      AppRoute.travelCompany.name,
+                                      extra:
+                                          TravelCompanyDetailArgs(company: company),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                ],
+                            ] else ...[
+                              _SectionHeader(
+                                title: l10n.t(
+                                  'travel.tabs.saved',
+                                  params: {'count': '$favoritesCount'},
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              if (state.isLoading && favorites.isEmpty)
+                                const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(vertical: 30),
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                )
+                              else if (favorites.isEmpty)
+                                Text(
+                                  l10n.t('travel.saved.empty'),
+                                  style: TextStyle(
+                                    color: theme.textTheme.bodyMedium?.color
+                                        ?.withValues(alpha: 0.7),
+                                    fontSize: 15,
+                                  ),
+                                )
+                              else
+                                for (final package in favorites) ...[
+                                  TravelPackageCard(
+                                    package: package,
+                                    isFavorite: true,
+                                    onFavoriteToggle: () =>
+                                        cubit.toggleFavorite(package.id),
+                                  ),
+                                  const SizedBox(height: 16),
+                                ],
+                            ],
                           ],
-                          selectedIndex: state.activeTab.index,
-                          onTabSelected: (index) =>
-                              cubit.selectTab(TravelTab.values[index]),
                         ),
-                        const SizedBox(height: 32),
-                        if (state.activeTab == TravelTab.all) ...[
-                          _SectionHeader(title: l10n.t('travel.section.companies')),
-                          const SizedBox(height: 18),
-                          for (final company in state.companies) ...[
-                            _CompanyCard(company: company),
-                            const SizedBox(height: 16),
-                          ],
-                        ],
-                        const SizedBox(height: 24),
-                        _SectionHeader(title: l10n.t('travel.section.allTours')),
-                        const SizedBox(height: 6),
-                        Text(
-                          l10n.t(
-                            'travel.section.availableCount',
-                            params: {'count': '${packages.length}'},
-                          ),
-                          style: const TextStyle(
-                            color: AppColors.textInfo,
-                            fontSize: 14,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        for (final package in packages) ...[
-                          TravelPackageCard(
-                            package: package,
-                            isFavorite: state.favoritePackageIds.contains(
-                              package.id,
-                            ),
-                            onFavoriteToggle: () =>
-                                cubit.toggleFavorite(package.id),
-                          ),
-                          const SizedBox(height: 18),
-                        ],
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
           ),
         );
       },
@@ -154,6 +189,59 @@ class _HeroHeader extends StatelessWidget {
             child: _MetricsCard(metrics: metrics),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ErrorBanner extends StatelessWidget {
+  final String message;
+
+  const _ErrorBanner({required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.error;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.error_outline_rounded, color: color),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(color: color, fontSize: 13),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlaceholderText extends StatelessWidget {
+  final String text;
+
+  const _PlaceholderText({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Text(
+        text,
+        style: TextStyle(
+          color:
+              Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
+          fontSize: 15,
+        ),
       ),
     );
   }
@@ -266,192 +354,146 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _CategoriesChips extends StatelessWidget {
-  final List<TravelCategory> categories;
-  final String selectedId;
-
-  const _CategoriesChips({required this.categories, required this.selectedId});
-
-  @override
-  Widget build(BuildContext context) {
-    final cubit = context.read<TravelCubit>();
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final unselectedColor =
-        theme.cardColor;
-    final unselectedBorder = isDark
-        ? AppColors.darkStroke
-        : AppColors.borderLight;
-    final unselectedText =
-        theme.textTheme.bodyMedium?.color ?? AppColors.textSecondary;
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          for (final category in categories) ...[
-            GestureDetector(
-              onTap: () => cubit.selectCategory(category.id),
-              child: Container(
-                margin: const EdgeInsets.only(right: 12),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 18,
-                  vertical: 12,
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(28),
-                  color: selectedId == category.id
-                      ? AppColors.primary
-                      : unselectedColor,
-                  border: selectedId == category.id
-                      ? null
-                      : Border.all(color: unselectedBorder),
-                  boxShadow: [],
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      category.icon,
-                      size: 18,
-                      color: selectedId == category.id
-                          ? AppColors.white
-                          : unselectedText.withValues(alpha: 0.6),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      category.label,
-                      style: TextStyle(
-                        color: selectedId == category.id
-                            ? AppColors.white
-                            : unselectedText,
-                        fontSize: 14,
-                        fontWeight: selectedId == category.id
-                            ? FontWeight.w600
-                            : FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
 class _CompanyCard extends StatelessWidget {
   final TravelCompany company;
+  final VoidCallback onTap;
 
-  const _CompanyCard({required this.company});
+  const _CompanyCard({required this.company, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final cardColor = Theme.of(context).cardColor;
     final l10n = context.l10n;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withValues(alpha: 0.04),
-            blurRadius: 26,
-            offset: const Offset(0, 18),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(6),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              borderRadius: BorderRadius.circular(24),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(30),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.black.withValues(alpha: 0.04),
+              blurRadius: 26,
+              offset: const Offset(0, 18),
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(18),
-              child: Image.asset(
-                company.thumbnail,
-                width: 56,
-                height: 56,
-                fit: BoxFit.cover,
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(18),
+                child: _CompanyAvatar(imagePath: company.thumbnail),
               ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  company.name,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).textTheme.titleMedium?.color ??
-                        AppColors.textPrimary,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    company.name,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).textTheme.titleMedium?.color ??
+                          AppColors.textPrimary,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.star_rounded,
-                      color: AppColors.primary,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      company.rating.toStringAsFixed(1),
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color:
-                            Theme.of(context).textTheme.bodyLarge?.color ??
-                                AppColors.textPrimary,
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.star_rounded,
+                        color: AppColors.primary,
+                        size: 18,
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      l10n.t(
-                        'travel.company.toursCount',
-                        params: {'count': '${company.tours}'},
+                      const SizedBox(width: 4),
+                      Text(
+                        company.rating.toStringAsFixed(1),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color:
+                              Theme.of(context).textTheme.bodyLarge?.color ??
+                                  AppColors.textPrimary,
+                        ),
                       ),
-                      style: TextStyle(
-                        color: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.color
-                            ?.withValues(alpha: 0.7),
-                        fontSize: 13,
+                      const SizedBox(width: 10),
+                      Text(
+                        l10n.t(
+                          'travel.company.toursCount',
+                          params: {'count': '${company.tours}'},
+                        ),
+                        style: TextStyle(
+                          color: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.color
+                              ?.withValues(alpha: 0.7),
+                          fontSize: 13,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              gradient: const LinearGradient(
-                colors: [
-                  AppColors.arrowGradientStart,
-                  AppColors.arrowGradientEnd,
+                    ],
+                  ),
                 ],
               ),
             ),
-            child: const Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 16,
-              color: AppColors.iconArrow,
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                gradient: const LinearGradient(
+                  colors: [
+                    AppColors.arrowGradientStart,
+                    AppColors.arrowGradientEnd,
+                  ],
+                ),
+              ),
+              child: const Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 16,
+                color: AppColors.iconArrow,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+}
+
+class _CompanyAvatar extends StatelessWidget {
+  final String imagePath;
+
+  const _CompanyAvatar({required this.imagePath});
+
+  @override
+  Widget build(BuildContext context) {
+    if (imagePath.startsWith('http')) {
+      return Image.network(
+        imagePath,
+        width: 56,
+        height: 56,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) =>
+            const Icon(Icons.image_not_supported_outlined),
+      );
+    }
+
+    return Image.asset(
+      imagePath,
+      width: 56,
+      height: 56,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) =>
+          const Icon(Icons.image_not_supported_outlined),
     );
   }
 }

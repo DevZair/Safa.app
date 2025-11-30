@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
+import 'package:safa_app/features/travel/data/travel_repository.dart';
+import 'package:safa_app/features/travel/models/travel_company.dart';
 import 'package:safa_app/features/travel/presentation/widgets/travel_package_card.dart';
 
 enum TravelTab { all, saved }
@@ -31,20 +33,6 @@ class TravelCategory {
   });
 }
 
-class TravelCompany {
-  final String name;
-  final double rating;
-  final int tours;
-  final String thumbnail;
-
-  const TravelCompany({
-    required this.name,
-    required this.rating,
-    required this.tours,
-    required this.thumbnail,
-  });
-}
-
 class TravelState {
   final String heroTitle;
   final String heroSubtitle;
@@ -55,6 +43,8 @@ class TravelState {
   final List<TravelCompany> companies;
   final List<TravelPackage> packages;
   final Set<String> favoritePackageIds;
+  final bool isLoading;
+  final String? errorMessage;
 
   const TravelState({
     required this.heroTitle,
@@ -66,6 +56,8 @@ class TravelState {
     required this.companies,
     required this.packages,
     required this.favoritePackageIds,
+    required this.isLoading,
+    required this.errorMessage,
   });
 
   TravelState copyWith({
@@ -78,6 +70,9 @@ class TravelState {
     List<TravelCompany>? companies,
     List<TravelPackage>? packages,
     Set<String>? favoritePackageIds,
+    bool? isLoading,
+    String? errorMessage,
+    bool resetError = false,
   }) {
     return TravelState(
       heroTitle: heroTitle ?? this.heroTitle,
@@ -89,6 +84,8 @@ class TravelState {
       companies: companies ?? this.companies,
       packages: packages ?? this.packages,
       favoritePackageIds: favoritePackageIds ?? this.favoritePackageIds,
+      isLoading: isLoading ?? this.isLoading,
+      errorMessage: resetError ? null : (errorMessage ?? this.errorMessage),
     );
   }
 
@@ -129,18 +126,21 @@ class TravelState {
       activeTab: TravelTab.all,
       companies: const [
         TravelCompany(
+          id: 'al-haramain',
           name: 'Al-Haramain Tours',
           rating: 4.9,
           tours: 156,
           thumbnail: 'assets/images/travel_card2.jpg',
         ),
         TravelCompany(
+          id: 'noor-travel',
           name: 'Noor Travel Group',
           rating: 4.8,
           tours: 243,
           thumbnail: 'assets/images/travel_card1.jpg',
         ),
         TravelCompany(
+          id: 'safa-marwa',
           name: 'Safa & Marwa Tours',
           rating: 4.7,
           tours: 187,
@@ -149,12 +149,49 @@ class TravelState {
       ],
       packages: _defaultPackages,
       favoritePackageIds: <String>{},
+      isLoading: true,
+      errorMessage: null,
     );
   }
 }
 
 class TravelCubit extends Cubit<TravelState> {
-  TravelCubit() : super(TravelState.initial());
+  TravelCubit({TravelRepository? repository})
+      : _repository = repository ?? TravelRepository(),
+        super(TravelState.initial()) {
+    loadTravelData();
+  }
+
+  final TravelRepository _repository;
+
+  Future<void> loadTravelData() async {
+    emit(state.copyWith(isLoading: true, resetError: true));
+    try {
+      final companies = await _repository.fetchCompanies();
+      final packages = await _repository.fetchPackages();
+
+      final favorites = state.favoritePackageIds
+          .where((id) => packages.any((pkg) => pkg.id == id))
+          .toSet();
+
+      emit(
+        state.copyWith(
+          companies: companies.isEmpty ? state.companies : companies,
+          packages: packages.isEmpty ? state.packages : packages,
+          favoritePackageIds: favorites,
+          isLoading: false,
+          errorMessage: null,
+        ),
+      );
+    } on Object catch (error) {
+      emit(
+        state.copyWith(
+          isLoading: false,
+          errorMessage: error.toString(),
+        ),
+      );
+    }
+  }
 
   void selectCategory(String categoryId) {
     if (categoryId == state.selectedCategoryId) return;
@@ -180,6 +217,8 @@ class TravelCubit extends Cubit<TravelState> {
 const _defaultPackages = <TravelPackage>[
   TravelPackage(
     id: 'umrah-economy',
+    companyId: 'al-haramain',
+    categoryId: 'umrah',
     title: 'Умра 2024 – Эконом',
     location: 'Makkah & Madinah',
     imagePath: 'assets/images/travel_card1.jpg',
@@ -199,7 +238,35 @@ const _defaultPackages = <TravelPackage>[
     ],
   ),
   TravelPackage(
+    id: 'umrah-comfort',
+    companyId: 'al-haramain',
+    categoryId: 'umrah',
+    title: 'Умра 2025 – Комфорт',
+    location: 'Makkah & Madinah',
+    imagePath: 'assets/images/travel_card1.jpg',
+    guideName: 'Sheikh Ahmed Al-Mansouri',
+    guideRating: 4.8,
+    priceUsd: 3100,
+    availabilityLabel: 'Оставшиеся места: 12',
+    startDateLabel: '20.02.2025',
+    durationLabel: '12 дней',
+    tags: [
+      TravelBadgeData(
+        'Популярно',
+        AppColors.badgeLightBackground,
+        AppColors.headingDeep,
+      ),
+      TravelBadgeData(
+        'Умра',
+        AppColors.badgeLightBackground,
+        AppColors.headingDeep,
+      ),
+    ],
+  ),
+  TravelPackage(
     id: 'hajj-premium',
+    companyId: 'noor-travel',
+    categoryId: 'hajj',
     title: 'Хадж 2025 – Премиум',
     location: 'Saudi Arabia',
     imagePath: 'assets/images/travel_card2.jpg',
@@ -211,6 +278,28 @@ const _defaultPackages = <TravelPackage>[
     durationLabel: '15 дней',
     tags: [
       TravelBadgeData('Новинка', AppColors.badgeNew),
+      TravelBadgeData(
+        'Хадж',
+        AppColors.surfaceLight,
+        AppColors.favoriteInactive,
+      ),
+    ],
+  ),
+  TravelPackage(
+    id: 'hajj-standard',
+    companyId: 'safa-marwa',
+    categoryId: 'hajj',
+    title: 'Хадж 2025 – Стандарт',
+    location: 'Saudi Arabia',
+    imagePath: 'assets/images/travel_card2.jpg',
+    guideName: 'Abdulloh Qori',
+    guideRating: 4.6,
+    priceUsd: 4200,
+    availabilityLabel: 'Оставшиеся места: 14',
+    startDateLabel: '05.06.2025',
+    durationLabel: '12 дней',
+    tags: [
+      TravelBadgeData('Раннее бронирование', AppColors.badgeNew),
       TravelBadgeData(
         'Хадж',
         AppColors.surfaceLight,
