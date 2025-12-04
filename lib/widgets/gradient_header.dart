@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class GradientHeader extends StatelessWidget {
   final IconData icon;
@@ -21,7 +22,7 @@ class GradientHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: height,
+      height: height.h,
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -38,23 +39,26 @@ class GradientHeader extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 CircleAvatar(
-                  radius: 35,
+                  radius: 35.r,
                   backgroundColor: Colors.white24,
-                  child: Icon(icon, color: Colors.white, size: 40),
+                  child: Icon(icon, color: Colors.white, size: 40.sp),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12.h),
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
-                    fontSize: 18,
+                    fontSize: 18.sp,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4.h),
                 Text(
                   subtitle,
-                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 14.sp,
+                  ),
                 ),
               ],
             ),
@@ -70,9 +74,9 @@ class _DiagonalStripesPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = Colors.white.withAlpha(20)
-      ..strokeWidth = 1;
+      ..strokeWidth = 1.w;
 
-    const spacing = 15.0;
+    final spacing = 15.w;
     for (double x = -size.height; x < size.width; x += spacing) {
       canvas.drawLine(
         Offset(x, 0),

@@ -7,6 +7,7 @@ import 'package:safa_app/features/travel/models/travel_company.dart';
 import 'package:safa_app/features/travel/presentation/cubit/travel_cubit.dart';
 import 'package:safa_app/features/travel/presentation/widgets/travel_package_card.dart';
 import 'package:safa_app/widgets/segmented_tabs.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class TravelCompanyDetailArgs {
   final TravelCompany company;
@@ -55,20 +56,22 @@ class _TravelCompanyPageState extends State<TravelCompanyPage> {
               ),
             )
             .toList();
+        final horizontalPadding = 20.w;
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           body: Stack(
             children: [
               SingleChildScrollView(
-                padding: const EdgeInsets.only(bottom: 40),
+                padding: EdgeInsets.only(bottom: 40.h),
                 child: Column(
                   children: [
                     _CompanyHeader(company: widget.company),
                     if (categories.isNotEmpty)
                       Transform.translate(
-                        offset: const Offset(0, -26),
+                        offset: Offset(0, -26.h),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          padding:
+                              EdgeInsets.symmetric(horizontal: horizontalPadding),
                           child: buildSegmentedTabs(
                             context: context,
                             tabs: tabConfigs,
@@ -83,22 +86,25 @@ class _TravelCompanyPageState extends State<TravelCompanyPage> {
                         ),
                       ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: horizontalPadding),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           if (state.errorMessage != null)
                             Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
+                              padding: EdgeInsets.only(bottom: 10.h),
                               child: _CompanyError(message: state.errorMessage!),
                             ),
                           if (state.isLoading && filteredPackages.isEmpty)
-                            const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 24),
-                              child: Center(child: CircularProgressIndicator()),
+                            Padding(
+                              padding: EdgeInsets.symmetric(vertical: 24.h),
+                              child: const Center(
+                                child: CircularProgressIndicator(),
+                              ),
                             )
                           else ...[
-                            if (categories.isNotEmpty) const SizedBox(height: 6),
+                            if (categories.isNotEmpty) SizedBox(height: 6.h),
                             Text(
                               l10n.t(
                                 'travel.section.availableCount',
@@ -106,16 +112,16 @@ class _TravelCompanyPageState extends State<TravelCompanyPage> {
                                   'count': '${filteredPackages.length}',
                                 },
                               ),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: AppColors.textInfo,
-                                fontSize: 14,
+                                fontSize: 14.sp,
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16.h),
                             if (filteredPackages.isEmpty)
                               Padding(
                                 padding:
-                                    const EdgeInsets.only(top: 8, bottom: 12),
+                                    EdgeInsets.only(top: 8.h, bottom: 12.h),
                                 child: Text(
                                   l10n.t('travel.section.noPackages'),
                                   style: TextStyle(
@@ -124,7 +130,7 @@ class _TravelCompanyPageState extends State<TravelCompanyPage> {
                                         .bodyMedium
                                         ?.color
                                         ?.withValues(alpha: 0.7),
-                                    fontSize: 15,
+                                    fontSize: 15.sp,
                                   ),
                                 ),
                               )
@@ -137,7 +143,7 @@ class _TravelCompanyPageState extends State<TravelCompanyPage> {
                                   onFavoriteToggle: () =>
                                       cubit.toggleFavorite(package.id),
                                 ),
-                                const SizedBox(height: 10),
+                                SizedBox(height: 10.h),
                               ],
                           ],
                         ],
@@ -149,12 +155,15 @@ class _TravelCompanyPageState extends State<TravelCompanyPage> {
               SafeArea(
                 child: Padding(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                      EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
                   child: CircleAvatar(
                     backgroundColor: Theme.of(context).cardColor,
-                    radius: 22,
+                    radius: 22.r,
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded),
+                      icon: Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        size: 18.sp,
+                      ),
                       color: Theme.of(context).iconTheme.color,
                       onPressed: () => context.pop(),
                     ),
@@ -179,18 +188,20 @@ class _CompanyThumbnail extends StatelessWidget {
     if (imagePath.startsWith('http')) {
       return Image.network(
         imagePath,
-        width: 76,
-        height: 76,
+        width: 76.r,
+        height: 76.r,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported),
+        errorBuilder: (context, error, stackTrace) =>
+            const Icon(Icons.image_not_supported),
       );
     }
     return Image.asset(
       imagePath,
-      width: 76,
-      height: 76,
+      width: 76.r,
+      height: 76.r,
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported),
+      errorBuilder: (context, error, stackTrace) =>
+          const Icon(Icons.image_not_supported),
     );
   }
 }
@@ -205,20 +216,20 @@ class _CompanyError extends StatelessWidget {
     final color = Theme.of(context).colorScheme.error;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Row(
         children: [
           Icon(Icons.error_outline_rounded, color: color),
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
           Expanded(
             child: Text(
               message,
-              style: TextStyle(color: color, fontSize: 13),
+              style: TextStyle(color: color, fontSize: 13.sp),
             ),
           ),
         ],
@@ -238,72 +249,77 @@ class _CompanyHeader extends StatelessWidget {
     final topInset = MediaQuery.of(context).padding.top;
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(20, topInset + 26, 20, 62),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
+      padding: EdgeInsets.fromLTRB(
+        20.w,
+        topInset + 26.h,
+        20.w,
+        62.h,
+      ),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
           colors: [Color(0xFF48C6B6), Color(0xFF35A0D3)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: const EdgeInsets.all(6),
+            padding: EdgeInsets.all(6.w),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(18.r),
               child: _CompanyThumbnail(imagePath: company.thumbnail),
             ),
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14.h),
           Text(
             company.name,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.white,
-              fontSize: 22,
+              fontSize: 22.sp,
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 Icons.star_rounded,
                 color: Colors.white,
-                size: 18,
+                size: 18.sp,
               ),
-              const SizedBox(width: 6),
+              SizedBox(width: 6.w),
               Text(
                 company.rating.toStringAsFixed(1),
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
-                  fontSize: 15,
+                  fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(width: 14),
-              const Icon(
+              SizedBox(width: 14.w),
+              Icon(
                 Icons.people_alt_rounded,
                 color: Colors.white,
-                size: 18,
+                size: 18.sp,
               ),
-              const SizedBox(width: 6),
+              SizedBox(width: 6.w),
               Text(
                 l10n.t(
                   'travel.company.toursCount',
                   params: {'count': '${company.tours}'},
                 ),
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
-                  fontSize: 15,
+                  fontSize: 15.sp,
                 ),
               ),
             ],

@@ -9,6 +9,7 @@ import 'package:safa_app/features/sadaqa/presentation/widgets/builde_favorites_s
 import 'package:safa_app/features/sadaqa/presentation/widgets/cause_card_sadaqa.dart';
 import 'package:safa_app/widgets/gradient_header.dart';
 import 'package:safa_app/widgets/segmented_tabs.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SadaqaPage extends StatelessWidget {
   const SadaqaPage({super.key});
@@ -24,7 +25,7 @@ class SadaqaPage extends StatelessWidget {
           final l10n = context.l10n;
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 32),
+            padding: EdgeInsets.only(bottom: 32.h),
             child: SafeArea(
               child: Stack(
                 children: [
@@ -34,11 +35,11 @@ class SadaqaPage extends StatelessWidget {
                     subtitle: l10n.t('sadaqa.header.subtitle'),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 200),
+                        SizedBox(height: 200.h),
                         _AssistanceCard(
                           title: l10n.t('sadaqa.assistance.title'),
                           subtitle: l10n.t('sadaqa.assistance.subtitle'),
@@ -46,7 +47,7 @@ class SadaqaPage extends StatelessWidget {
                           onPressed: () =>
                               context.pushNamed(AppRoute.requestHelp.name),
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16.h),
                         buildSegmentedTabs(
                           context: context,
                           tabs: [
@@ -67,13 +68,13 @@ class SadaqaPage extends StatelessWidget {
                             cubit.selectTab(SadaqaTab.values[index]);
                           },
                         ),
-                        const SizedBox(height: 24),
+                        SizedBox(height: 24.h),
                         Text(
                           state.activeTab == SadaqaTab.all
                               ? l10n.t('sadaqa.section.current')
                               : l10n.t('sadaqa.section.favorites'),
                           style: TextStyle(
-                            fontSize: 22,
+                            fontSize: 22.sp,
                             fontFamily: 'Poppins',
                             color: Theme.of(context)
                                 .colorScheme
@@ -81,7 +82,7 @@ class SadaqaPage extends StatelessWidget {
                                 .withValues(alpha: 0.82),
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: 12.h),
                         if (causes.isEmpty)
                           buildFavoritesPlaceholder(context)
                         else
@@ -143,21 +144,21 @@ class _AssistanceCard extends StatelessWidget {
     final cardColor = Theme.of(context).cardColor;
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 16),
-      padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 24),
+      margin: EdgeInsets.symmetric(vertical: 16.h),
+      padding: EdgeInsets.symmetric(vertical: 28.h, horizontal: 24.w),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: const [
+        borderRadius: BorderRadius.circular(28.r),
+        boxShadow: [
           BoxShadow(
-            color: Color.fromRGBO(46, 125, 110, 0.20),
-            blurRadius: 25,
-            offset: Offset(0, 18),
+            color: const Color.fromRGBO(46, 125, 110, 0.20),
+            blurRadius: 25.r,
+            offset: Offset(0, 18.h),
           ),
           BoxShadow(
-            color: Color.fromRGBO(0, 0, 0, 0.05),
-            blurRadius: 12,
-            offset: Offset(0, 8),
+            color: const Color.fromRGBO(0, 0, 0, 0.05),
+            blurRadius: 12.r,
+            offset: Offset(0, 8.h),
           ),
         ],
       ),
@@ -173,31 +174,35 @@ class _AssistanceCard extends StatelessWidget {
                     color: Theme.of(context).brightness == Brightness.dark
                         ? Colors.white
                         : const Color(0xFF1A2B4F),
-                    fontSize: 19,
+                    fontSize: 19.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
               Container(
-                width: 40,
-                height: 40,
+                width: 40.r,
+                height: 40.r,
                 decoration: BoxDecoration(
                   color: cardColor,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: gradientColors.first, width: 1.5),
-                  boxShadow: const [
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(color: gradientColors.first, width: 1.5.w),
+                  boxShadow: [
                     BoxShadow(
-                      color: Color.fromRGBO(33, 147, 108, 0.18),
-                      blurRadius: 14,
-                      offset: Offset(0, 6),
+                      color: const Color.fromRGBO(33, 147, 108, 0.18),
+                      blurRadius: 14.r,
+                      offset: Offset(0, 6.h),
                     ),
                   ],
                 ),
-                child: const Icon(Icons.help_outline, color: Color(0xFF1FAB82)),
+                child: Icon(
+                  Icons.help_outline,
+                  color: const Color(0xFF1FAB82),
+                  size: 20.sp,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Text(
             subtitle,
             style: TextStyle(
@@ -205,10 +210,10 @@ class _AssistanceCard extends StatelessWidget {
                   .colorScheme
                   .onSurface
                   .withValues(alpha: 0.72),
-              fontSize: 14,
+              fontSize: 14.sp,
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24.h),
           DecoratedBox(
             decoration: BoxDecoration(
               gradient: const LinearGradient(
@@ -216,28 +221,28 @@ class _AssistanceCard extends StatelessWidget {
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
-              borderRadius: BorderRadius.circular(28),
-              boxShadow: const [
+              borderRadius: BorderRadius.circular(28.r),
+              boxShadow: [
                 BoxShadow(
-                  color: Color.fromRGBO(33, 147, 108, 0.35),
-                  blurRadius: 20,
-                  offset: Offset(0, 8),
+                  color: const Color.fromRGBO(33, 147, 108, 0.35),
+                  blurRadius: 20.r,
+                  offset: Offset(0, 8.h),
                 ),
               ],
             ),
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: BorderRadius.circular(28.r),
                 onTap: onPressed,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  padding: EdgeInsets.symmetric(vertical: 12.h),
                   child: Center(
                     child: Text(
                       buttonLabel,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
-                        fontSize: 16,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

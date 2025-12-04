@@ -2,10 +2,11 @@ import 'package:safa_app/features/travel/presentation/cubit/travel_cubit.dart';
 import 'package:safa_app/features/travel/data/travel_repository.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:safa_app/core/settings/app_settings_cubit.dart';
 import 'package:safa_app/core/settings/app_settings_state.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:safa_app/core/settings/app_settings_cubit.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:safa_app/core/navigation/app_router.dart';
 import 'package:safa_app/core/service/db_service.dart';
 import 'package:safa_app/core/styles/app_theme.dart';
@@ -13,6 +14,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:safa_app/firebase_options.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -23,14 +25,29 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await DBService.initialize();
+  const enableMessaging = !kIsWeb;
 
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  if (enableMessaging) {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  }
+  await DBService.initialize();
 
   final preferences = await SharedPreferences.getInstance();
 
-  runApp(SafaApp(prefs: preferences));
+  runApp(
+    ScreenUtilInit(
+      designSize: const Size(440, 956),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      useInheritedMediaQuery: true,
+      builder: (_, child) => child ?? const SizedBox.shrink(),
+      child: SafaApp(
+        prefs: preferences,
+        enableMessaging: enableMessaging,
+      ),
+    ),
+  );
 }
 
 class SafaApp extends StatefulWidget {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
 
 class SegmentedTabConfig {
@@ -36,11 +37,11 @@ Widget buildSegmentedTabs({
       : AppColors.black.withValues(alpha: 0.08);
 
   return Container(
-    padding: const EdgeInsets.all(4),
+    padding: EdgeInsets.all(4.w),
     decoration: BoxDecoration(
       color: trackColor,
-      borderRadius: BorderRadius.circular(32),
-      border: Border.all(color: borderColor, width: 1.5),
+      borderRadius: BorderRadius.circular(32.r),
+      border: Border.all(color: borderColor, width: 1.5.w),
     ),
     child: Row(
       children: [
@@ -50,19 +51,19 @@ Widget buildSegmentedTabs({
               onTap: () => handleTap(i),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 0),
-                padding: const EdgeInsets.symmetric(
-                  vertical: 12,
-                  horizontal: 12,
+                padding: EdgeInsets.symmetric(
+                  vertical: 12.h,
+                  horizontal: 12.w,
                 ),
                 decoration: BoxDecoration(
                   color: selectedIndex == i ? activeBg : Colors.transparent,
-                  borderRadius: BorderRadius.circular(28),
+                  borderRadius: BorderRadius.circular(28.r),
                   boxShadow: selectedIndex == i
                       ? [
                           BoxShadow(
                             color: shadowColor,
-                            blurRadius: 12,
-                            offset: const Offset(0, 6),
+                            blurRadius: 12.r,
+                            offset: Offset(0, 6.h),
                           ),
                         ]
                       : null,
@@ -75,12 +76,12 @@ Widget buildSegmentedTabs({
                         selectedIndex == i
                             ? (tabs[i].activeIcon ?? tabs[i].icon)
                             : tabs[i].icon,
-                        size: 18,
+                        size: 18.sp,
                         color: selectedIndex == i
                             ? activeTextColor
                             : inactiveColor,
                       ),
-                      const SizedBox(width: 6),
+                      SizedBox(width: 6.w),
                     ],
                     Flexible(
                       child: Text(
@@ -90,6 +91,7 @@ Widget buildSegmentedTabs({
                           color:
                               selectedIndex == i ? activeTextColor : inactiveColor,
                           fontWeight: FontWeight.w600,
+                          fontSize: 14.sp,
                         ),
                       ),
                     ),
@@ -98,7 +100,7 @@ Widget buildSegmentedTabs({
               ),
             ),
           ),
-          if (i != tabs.length - 1) const SizedBox(width: 8),
+          if (i != tabs.length - 1) SizedBox(width: 8.w),
         ],
       ],
     ),

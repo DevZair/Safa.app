@@ -160,7 +160,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               ),
                               onTap: () async {
                                 final Uri url = Uri.parse(
-                                  "https://YOUR-SITE.com/privacy.html",
+                                  "https://safa-app.netlify.app",
                                 );
 
                                 final bool supported = await canLaunchUrl(url);

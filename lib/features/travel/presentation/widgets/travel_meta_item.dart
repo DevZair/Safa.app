@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
 
 class TravelMetaItem extends StatelessWidget {
@@ -23,15 +24,15 @@ class TravelMetaItem extends StatelessWidget {
       children: [
         Icon(
           icon,
-          size: 18,
+          size: 18.sp,
           color: Theme.of(context).colorScheme.primary,
         ),
-        const SizedBox(width: 6),
+        SizedBox(width: 6.w),
         Text(
           label,
           style: TextStyle(
             color: textColor,
-            fontSize: 13,
+            fontSize: 13.sp,
             fontWeight: FontWeight.w500,
           ),
         ),

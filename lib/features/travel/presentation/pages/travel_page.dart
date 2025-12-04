@@ -9,6 +9,7 @@ import 'package:safa_app/core/styles/app_colors.dart';
 import 'package:safa_app/widgets/segmented_tabs.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/material.dart';
 
 class TravelPage extends StatelessWidget {
@@ -35,6 +36,7 @@ class _TravelView extends StatelessWidget {
             .where((p) => state.favoritePackageIds.contains(p.id))
             .toList();
         final favoritesCount = favorites.length;
+        final horizontalPadding = 20.w;
         return Scaffold(
           backgroundColor: theme.scaffoldBackgroundColor,
           body: Builder(
@@ -46,7 +48,7 @@ class _TravelView extends StatelessWidget {
               }
 
               return SingleChildScrollView(
-                padding: const EdgeInsets.only(bottom: 40),
+                padding: EdgeInsets.only(bottom: 40.h),
                 child: SafeArea(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -56,9 +58,10 @@ class _TravelView extends StatelessWidget {
                         subtitle: state.heroSubtitle,
                         metrics: state.metrics,
                       ),
-                      const SizedBox(height: 90),
+                      SizedBox(height: 90.h),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: horizontalPadding),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -74,63 +77,64 @@ class _TravelView extends StatelessWidget {
                                   label: l10n.t('travel.tabs.companies'),
                                   icon: Icons.apartment_rounded,
                                 ),
-                                SegmentedTabConfig(
-                                  label: l10n.t(
-                                    'travel.tabs.saved',
-                                    params: {'count': '$favoritesCount'},
-                                  ),
-                                  icon: Icons.favorite_border_rounded,
-                                  activeIcon: Icons.favorite_rounded,
-                                ),
-                              ],
-                              selectedIndex: state.activeTab.index,
-                              onTabSelected: (index) =>
-                                  cubit.selectTab(TravelTab.values[index]),
-                            ),
-                            const SizedBox(height: 28),
-                            if (state.activeTab == TravelTab.all) ...[
-                              _SectionHeader(
-                                title: l10n.t('travel.section.companies'),
+                            SegmentedTabConfig(
+                              label: l10n.t(
+                                'travel.tabs.saved',
+                                params: {'count': '$favoritesCount'},
                               ),
-                              const SizedBox(height: 18),
-                              if (state.companies.isEmpty)
-                                _PlaceholderText(
-                                  text: l10n.t('travel.section.noCompanies'),
-                                )
-                              else
-                                for (final company in state.companies) ...[
-                                  _CompanyCard(
+                              icon: Icons.favorite_border_rounded,
+                              activeIcon: Icons.favorite_rounded,
+                            ),
+                          ],
+                          selectedIndex: state.activeTab.index,
+                          onTabSelected: (index) =>
+                              cubit.selectTab(TravelTab.values[index]),
+                        ),
+                        SizedBox(height: 28.h),
+                        if (state.activeTab == TravelTab.all) ...[
+                          _SectionHeader(
+                            title: l10n.t('travel.section.companies'),
+                          ),
+                          SizedBox(height: 18.h),
+                          if (state.companies.isEmpty)
+                            _PlaceholderText(
+                              text: l10n.t('travel.section.noCompanies'),
+                            )
+                          else
+                            for (final company in state.companies) ...[
+                              _CompanyCard(
                                     company: company,
                                     onTap: () => context.pushNamed(
                                       AppRoute.travelCompany.name,
                                       extra:
                                           TravelCompanyDetailArgs(company: company),
-                                    ),
                                   ),
-                                  const SizedBox(height: 16),
-                                ],
-                            ] else ...[
-                              _SectionHeader(
-                                title: l10n.t(
-                                  'travel.tabs.saved',
-                                  params: {'count': '$favoritesCount'},
                                 ),
+                                SizedBox(height: 16.h),
+                              ],
+                          ] else ...[
+                            _SectionHeader(
+                              title: l10n.t(
+                                'travel.tabs.saved',
+                                params: {'count': '$favoritesCount'},
                               ),
-                              const SizedBox(height: 14),
-                              if (state.isLoading && favorites.isEmpty)
-                                const Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 30),
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                )
-                              else if (favorites.isEmpty)
-                                Text(
-                                  l10n.t('travel.saved.empty'),
-                                  style: TextStyle(
+                            ),
+                            SizedBox(height: 14.h),
+                            if (state.isLoading && favorites.isEmpty)
+                              Center(
+                                child: Padding(
+                                  padding:
+                                      EdgeInsets.symmetric(vertical: 30.h),
+                                  child: const CircularProgressIndicator(),
+                                ),
+                              )
+                            else if (favorites.isEmpty)
+                              Text(
+                                l10n.t('travel.saved.empty'),
+                                style: TextStyle(
                                     color: theme.textTheme.bodyMedium?.color
                                         ?.withValues(alpha: 0.7),
-                                    fontSize: 15,
+                                    fontSize: 15.sp,
                                   ),
                                 )
                               else
@@ -141,12 +145,12 @@ class _TravelView extends StatelessWidget {
                                     onFavoriteToggle: () =>
                                         cubit.toggleFavorite(package.id),
                                   ),
-                                  const SizedBox(height: 16),
+                                  SizedBox(height: 16.h),
                                 ],
-                            ],
                           ],
-                        ),
+                        ],
                       ),
+                    ),
                     ],
                   ),
                 ),
@@ -173,7 +177,7 @@ class _HeroHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 320,
+      height: 320.h,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -183,9 +187,9 @@ class _HeroHeader extends StatelessWidget {
             subtitle: subtitle,
           ),
           Positioned(
-            left: 20,
-            right: 20,
-            bottom: -60,
+            left: 20.w,
+            right: 20.w,
+            bottom: -60.h,
             child: _MetricsCard(metrics: metrics),
           ),
         ],
@@ -204,20 +208,20 @@ class _ErrorBanner extends StatelessWidget {
     final color = Theme.of(context).colorScheme.error;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Row(
         children: [
           Icon(Icons.error_outline_rounded, color: color),
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
           Expanded(
             child: Text(
               message,
-              style: TextStyle(color: color, fontSize: 13),
+              style: TextStyle(color: color, fontSize: 13.sp),
             ),
           ),
         ],
@@ -234,13 +238,16 @@ class _PlaceholderText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: EdgeInsets.symmetric(vertical: 12.h),
       child: Text(
         text,
         style: TextStyle(
-          color:
-              Theme.of(context).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
-          fontSize: 15,
+          color: Theme.of(context)
+              .textTheme
+              .bodyMedium
+              ?.color
+              ?.withValues(alpha: 0.7),
+          fontSize: 15.sp,
         ),
       ),
     );
@@ -256,15 +263,15 @@ class _MetricsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cardColor = Theme.of(context).cardColor;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+      padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 20.h),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(38),
+        borderRadius: BorderRadius.circular(38.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 32,
-            offset: const Offset(0, 22),
+            blurRadius: 32.r,
+            offset: Offset(0, 22.h),
           ),
         ],
       ),
@@ -273,7 +280,11 @@ class _MetricsCard extends StatelessWidget {
           for (int i = 0; i < metrics.length; i++) ...[
             Expanded(child: _MetricTile(metric: metrics[i])),
             if (i != metrics.length - 1)
-              Container(width: 1, height: 56, color: AppColors.metricDivider),
+              Container(
+                width: 1.w,
+                height: 56.h,
+                color: AppColors.metricDivider,
+              ),
           ],
         ],
       ),
@@ -298,10 +309,10 @@ class _MetricTile extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          width: 52,
-          height: 52,
+          width: 52.r,
+          height: 52.r,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(18.r),
             gradient: const LinearGradient(
               colors: [AppColors.mintTint, AppColors.skyTint],
               begin: Alignment.topLeft,
@@ -310,22 +321,22 @@ class _MetricTile extends StatelessWidget {
           ),
           child: Icon(metric.icon, color: AppColors.iconAccent),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: 10.h),
         Text(
           metric.value,
           style: TextStyle(
             color: valueColor,
-            fontSize: 18,
+            fontSize: 18.sp,
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: 2),
+        SizedBox(height: 2.h),
         Text(
           metric.label,
           textAlign: TextAlign.center,
           style: TextStyle(
             color: labelColor,
-            fontSize: 12,
+            fontSize: 12.sp,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -347,7 +358,7 @@ class _SectionHeader extends StatelessWidget {
       title,
       style: TextStyle(
         color: color,
-        fontSize: 18,
+        fontSize: 18.sp,
         fontWeight: FontWeight.w600,
       ),
     );
@@ -367,32 +378,32 @@ class _CompanyCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 16.h),
         decoration: BoxDecoration(
           color: cardColor,
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(30.r),
           boxShadow: [
             BoxShadow(
               color: AppColors.black.withValues(alpha: 0.04),
-              blurRadius: 26,
-              offset: const Offset(0, 18),
+              blurRadius: 26.r,
+              offset: Offset(0, 18.h),
             ),
           ],
         ),
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(6),
+              padding: EdgeInsets.all(6.w),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(24.r),
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(18.r),
                 child: _CompanyAvatar(imagePath: company.thumbnail),
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -400,21 +411,21 @@ class _CompanyCard extends StatelessWidget {
                   Text(
                     company.name,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).textTheme.titleMedium?.color ??
                           AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  SizedBox(height: 6.h),
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.star_rounded,
                         color: AppColors.primary,
-                        size: 18,
+                        size: 18.sp,
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: 4.w),
                       Text(
                         company.rating.toStringAsFixed(1),
                         style: TextStyle(
@@ -424,7 +435,7 @@ class _CompanyCard extends StatelessWidget {
                                   AppColors.textPrimary,
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      SizedBox(width: 10.w),
                       Text(
                         l10n.t(
                           'travel.company.toursCount',
@@ -436,7 +447,7 @@ class _CompanyCard extends StatelessWidget {
                               .bodySmall
                               ?.color
                               ?.withValues(alpha: 0.7),
-                          fontSize: 13,
+                          fontSize: 13.sp,
                         ),
                       ),
                     ],
@@ -445,10 +456,10 @@ class _CompanyCard extends StatelessWidget {
               ),
             ),
             Container(
-              width: 42,
-              height: 42,
+              width: 42.r,
+              height: 42.r,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16.r),
                 gradient: const LinearGradient(
                   colors: [
                     AppColors.arrowGradientStart,
@@ -456,9 +467,9 @@ class _CompanyCard extends StatelessWidget {
                   ],
                 ),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.arrow_forward_ios_rounded,
-                size: 16,
+                size: 16.sp,
                 color: AppColors.iconArrow,
               ),
             ),
@@ -479,20 +490,20 @@ class _CompanyAvatar extends StatelessWidget {
     if (imagePath.startsWith('http')) {
       return Image.network(
         imagePath,
-        width: 56,
-        height: 56,
+        width: 56.r,
+        height: 56.r,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) =>
+        errorBuilder: (context, error, stackTrace) =>
             const Icon(Icons.image_not_supported_outlined),
       );
     }
 
     return Image.asset(
       imagePath,
-      width: 56,
-      height: 56,
+      width: 56.r,
+      height: 56.r,
       fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) =>
+      errorBuilder: (context, error, stackTrace) =>
           const Icon(Icons.image_not_supported_outlined),
     );
   }

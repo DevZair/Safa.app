@@ -1,12 +1,13 @@
 final class ApiConstants {
   const ApiConstants._();
 
-  static const String baseUrl = 'https://eldor.kz';
+  // TODO: replace with the FastAPI base URL when it is available.
+  static const String baseUrl = 'http://localhost:8000';
 
-  // Travel
   static const String travelCompanies = '/api/travel/companies';
   static const String travelPackages = '/api/travel/packages';
 
-  // Sadaqa
-  static const String requestHelp = '/api/help/requests';
+  static const String requestHelp = '/api/sadaqa/help_request/';
+  static const String sadaqaCategories = '/api/sadaqa/help_category/';
+  static const String sadaqaMaterialStatuses = '/api/sadaqa/materials_status/';
 }
