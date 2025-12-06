@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:safa_app/widgets/gradient_header.dart';
 
-/// Consistent header for settings screen that reuses the shared gradient header.
 class SettingsHeader extends StatelessWidget {
   const SettingsHeader({
     super.key,
