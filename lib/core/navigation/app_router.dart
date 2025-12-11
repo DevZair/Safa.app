@@ -4,6 +4,7 @@ import 'package:safa_app/core/navigation/app_shell.dart';
 import 'package:safa_app/features/sadaqa/presentation/pages/request_help.dart';
 import 'package:safa_app/features/sadaqa/presentation/pages/sadaqa_detail.dart';
 import 'package:safa_app/features/sadaqa/presentation/pages/sadaqa_page.dart';
+import 'package:safa_app/features/sadaqa_history/presentation/pages/sadaqa_history_page.dart';
 import 'package:safa_app/features/settings/presentation/pages/settings_page.dart';
 import 'package:safa_app/features/travel/presentation/pages/travel_company_page.dart';
 import 'package:safa_app/features/travel/presentation/pages/travel_page.dart';
@@ -14,6 +15,7 @@ enum AppRoute {
   requestHelp,
   travel,
   travelCompany,
+  settingsHistory,
   settings
 }
 
@@ -99,6 +101,13 @@ class AppRouter {
                 path: '/settings',
                 name: AppRoute.settings.name,
                 builder: (context, state) => const SettingsPage(),
+                routes: [
+                  GoRoute(
+                    path: 'history',
+                    name: AppRoute.settingsHistory.name,
+                    builder: (context, state) => const SadaqaHistoryPage(),
+                  ),
+                ],
               ),
             ],
           ),

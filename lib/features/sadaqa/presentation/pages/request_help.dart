@@ -43,6 +43,8 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
   ];
 
   String? _selectedCategory;
+  final List<String> _companies = const ['Мерім', 'Береке', 'Rahmet'];
+  String? _selectedCompany;
   bool _isOtherCategory = false;
   int _storyLength = 0;
   bool _isSubmitting = false;
@@ -278,6 +280,18 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
                 ],
                 const SizedBox(height: 16),
                 _LabeledField(
+                  label: 'Фонд / компания *',
+                  child: _RequestDropdown(
+                    value: _selectedCompany,
+                    hintText: 'Выберите фонд или компанию',
+                    items: _companies,
+                    onChanged: (value) {
+                      setState(() => _selectedCompany = value);
+                    },
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _LabeledField(
                   label: 'Необходимая сумма (ТГ)',
                   child: _RequestTextField(
                     controller: _amountController,
@@ -375,6 +389,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
               email: _emailController.text.trim(),
               city: _cityController.text.trim(),
               address: _addressController.text.trim(),
+              company: _selectedCompany ?? '',
               category: _selectedCategory ?? '',
               materialStatus: _materialStatuses
                   .firstWhere(
@@ -539,6 +554,12 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
       });
       return;
     }
+    if (_selectedCompany == null || _selectedCompany!.isEmpty) {
+      setState(() {
+        _submitError = 'Пожалуйста, выберите фонд/компанию.';
+      });
+      return;
+    }
     final amountText = _amountController.text.trim();
     if (amountText.isNotEmpty && num.tryParse(amountText) == null) {
       setState(() {
@@ -556,6 +577,8 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
 
     final uploadFile = await _buildMultipartFile();
 
+    if (!mounted) return;
+
     final payload = RequestHelpPayload(
       name: _firstNameController.text.trim(),
       surname: _lastNameController.text.trim(),
@@ -572,6 +595,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
       iin: _iinController.text.trim().isEmpty
           ? null
           : _iinController.text.trim(),
+      companyName: _selectedCompany,
       materialStatus: _selectedMaterialStatus,
       money: amountValue,
       status: null,
@@ -598,6 +622,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
         _selectedCategoryId = 1;
         _selectedMaterialStatus =
             _materialStatuses.isNotEmpty ? '${_materialStatuses.first.id}' : null;
+        _selectedCompany = null;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Ваш запрос отправлен на проверку.')),
@@ -713,6 +738,7 @@ class _PayloadPreviewCard extends StatelessWidget {
     required this.email,
     required this.city,
     required this.address,
+    required this.company,
     required this.category,
     required this.materialStatus,
     required this.amount,
@@ -728,6 +754,7 @@ class _PayloadPreviewCard extends StatelessWidget {
   final String email;
   final String city;
   final String address;
+  final String company;
   final String category;
   final String materialStatus;
   final String amount;
@@ -780,6 +807,7 @@ class _PayloadPreviewCard extends StatelessWidget {
           _PreviewRow(label: 'Телефон', value: phone),
           _PreviewRow(label: 'Email', value: email),
           _PreviewRow(label: 'Адрес', value: addressText),
+          _PreviewRow(label: 'Фонд / компания', value: company),
           _PreviewRow(label: 'Категория', value: category),
           _PreviewRow(label: 'Мат. статус', value: materialStatus),
           _PreviewRow(label: 'Сумма, ₸', value: amount.isEmpty ? '—' : amount),
@@ -1418,7 +1446,7 @@ class _MaterialStatusDropdown extends StatelessWidget {
     }
 
     return DropdownButtonFormField<String>(
-      value: value?.isEmpty == true ? null : value,
+      initialValue: value?.isEmpty == true ? null : value,
       items: statuses
           .map(
             (item) => DropdownMenuItem<String>(

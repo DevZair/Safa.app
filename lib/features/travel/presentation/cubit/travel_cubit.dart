@@ -222,6 +222,10 @@ const _defaultPackages = <TravelPackage>[
     title: 'Умра 2024 – Эконом',
     location: 'Makkah & Madinah',
     imagePath: 'assets/images/travel_card1.jpg',
+    gallery: [
+      'assets/images/travel_card1.jpg',
+      'assets/images/travel_card2.jpg',
+    ],
     guideName: 'Abdruhman Qori',
     guideRating: 4.9,
     priceUsd: 2500,
@@ -244,6 +248,10 @@ const _defaultPackages = <TravelPackage>[
     title: 'Умра 2025 – Комфорт',
     location: 'Makkah & Madinah',
     imagePath: 'assets/images/travel_card1.jpg',
+    gallery: [
+      'assets/images/travel_card1.jpg',
+      'assets/images/travel_card2.jpg',
+    ],
     guideName: 'Sheikh Ahmed Al-Mansouri',
     guideRating: 4.8,
     priceUsd: 3100,
@@ -270,6 +278,10 @@ const _defaultPackages = <TravelPackage>[
     title: 'Хадж 2025 – Премиум',
     location: 'Saudi Arabia',
     imagePath: 'assets/images/travel_card2.jpg',
+    gallery: [
+      'assets/images/travel_card2.jpg',
+      'assets/images/travel_card1.jpg',
+    ],
     guideName: 'Islam Qori',
     guideRating: 4.8,
     priceUsd: 5500,
@@ -292,6 +304,10 @@ const _defaultPackages = <TravelPackage>[
     title: 'Хадж 2025 – Стандарт',
     location: 'Saudi Arabia',
     imagePath: 'assets/images/travel_card2.jpg',
+    gallery: [
+      'assets/images/travel_card2.jpg',
+      'assets/images/travel_card1.jpg',
+    ],
     guideName: 'Abdulloh Qori',
     guideRating: 4.6,
     priceUsd: 4200,

@@ -10,4 +10,5 @@ final class ApiConstants {
   static const String requestHelp = '/api/sadaqa/help_request/';
   static const String sadaqaCategories = '/api/sadaqa/help_category/';
   static const String sadaqaMaterialStatuses = '/api/sadaqa/materials_status/';
+  static const String sadaqaHistory = '/api/sadaqa/donations/history/';
 }

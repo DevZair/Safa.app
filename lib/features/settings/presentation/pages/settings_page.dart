@@ -1,11 +1,13 @@
-import 'package:safa_app/features/settings/presentation/widgets/settings_user_card.dart';
-import 'package:safa_app/features/settings/presentation/widgets/settings_section.dart';
-import 'package:safa_app/features/settings/presentation/widgets/settings_header.dart';
-import 'package:safa_app/features/settings/presentation/widgets/settings_tile.dart';
+import 'package:go_router/go_router.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
-import 'package:safa_app/core/settings/app_settings_state.dart';
+import 'package:safa_app/core/navigation/app_router.dart';
 import 'package:safa_app/core/settings/app_settings_cubit.dart';
+import 'package:safa_app/core/settings/app_settings_state.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
+import 'package:safa_app/features/settings/presentation/widgets/settings_header.dart';
+import 'package:safa_app/features/settings/presentation/widgets/settings_section.dart';
+import 'package:safa_app/features/settings/presentation/widgets/settings_tile.dart';
+import 'package:safa_app/features/settings/presentation/widgets/settings_user_card.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
@@ -149,7 +151,11 @@ class _SettingsPageState extends State<SettingsPage> {
                               subtitle: l10n.t(
                                 'settings.account.history.subtitle',
                               ),
-                              onTap: () {},
+                              onTap: () {
+                                context.pushNamed(
+                                  AppRoute.settingsHistory.name,
+                                );
+                              },
                             ),
                             SettingsTile(
                               icon: Icons.lock_outline,

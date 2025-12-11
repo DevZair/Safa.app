@@ -12,6 +12,8 @@ class SadaqaDetailHeader extends StatelessWidget {
     required this.onBack,
     required this.title,
     required this.subtitle,
+    this.companyName,
+    this.companyLogo,
     this.isFavorite = false,
     this.onFavorite,
     this.onShare,
@@ -21,6 +23,8 @@ class SadaqaDetailHeader extends StatelessWidget {
   final VoidCallback onBack;
   final String title;
   final String subtitle;
+  final String? companyName;
+  final String? companyLogo;
   final bool isFavorite;
   final VoidCallback? onFavorite;
   final VoidCallback? onShare;
@@ -28,7 +32,7 @@ class SadaqaDetailHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 320,
+      height: 340,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [Color(0xFF1FC8A9), Color(0xFF2A9ED7)],
@@ -42,7 +46,7 @@ class SadaqaDetailHeader extends StatelessWidget {
             child: CustomPaint(painter: SadaqaHeaderPatternPainter()),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(28, 20, 20, 170),
+            padding: const EdgeInsets.fromLTRB(28, 20, 20, 140),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -62,6 +66,11 @@ class SadaqaDetailHeader extends StatelessWidget {
                   ],
                 ),
                 const Spacer(),
+                _CompanyHeader(
+                  name: companyName,
+                  logo: companyLogo,
+                ),
+                const SizedBox(height: 10),
                 Text(
                   title,
                   style: const TextStyle(
@@ -106,6 +115,135 @@ class SadaqaCircleAction extends StatelessWidget {
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: Colors.white, size: 22),
+      ),
+    );
+  }
+}
+
+class _CompanyHeader extends StatelessWidget {
+  const _CompanyHeader({this.name, this.logo});
+
+  final String? name;
+  final String? logo;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bg = Colors.white.withValues(alpha: 0.22);
+    return Row(
+      children: [
+        _CompanyAvatar(logo: logo, fallback: name),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            name?.isNotEmpty == true ? name! : 'Фонд',
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.28)),
+          ),
+          child: Row(
+            children: const [
+              Icon(Icons.verified_rounded, size: 16, color: Colors.white),
+              SizedBox(width: 6),
+              Text(
+                'Фонд',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CompanyAvatar extends StatelessWidget {
+  const _CompanyAvatar({this.logo, this.fallback});
+
+  final String? logo;
+  final String? fallback;
+
+  @override
+  Widget build(BuildContext context) {
+    final border = Border.all(color: Colors.white.withValues(alpha: 0.35));
+    final radius = BorderRadius.circular(14);
+
+    Widget avatar;
+    if (logo != null && logo!.isNotEmpty) {
+      final isNetwork = logo!.startsWith('http');
+      avatar = ClipRRect(
+        borderRadius: radius,
+        child: isNetwork
+            ? Image.network(
+                logo!,
+                width: 52,
+                height: 52,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => _FallbackAvatar(fallback),
+              )
+            : Image.asset(
+                logo!,
+                width: 52,
+                height: 52,
+                fit: BoxFit.cover,
+              ),
+      );
+    } else {
+      avatar = _FallbackAvatar(fallback);
+    }
+
+    return Container(
+      width: 56,
+      height: 56,
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: border,
+        color: Colors.white.withValues(alpha: 0.18),
+      ),
+      child: ClipRRect(
+        borderRadius: radius,
+        child: avatar,
+      ),
+    );
+  }
+}
+
+class _FallbackAvatar extends StatelessWidget {
+  const _FallbackAvatar(this.fallback);
+
+  final String? fallback;
+
+  @override
+  Widget build(BuildContext context) {
+    final trimmed = fallback?.trim() ?? '';
+    final initial =
+        trimmed.isNotEmpty ? trimmed.substring(0, 1).toUpperCase() : 'F';
+    return Container(
+      color: Colors.white.withValues(alpha: 0.2),
+      alignment: Alignment.center,
+      child: Text(
+        initial,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          fontSize: 18,
+        ),
       ),
     );
   }

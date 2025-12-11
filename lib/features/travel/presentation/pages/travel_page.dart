@@ -16,6 +16,7 @@ class TravelPage extends StatelessWidget {
   const TravelPage({super.key});
 
   static const routeName = '/travel';
+  static const bool _showErrorBanner = false;
 
   @override
   Widget build(BuildContext context) => const _TravelView();
@@ -65,11 +66,6 @@ class _TravelView extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            if (state.errorMessage != null)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 14),
-                                child: _ErrorBanner(message: state.errorMessage!),
-                              ),
                             buildSegmentedTabs(
                               context: context,
                               tabs: [

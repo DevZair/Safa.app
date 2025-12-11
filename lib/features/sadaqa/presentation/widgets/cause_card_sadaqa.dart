@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
 
@@ -5,6 +7,8 @@ class CauseCard extends StatelessWidget {
   final String imagePath;
   final String title;
   final String subtitle;
+  final String? companyName;
+  final List<String> gallery;
   final int amount;
   final bool isFavorite;
   final String recommendedLabel;
@@ -17,6 +21,8 @@ class CauseCard extends StatelessWidget {
     required this.imagePath,
     required this.title,
     required this.subtitle,
+    this.companyName,
+    this.gallery = const [],
     required this.amount,
     required this.isFavorite,
     required this.recommendedLabel,
@@ -47,17 +53,51 @@ class CauseCard extends StatelessWidget {
           children: [
             Stack(
               children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(20),
-                  ),
-                  child: Image.asset(
-                    imagePath,
-                    height: 160,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
+                _ImageCarousel(
+                  height: 200,
+                  images: (gallery.isNotEmpty ? gallery : [imagePath]),
                 ),
+                if (companyName?.isNotEmpty == true)
+                  Positioned(
+                    left: 12,
+                    top: 12,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.92),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.08),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.handshake_rounded,
+                            size: 16,
+                            color: AppColors.primary,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            companyName!,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 Positioned(
                   top: 12,
                   right: 12,
@@ -173,6 +213,121 @@ class CauseCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ImageCarousel extends StatefulWidget {
+  const _ImageCarousel({required this.images, required this.height});
+
+  final List<String> images;
+  final double height;
+
+  @override
+  State<_ImageCarousel> createState() => _ImageCarouselState();
+}
+
+class _ImageCarouselState extends State<_ImageCarousel> {
+  late final PageController _controller;
+  Timer? _timer;
+  int _current = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = PageController();
+    _startAutoScroll();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _startAutoScroll() {
+    _timer?.cancel();
+    if (widget.images.length < 2) return;
+    _timer = Timer.periodic(const Duration(seconds: 4), (_) {
+      _current = (_current + 1) % widget.images.length;
+      _controller.animateToPage(
+        _current,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final images = widget.images;
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      child: Stack(
+        children: [
+          SizedBox(
+            height: widget.height,
+            width: double.infinity,
+            child: PageView.builder(
+              controller: _controller,
+              onPageChanged: (index) => setState(() => _current = index),
+              itemCount: images.length,
+              itemBuilder: (context, index) {
+                final path = images[index];
+                final isNetwork = path.startsWith('http');
+                final imageWidget = isNetwork
+                    ? Image.network(
+                        path,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: widget.height,
+                        errorBuilder: (_, __, ___) => _fallbackImage(),
+                      )
+                    : Image.asset(
+                        path,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: widget.height,
+                      );
+                return imageWidget;
+              },
+            ),
+          ),
+          if (images.length > 1)
+            Positioned(
+              bottom: 10,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  images.length,
+                  (index) => AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    width: _current == index ? 10 : 6,
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: _current == index
+                          ? Colors.white
+                          : Colors.white.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _fallbackImage() {
+    return Container(
+      color: Colors.grey.shade200,
+      alignment: Alignment.center,
+      child: const Icon(Icons.image_not_supported_outlined, size: 28),
     );
   }
 }

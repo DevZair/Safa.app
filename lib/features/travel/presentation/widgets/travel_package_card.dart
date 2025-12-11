@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:safa_app/features/travel/presentation/widgets/travel_meta_item.dart';
 import 'package:safa_app/features/travel/presentation/widgets/travel_badge.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
@@ -12,6 +14,7 @@ class TravelPackage {
   final String title;
   final String location;
   final String imagePath;
+  final List<String> gallery;
   final String guideName;
   final double guideRating;
   final int priceUsd;
@@ -27,6 +30,7 @@ class TravelPackage {
     required this.title,
     required this.location,
     required this.imagePath,
+    required this.gallery,
     required this.guideName,
     required this.guideRating,
     required this.priceUsd,
@@ -42,6 +46,16 @@ class TravelPackage {
     final guideRating = guideRatingRaw is num
         ? guideRatingRaw.toDouble()
         : double.tryParse('$guideRatingRaw') ?? 0;
+    final images = <String>[];
+    final rawImages = json['images'] ?? json['gallery'];
+    if (rawImages is List) {
+      images.addAll(
+        rawImages
+            .map((e) => '$e')
+            .where((path) => path.trim().isNotEmpty)
+            .toList(),
+      );
+    }
     return TravelPackage(
       id: '${json['id'] ?? ''}',
       companyId: '${json['company_id'] ?? json['companyId'] ?? ''}',
@@ -49,6 +63,7 @@ class TravelPackage {
       title: '${json['title'] ?? ''}',
       location: '${json['location'] ?? ''}',
       imagePath: '${json['image'] ?? json['imagePath'] ?? ''}',
+      gallery: images,
       guideName: '${json['guide_name'] ?? json['guideName'] ?? ''}',
       guideRating: guideRating,
       priceUsd: price is num ? price.toInt() : int.tryParse('$price') ?? 0,
@@ -195,7 +210,10 @@ class _PackageImage extends StatelessWidget {
         children: [
           AspectRatio(
             aspectRatio: 16 / 11,
-            child: _TravelImage(imagePath: package.imagePath),
+            child: _TravelImageCarousel(
+              images:
+                  package.gallery.isNotEmpty ? package.gallery : [package.imagePath],
+            ),
           ),
           Positioned(
             left: 16.w,
@@ -405,33 +423,103 @@ class _FavoriteButton extends StatelessWidget {
   }
 }
 
-class _TravelImage extends StatelessWidget {
-  final String imagePath;
+class _TravelImageCarousel extends StatefulWidget {
+  const _TravelImageCarousel({required this.images});
 
-  const _TravelImage({required this.imagePath});
+  final List<String> images;
+
+  @override
+  State<_TravelImageCarousel> createState() => _TravelImageCarouselState();
+}
+
+class _TravelImageCarouselState extends State<_TravelImageCarousel> {
+  late final PageController _controller;
+  Timer? _timer;
+  int _current = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = PageController();
+    _startAutoScroll();
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _startAutoScroll() {
+    _timer?.cancel();
+    if (widget.images.length < 2) return;
+    _timer = Timer.periodic(const Duration(seconds: 4), (_) {
+      _current = (_current + 1) % widget.images.length;
+      _controller.animateToPage(
+        _current,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (imagePath.startsWith('http')) {
-      return Image.network(
-        imagePath,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => Container(
-          color: AppColors.surfaceLight,
-          alignment: Alignment.center,
-          child: const Icon(Icons.image_not_supported_outlined),
+    final images = widget.images;
+    return Stack(
+      children: [
+        PageView.builder(
+          controller: _controller,
+          onPageChanged: (index) => setState(() => _current = index),
+          itemCount: images.length,
+          itemBuilder: (context, index) {
+            final path = images[index];
+            final isNetwork = path.startsWith('http');
+            return isNetwork
+                ? Image.network(
+                    path,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _fallback(),
+                  )
+                : Image.asset(
+                    path,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => _fallback(),
+                  );
+          },
         ),
-      );
-    }
+        if (images.length > 1)
+          Positioned(
+            bottom: 10.h,
+            left: 0,
+            right: 0,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                images.length,
+                (index) => AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  margin: EdgeInsets.symmetric(horizontal: 4.w),
+                  width: _current == index ? 10.w : 6.w,
+                  height: 6.h,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: _current == index ? 0.95 : 0.6),
+                    borderRadius: BorderRadius.circular(4.r),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
 
-    return Image.asset(
-      imagePath,
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) => Container(
-        color: AppColors.surfaceLight,
-        alignment: Alignment.center,
-        child: const Icon(Icons.image_not_supported_outlined),
-      ),
+  Widget _fallback() {
+    return Container(
+      color: AppColors.surfaceLight,
+      alignment: Alignment.center,
+      child: const Icon(Icons.image_not_supported_outlined),
     );
   }
 }

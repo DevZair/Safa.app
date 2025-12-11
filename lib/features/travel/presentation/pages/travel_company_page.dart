@@ -88,14 +88,9 @@ class _TravelCompanyPageState extends State<TravelCompanyPage> {
                     Padding(
                       padding:
                           EdgeInsets.symmetric(horizontal: horizontalPadding),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (state.errorMessage != null)
-                            Padding(
-                              padding: EdgeInsets.only(bottom: 10.h),
-                              child: _CompanyError(message: state.errorMessage!),
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
                           if (state.isLoading && filteredPackages.isEmpty)
                             Padding(
                               padding: EdgeInsets.symmetric(vertical: 24.h),

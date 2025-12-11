@@ -7,6 +7,9 @@ class SadaqaCause {
   final String imagePath;
   final String title;
   final String subtitle;
+  final String? companyName;
+  final String? companyLogo;
+  final List<String> gallery;
   final int amount;
   final double raised;
   final double goal;
@@ -18,6 +21,9 @@ class SadaqaCause {
     required this.imagePath,
     required this.title,
     required this.subtitle,
+    this.companyName,
+    this.companyLogo,
+    this.gallery = const [],
     required this.amount,
     required this.raised,
     required this.goal,
@@ -87,6 +93,12 @@ const _defaultCauses = <SadaqaCause>[
     imagePath: 'assets/images/font1.jpeg',
     title: 'Набор деньги для детей Газа',
     subtitle: 'Соберите деньги для детей в Газе',
+    companyName: 'Мерім',
+    companyLogo: 'assets/images/meirim_logo.png',
+    gallery: [
+      'assets/images/font1.jpeg',
+      'assets/images/font2.jpg',
+    ],
     amount: 5000,
     raised: 32450,
     goal: 50000,
@@ -99,6 +111,12 @@ const _defaultCauses = <SadaqaCause>[
     imagePath: 'assets/images/font2.jpg',
     title: 'Детский дом – поддержка',
     subtitle: 'Обеспечьте детей необходимым',
+    companyName: 'Береке',
+    companyLogo: 'assets/images/font2.jpg',
+    gallery: [
+      'assets/images/font2.jpg',
+      'assets/images/font1.jpeg',
+    ],
     amount: 12000,
     raised: 16500,
     goal: 30000,
@@ -111,6 +129,11 @@ const _defaultCauses = <SadaqaCause>[
     imagePath: 'assets/images/font1.jpeg',
     title: 'Образование для сирот',
     subtitle: 'Подарите возможность учиться',
+    companyName: 'Rahmet',
+    companyLogo: 'assets/images/font1.jpeg',
+    gallery: [
+      'assets/images/font1.jpeg',
+    ],
     amount: 8000,
     raised: 9400,
     goal: 20000,

@@ -25,6 +25,7 @@ class RequestHelpPayload {
   final int helpCategory;
   final String? email;
   final String? otherCategory;
+  final String? companyName;
   final int? age;
   final int? childInFam;
   final String? iin;
@@ -42,6 +43,7 @@ class RequestHelpPayload {
     required this.helpCategory,
     this.email,
     this.otherCategory,
+    this.companyName,
     this.age,
     this.childInFam,
     this.iin,
@@ -63,6 +65,8 @@ class RequestHelpPayload {
       'address': address,
       'iin': iin,
       'why_need_help': whyNeedHelp,
+      if (companyName != null && companyName!.isNotEmpty)
+        'company_name': companyName,
       if (status != null) 'status': status,
       'material_status': materialStatus ?? '',
       'help_category': helpCategory,

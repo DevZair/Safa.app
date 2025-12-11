@@ -79,6 +79,8 @@ class _SadaqaDetailState extends State<SadaqaDetail> {
                     onBack: () => context.pop(),
                     title: widget.cause.title,
                     subtitle: widget.cause.subtitle,
+                    companyName: widget.cause.companyName,
+                    companyLogo: widget.cause.companyLogo,
                     isFavorite: _isFavorite,
                     onFavorite: _toggleFavorite,
                   ),

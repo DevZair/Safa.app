@@ -91,6 +91,8 @@ class SadaqaPage extends StatelessWidget {
                               imagePath: cause.imagePath,
                               title: cause.title,
                               subtitle: cause.subtitle,
+                              gallery: cause.gallery,
+                              companyName: cause.companyName,
                               amount: cause.amount,
                               isFavorite: state.isFavorite(cause.id),
                               recommendedLabel:
