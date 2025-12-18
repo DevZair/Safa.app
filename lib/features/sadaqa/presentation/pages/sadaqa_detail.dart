@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
-import 'package:safa_app/features/sadaqa/presentation/cubit/sadaqa_cubit.dart';
+import 'package:safa_app/features/sadaqa/models/sadaqa_cause.dart';
 import '../widgets/sadaqa_detail_components.dart';
 
 class SadaqaDetailArgs {
@@ -49,9 +49,9 @@ class _SadaqaDetailState extends State<SadaqaDetail> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final progress = (widget.cause.raised / widget.cause.goal)
-        .clamp(0.0, 1.0)
-        .toDouble();
+    final progress = widget.cause.goal <= 0
+        ? 0.0
+        : (widget.cause.raised / widget.cause.goal).clamp(0.0, 1.0).toDouble();
     final statusLabel = progress < 0.55
         ? l10n.t('sadaqa.detail.status.critical')
         : progress < 0.8

@@ -48,8 +48,8 @@ class SadaqaHistoryState {
 
 class SadaqaHistoryCubit extends Cubit<SadaqaHistoryState> {
   SadaqaHistoryCubit({SadaqaHistoryRepository? repository})
-      : _repository = repository ?? SadaqaHistoryRepository(),
-        super(SadaqaHistoryState.initial()) {
+    : _repository = repository ?? SadaqaHistoryRepository(),
+      super(SadaqaHistoryState.initial()) {
     loadHistory();
   }
 
@@ -66,64 +66,23 @@ class SadaqaHistoryCubit extends Cubit<SadaqaHistoryState> {
 
     try {
       final items = await _repository.fetchHistory();
-      final hydratedItems = items.isNotEmpty ? items : _mockItems();
       emit(
         state.copyWith(
-          items: hydratedItems,
+          items: items,
           isLoading: false,
           isRefreshing: false,
           errorMessage: null,
         ),
       );
     } on Object catch (error) {
-      final fallback = _mockItems();
       emit(
         state.copyWith(
-          items: fallback,
+          items: const [],
           isLoading: false,
           isRefreshing: false,
-          errorMessage: fallback.isEmpty ? error.toString() : null,
+          errorMessage: error.toString(),
         ),
       );
     }
-  }
-
-  List<SadaqaHistoryItem> _mockItems() {
-    final now = DateTime.now();
-    return [
-      SadaqaHistoryItem(
-        id: 1,
-        title: 'Поддержка семьи из Астаны',
-        amount: 15000,
-        currency: 'KZT',
-        createdAt: now.subtract(const Duration(days: 1, hours: 3)),
-        status: SadaqaHistoryStatus.success,
-        paymentMethod: 'Kaspi',
-        receiptId: 'KZ-2024-0015',
-        companyName: 'Мерім',
-      ),
-      SadaqaHistoryItem(
-        id: 2,
-        title: 'Лекарства для нуждающихся',
-        amount: 8000,
-        currency: 'KZT',
-        createdAt: now.subtract(const Duration(days: 3, hours: 5)),
-        status: SadaqaHistoryStatus.pending,
-        paymentMethod: 'Card',
-        receiptId: 'KZ-2024-0008',
-        companyName: 'Береке',
-      ),
-      SadaqaHistoryItem(
-        id: 3,
-        title: 'Помощь детскому дому',
-        amount: 12000,
-        currency: 'KZT',
-        createdAt: now.subtract(const Duration(days: 7, hours: 2)),
-        status: SadaqaHistoryStatus.failed,
-        paymentMethod: 'Apple Pay',
-        receiptId: 'KZ-2024-0003',
-        companyName: 'Rahmet',
-      ),
-    ];
   }
 }

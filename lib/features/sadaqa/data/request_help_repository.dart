@@ -16,6 +16,26 @@ class ReferenceItem {
   }
 }
 
+class CategoryItem {
+  final int id;
+  final String title;
+  final bool isOther;
+
+  const CategoryItem({
+    required this.id,
+    required this.title,
+    this.isOther = false,
+  });
+
+  factory CategoryItem.fromJson(Map<String, Object?> json) {
+    return CategoryItem(
+      id: (json['id'] as num?)?.toInt() ?? 0,
+      title: '${json['title'] ?? ''}',
+      isOther: json['is_other'] == true,
+    );
+  }
+}
+
 class RequestHelpPayload {
   final String name;
   final String surname;
@@ -29,10 +49,10 @@ class RequestHelpPayload {
   final int? age;
   final int? childInFam;
   final String? iin;
-  final String? materialStatus;
+  final int? materialStatus;
   final int? status;
   final num? money;
-  final Object? file;
+  final bool receivedOtherHelp;
 
   const RequestHelpPayload({
     required this.name,
@@ -41,6 +61,7 @@ class RequestHelpPayload {
     required this.address,
     required this.whyNeedHelp,
     required this.helpCategory,
+    this.receivedOtherHelp = false,
     this.email,
     this.otherCategory,
     this.companyName,
@@ -50,53 +71,111 @@ class RequestHelpPayload {
     this.materialStatus,
     this.money,
     this.status,
-    this.file,
   });
 
-  FormData toFormData() {
-    final formMap = <String, Object?>{
+  Map<String, Object?> toJson() {
+    return <String, Object?>{
       'name': name,
       'surname': surname,
-      'age': age,
+      'age': age ?? 0,
       'email': email,
       'phone_number': phoneNumber,
       'other_category': otherCategory,
-      'child_in_fam': childInFam,
+      'child_num': childInFam ?? 0,
       'address': address,
-      'iin': iin,
-      'why_need_help': whyNeedHelp,
-      if (companyName != null && companyName!.isNotEmpty)
-        'company_name': companyName,
-      if (status != null) 'status': status,
-      'material_status': materialStatus ?? '',
-      'help_category': helpCategory,
+      'iin': iin ?? '',
+      'help_reason': whyNeedHelp,
+      'received_other_help': receivedOtherHelp,
+      'company_name': companyName,
+      'status': status,
+      'materials_status_id': materialStatus ?? 0,
+      'help_category_id': helpCategory,
+      'money': money,
     };
-
-    if (money != null) {
-      formMap['money'] = money;
-    }
-    if (file != null) {
-      formMap['file'] = file;
-    }
-
-    return FormData.fromMap(formMap);
   }
 }
 
 class RequestHelpRepository {
-  Future<void> send(RequestHelpPayload payload) async {
-    await ApiService.request<Map<String, Object?>>(
+  Future<int?> send(RequestHelpPayload payload) async {
+    final response = await ApiService.request<Map<String, Object?>>(
       ApiConstants.requestHelp,
       method: Method.post,
-      formData: payload.toFormData(),
+      data: payload.toJson(),
+    );
+
+    if (response case {'id': final Object? id}) {
+      return (id as num?)?.toInt();
+    }
+    return null;
+  }
+
+  Future<void> uploadFile({
+    required int helpRequestId,
+    required MultipartFile file,
+  }) async {
+    final formData = FormData.fromMap({'file': file});
+    final path = '${ApiConstants.requestHelpFileUpload}$helpRequestId';
+    await ApiService.request<Map<String, Object?>>(
+      path,
+      method: Method.post,
+      formData: formData,
     );
   }
 
   Future<List<ReferenceItem>> fetchMaterialStatuses() async {
-    final data = await ApiService.request<List<Object?>>(
+    final paths = <String>{
       ApiConstants.sadaqaMaterialStatuses,
+      '/api/sadaqa/material_status/',
+      '/sadaqa/materials_status/',
+      '/sadaqa/material_status/',
+    };
+
+    List<Object?> data = const [];
+    Object? lastError;
+
+    for (final path in paths) {
+      try {
+        final response = await ApiService.request<List<Object?>>(
+          path,
+          method: Method.get,
+        );
+        data = response;
+        lastError = null;
+        break;
+      } catch (error) {
+        lastError = error;
+        continue;
+      }
+    }
+
+    if (data.isEmpty && lastError != null) throw lastError;
+
+    return data
+        .whereType<Map<String, Object?>>()
+        .map(ReferenceItem.fromJson)
+        .where((item) => item.id != 0 && item.title.isNotEmpty)
+        .toList();
+  }
+
+  Future<List<CategoryItem>> fetchCategories() async {
+    final data = await ApiService.request<List<Object?>>(
+      ApiConstants.sadaqaCategories,
       method: Method.get,
     );
+
+    return data
+        .whereType<Map<String, Object?>>()
+        .map(CategoryItem.fromJson)
+        .where((item) => item.id != 0 && item.title.isNotEmpty)
+        .toList();
+  }
+
+  Future<List<ReferenceItem>> fetchCompanies() async {
+    final data = await ApiService.request<List<Object?>>(
+      ApiConstants.sadaqaCompanies,
+      method: Method.get,
+    );
+
     return data
         .whereType<Map<String, Object?>>()
         .map(ReferenceItem.fromJson)

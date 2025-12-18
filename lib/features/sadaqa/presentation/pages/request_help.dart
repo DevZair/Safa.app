@@ -27,24 +27,16 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
   final _storyController = TextEditingController();
   final _otherCategoryController = TextEditingController();
   late final List<TextEditingController> _trackedControllers;
-  int _selectedCategoryId = 1;
   String? _selectedMaterialStatus;
   final List<ReferenceItem> _materialStatuses = [];
+  final List<CategoryItem> _categories = [];
+  final List<ReferenceItem> _companies = [];
   PlatformFile? _selectedFile;
   bool _isPickingFile = false;
-
-  final List<String> _categories = const [
-    'Медицинская помощь',
-    'Образование',
-    'Чрезвычайная помощь',
-    'Продовольственная помощь',
-    'Жильё',
-    'Другая категория',
-  ];
-
-  String? _selectedCategory;
-  final List<String> _companies = const ['Мерім', 'Береке', 'Rahmet'];
-  String? _selectedCompany;
+  bool _isLoadingCategories = true;
+  bool _isLoadingCompanies = true;
+  int? _selectedCategoryId;
+  int? _selectedCompanyId;
   bool _isOtherCategory = false;
   int _storyLength = 0;
   bool _isSubmitting = false;
@@ -72,6 +64,8 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
     }
     _storyController.addListener(_handleStoryChanged);
     _loadMaterialStatuses();
+    _loadCategories();
+    _loadCompanies();
   }
 
   @override
@@ -174,14 +168,16 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
                         controller: _ageController,
                         hintText: 'Например, 32',
                         keyboardType: TextInputType.number,
-                        validator: _optionalNumberValidator,
+                        validator: _requiredNumberValidator,
                       ),
                     ),
                     _LabeledField(
                       label: 'ИИН (опционально)',
                       child: _RequestTextField(
                         controller: _iinController,
-                        hintText: 'ИИН (по желанию)',
+                        hintText: 'ИИН (12 цифр)',
+                        keyboardType: TextInputType.number,
+                        validator: _requiredValidator,
                       ),
                     ),
                   ],
@@ -195,7 +191,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
                         controller: _childrenController,
                         hintText: 'Например, 2',
                         keyboardType: TextInputType.number,
-                        validator: _optionalNumberValidator,
+                        validator: _requiredNumberValidator,
                       ),
                     ),
                     _LabeledField(
@@ -252,17 +248,22 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
               children: [
                 _LabeledField(
                   label: 'Категория помощи *',
-                  child: _RequestDropdown(
-                    value: _selectedCategory,
-                    hintText: 'Выберите категорию',
-                    items: _categories,
+                  child: _CategoryDropdown(
+                    categories: _categories,
+                    isLoading: _isLoadingCategories,
+                    value: _selectedCategoryId,
                     onChanged: (value) {
                       setState(() {
-                        _selectedCategory = value;
-                        _selectedCategoryId =
-                            (_categories.indexOf(value ?? '') + 1)
-                                .clamp(1, _categories.length);
-                        _isOtherCategory = value == 'Другая категория';
+                        _selectedCategoryId = value;
+                        final selected = _categories.firstWhere(
+                          (item) => item.id == value,
+                          orElse: () => const CategoryItem(
+                            id: 0,
+                            title: '',
+                            isOther: false,
+                          ),
+                        );
+                        _isOtherCategory = selected.isOther && value != null;
                       });
                     },
                   ),
@@ -281,12 +282,12 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
                 const SizedBox(height: 16),
                 _LabeledField(
                   label: 'Фонд / компания *',
-                  child: _RequestDropdown(
-                    value: _selectedCompany,
-                    hintText: 'Выберите фонд или компанию',
-                    items: _companies,
+                  child: _CompanyDropdown(
+                    companies: _companies,
+                    isLoading: _isLoadingCompanies,
+                    value: _selectedCompanyId,
                     onChanged: (value) {
-                      setState(() => _selectedCompany = value);
+                      setState(() => _selectedCompanyId = value);
                     },
                   ),
                 ),
@@ -309,8 +310,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
                     children: [
                       _RequestTextField(
                         controller: _storyController,
-                        hintText:
-                            'Опишите вашу историю как можно подробнее.',
+                        hintText: 'Опишите вашу историю как можно подробнее.',
                         maxLines: 6,
                         maxLength: 600,
                         validator: _requiredValidator,
@@ -340,10 +340,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
             ),
           ),
           const SizedBox(height: 28),
-          _SubmitButton(
-            onPressed: () => _submit(),
-            isLoading: _isSubmitting,
-          ),
+          _SubmitButton(onPressed: () => _submit(), isLoading: _isSubmitting),
           const SizedBox(height: 18),
           const _FooterNote(),
         ],
@@ -381,29 +378,6 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final isWide = constraints.maxWidth > 900;
-            final previewCard = _PayloadPreviewCard(
-              name: _firstNameController.text.trim(),
-              surname: _lastNameController.text.trim(),
-              phone: _phoneController.text.trim(),
-              email: _emailController.text.trim(),
-              city: _cityController.text.trim(),
-              address: _addressController.text.trim(),
-              company: _selectedCompany ?? '',
-              category: _selectedCategory ?? '',
-              materialStatus: _materialStatuses
-                  .firstWhere(
-                    (item) => '${item.id}' == _selectedMaterialStatus,
-                    orElse: () => const ReferenceItem(id: 0, title: ''),
-                  )
-                  .title,
-              amount: _amountController.text.trim(),
-              story: _storyController.text.trim(),
-              children: _childrenController.text.trim(),
-              iin: _iinController.text.trim(),
-              age: _ageController.text.trim(),
-            );
-
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
               child: Center(
@@ -418,22 +392,8 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
                       ],
                       const _HeroCard(),
                       const SizedBox(height: 16),
-                      const _BackendFieldsCard(),
                       const SizedBox(height: 24),
-                      if (isWide)
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(child: form),
-                            const SizedBox(width: 18),
-                            SizedBox(width: 360, child: previewCard),
-                          ],
-                        )
-                      else ...[
-                        form,
-                        const SizedBox(height: 16),
-                        previewCard,
-                      ],
+                      form,
                     ],
                   ),
                 ),
@@ -461,14 +421,51 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
       _materialStatuses
         ..clear()
         ..addAll(items);
-      _selectedMaterialStatus =
-          _materialStatuses.isNotEmpty ? '${_materialStatuses.first.id}' : null;
+      _selectedMaterialStatus = _materialStatuses.isNotEmpty
+          ? '${_materialStatuses.first.id}'
+          : null;
     } catch (_) {
       _materialStatuses.clear();
       _selectedMaterialStatus = null;
     } finally {
       if (mounted) {
         setState(() => _isLoadingRefs = false);
+      }
+    }
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final items = await _repository.fetchCategories();
+      _categories
+        ..clear()
+        ..addAll(items);
+      _selectedCategoryId = null;
+      _isOtherCategory = false;
+    } catch (_) {
+      _categories.clear();
+      _selectedCategoryId = null;
+      _isOtherCategory = false;
+    } finally {
+      if (mounted) {
+        setState(() => _isLoadingCategories = false);
+      }
+    }
+  }
+
+  Future<void> _loadCompanies() async {
+    try {
+      final items = await _repository.fetchCompanies();
+      _companies
+        ..clear()
+        ..addAll(items);
+      _selectedCompanyId = null;
+    } catch (_) {
+      _companies.clear();
+      _selectedCompanyId = null;
+    } finally {
+      if (mounted) {
+        setState(() => _isLoadingCompanies = false);
       }
     }
   }
@@ -522,16 +519,10 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
     final file = _selectedFile;
     if (file == null) return null;
     if (file.bytes != null) {
-      return MultipartFile.fromBytes(
-        file.bytes!,
-        filename: file.name,
-      );
+      return MultipartFile.fromBytes(file.bytes!, filename: file.name);
     }
     if (file.path != null && file.path!.isNotEmpty) {
-      return MultipartFile.fromFile(
-        file.path!,
-        filename: file.name,
-      );
+      return MultipartFile.fromFile(file.path!, filename: file.name);
     }
     return null;
   }
@@ -542,7 +533,13 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
     if (!isValid) {
       return;
     }
-    if (_selectedCategory == null || _selectedCategory!.isEmpty) {
+    if (_categories.isEmpty) {
+      setState(() {
+        _submitError = 'Категории не загружены. Попробуйте позже.';
+      });
+      return;
+    }
+    if (_selectedCategoryId == null) {
       setState(() {
         _submitError = 'Пожалуйста, выберите категорию помощи.';
       });
@@ -554,9 +551,36 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
       });
       return;
     }
-    if (_selectedCompany == null || _selectedCompany!.isEmpty) {
+    if (_selectedMaterialStatus == null || _selectedMaterialStatus!.isEmpty) {
+      setState(() {
+        _submitError = 'Выберите материальный статус.';
+      });
+      return;
+    }
+    if (_companies.isNotEmpty && _selectedCompanyId == null) {
       setState(() {
         _submitError = 'Пожалуйста, выберите фонд/компанию.';
+      });
+      return;
+    }
+    final ageValue = int.tryParse(_ageController.text.trim());
+    if (ageValue == null) {
+      setState(() {
+        _submitError = 'Введите возраст.';
+      });
+      return;
+    }
+    final childrenValue = int.tryParse(_childrenController.text.trim());
+    if (childrenValue == null) {
+      setState(() {
+        _submitError = 'Укажите количество детей.';
+      });
+      return;
+    }
+    final iinText = _iinController.text.trim();
+    if (iinText.isEmpty) {
+      setState(() {
+        _submitError = 'Введите ИИН.';
       });
       return;
     }
@@ -568,16 +592,20 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
       return;
     }
 
-    final ageValue = int.tryParse(_ageController.text.trim());
-    final childrenValue = int.tryParse(_childrenController.text.trim());
     final addressCombined = _cityController.text.trim().isEmpty
         ? _addressController.text.trim()
         : '${_cityController.text.trim()}, ${_addressController.text.trim()}';
     final amountValue = num.tryParse(amountText);
 
-    final uploadFile = await _buildMultipartFile();
-
     if (!mounted) return;
+
+    final selectedCompany = _companies
+        .firstWhere(
+          (item) => item.id == _selectedCompanyId,
+          orElse: () => const ReferenceItem(id: 0, title: ''),
+        )
+        .title;
+    final uploadFile = await _buildMultipartFile();
 
     final payload = RequestHelpPayload(
       name: _firstNameController.text.trim(),
@@ -588,19 +616,18 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
           : _emailController.text.trim(),
       address: addressCombined,
       whyNeedHelp: _storyController.text.trim(),
-      otherCategory:
-          _isOtherCategory ? _otherCategoryController.text.trim() : null,
+      otherCategory: _isOtherCategory
+          ? _otherCategoryController.text.trim()
+          : null,
       age: ageValue,
       childInFam: childrenValue,
-      iin: _iinController.text.trim().isEmpty
-          ? null
-          : _iinController.text.trim(),
-      companyName: _selectedCompany,
-      materialStatus: _selectedMaterialStatus,
+      iin: iinText,
+      companyName: selectedCompany.isEmpty ? null : selectedCompany,
+      materialStatus: int.tryParse(_selectedMaterialStatus ?? ''),
+      receivedOtherHelp: false,
       money: amountValue,
       status: null,
-      helpCategory: _selectedCategoryId,
-      file: uploadFile,
+      helpCategory: _selectedCategoryId!,
     );
 
     FocusScope.of(context).unfocus();
@@ -610,19 +637,25 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
     });
 
     try {
-      await _repository.send(payload);
+      final requestId = await _repository.send(payload);
+      if (requestId != null && uploadFile != null) {
+        await _repository.uploadFile(
+          helpRequestId: requestId,
+          file: uploadFile,
+        );
+      }
       if (!mounted) return;
       setState(() {
         _isSubmitting = false;
         _submitError = null;
-        _selectedCategory = null;
         _selectedFile = null;
         _storyLength = 0;
         _isOtherCategory = false;
-        _selectedCategoryId = 1;
-        _selectedMaterialStatus =
-            _materialStatuses.isNotEmpty ? '${_materialStatuses.first.id}' : null;
-        _selectedCompany = null;
+        _selectedCategoryId = null;
+        _selectedMaterialStatus = _materialStatuses.isNotEmpty
+            ? '${_materialStatuses.first.id}'
+            : null;
+        _selectedCompanyId = null;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Ваш запрос отправлен на проверку.')),
@@ -647,179 +680,6 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
         _submitError = error.toString();
       });
     }
-  }
-}
-
-class _BackendFieldsCard extends StatelessWidget {
-  const _BackendFieldsCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE3E8F2)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color.fromRGBO(26, 43, 79, 0.08),
-            blurRadius: 24,
-            offset: Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Поля, которые уйдут в FastAPI',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF1A2B4F),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            'Мы собираем ключевые поля из формы и отправляем их в endpoint '
-            '/api/sadaqa/help_request/.',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: const Color(0xFF6B7A90),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: const [
-              _FieldChip(label: 'Имя', backendKey: 'name', required: true),
-              _FieldChip(label: 'Фамилия', backendKey: 'surname', required: true),
-              _FieldChip(label: 'Телефон', backendKey: 'phone_number', required: true),
-              _FieldChip(label: 'Адрес', backendKey: 'address', required: true),
-              _FieldChip(label: 'Категория', backendKey: 'help_category', required: true),
-              _FieldChip(label: 'История', backendKey: 'why_need_help', required: true),
-              _FieldChip(label: 'Сумма', backendKey: 'money'),
-              _FieldChip(label: 'Мат. статус', backendKey: 'material_status'),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Опционально',
-            style: theme.textTheme.bodySmall?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF1A2B4F),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: const [
-              _FieldChip(label: 'Email', backendKey: 'email'),
-              _FieldChip(label: 'Другая категория', backendKey: 'other_category'),
-              _FieldChip(label: 'Возраст', backendKey: 'age'),
-              _FieldChip(label: 'Дети', backendKey: 'child_in_fam'),
-              _FieldChip(label: 'ИИН', backendKey: 'iin'),
-              _FieldChip(label: 'Вложение', backendKey: 'file'),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PayloadPreviewCard extends StatelessWidget {
-  const _PayloadPreviewCard({
-    required this.name,
-    required this.surname,
-    required this.phone,
-    required this.email,
-    required this.city,
-    required this.address,
-    required this.company,
-    required this.category,
-    required this.materialStatus,
-    required this.amount,
-    required this.story,
-    required this.children,
-    required this.iin,
-    required this.age,
-  });
-
-  final String name;
-  final String surname;
-  final String phone;
-  final String email;
-  final String city;
-  final String address;
-  final String company;
-  final String category;
-  final String materialStatus;
-  final String amount;
-  final String story;
-  final String children;
-  final String iin;
-  final String age;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final addressText =
-        [city, address].where((value) => value.isNotEmpty).join(', ');
-
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFE6ECF5)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color.fromRGBO(26, 43, 79, 0.05),
-            blurRadius: 18,
-            offset: Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Предпросмотр данных',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF1A2B4F),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Что уйдёт в запрос прямо сейчас.',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: const Color(0xFF6B7A90),
-            ),
-          ),
-          const SizedBox(height: 12),
-          const Divider(height: 1, color: Color(0xFFE6ECF5)),
-          const SizedBox(height: 12),
-          _PreviewRow(label: 'ФИО', value: '${name.trim()} ${surname.trim()}'.trim()),
-          _PreviewRow(label: 'Телефон', value: phone),
-          _PreviewRow(label: 'Email', value: email),
-          _PreviewRow(label: 'Адрес', value: addressText),
-          _PreviewRow(label: 'Фонд / компания', value: company),
-          _PreviewRow(label: 'Категория', value: category),
-          _PreviewRow(label: 'Мат. статус', value: materialStatus),
-          _PreviewRow(label: 'Сумма, ₸', value: amount.isEmpty ? '—' : amount),
-          _PreviewRow(label: 'Возраст / дети', value: [
-            if (age.isNotEmpty) 'Возраст: $age',
-            if (children.isNotEmpty) 'Дети: $children',
-          ].join(' | ')),
-          _PreviewRow(label: 'ИИН', value: iin),
-          _PreviewRow(label: 'История', value: story, multiline: true),
-        ],
-      ),
-    );
   }
 }
 
@@ -978,8 +838,7 @@ class _PreviewRow extends StatelessWidget {
           Text(
             isEmpty ? '—' : value,
             maxLines: multiline ? 4 : 1,
-            overflow:
-                multiline ? TextOverflow.fade : TextOverflow.ellipsis,
+            overflow: multiline ? TextOverflow.fade : TextOverflow.ellipsis,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: const Color(0xFF1A2B4F),
               fontWeight: FontWeight.w600,
@@ -1036,7 +895,9 @@ class _UploadTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(
-                hasFile ? Icons.insert_drive_file_outlined : Icons.cloud_upload_outlined,
+                hasFile
+                    ? Icons.insert_drive_file_outlined
+                    : Icons.cloud_upload_outlined,
                 color: hasFile ? Colors.white : const Color(0xFF2EC8A6),
               ),
             ),
@@ -1055,7 +916,10 @@ class _UploadTile extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: const TextStyle(color: Color(0xFF6B7A90), fontSize: 13),
+                    style: const TextStyle(
+                      color: Color(0xFF6B7A90),
+                      fontSize: 13,
+                    ),
                   ),
                 ],
               ),
@@ -1141,6 +1005,16 @@ String? _requiredValidator(String? value) {
   return null;
 }
 
+String? _requiredNumberValidator(String? value) {
+  if (value == null || value.trim().isEmpty) {
+    return 'Обязательное поле';
+  }
+  if (num.tryParse(value.trim()) == null) {
+    return 'Введите число';
+  }
+  return null;
+}
+
 String? _optionalNumberValidator(String? value) {
   if (value == null || value.trim().isEmpty) {
     return null;
@@ -1180,10 +1054,7 @@ class _SubmitError extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(
-                color: Color(0xFFD32F2F),
-                fontSize: 13,
-              ),
+              style: const TextStyle(color: Color(0xFFD32F2F), fontSize: 13),
             ),
           ),
         ],
@@ -1330,65 +1201,6 @@ class _RequestTextField extends StatelessWidget {
   }
 }
 
-class _RequestDropdown extends StatelessWidget {
-  const _RequestDropdown({
-    required this.items,
-    required this.onChanged,
-    required this.hintText,
-    this.value,
-  });
-
-  final List<String> items;
-  final ValueChanged<String?> onChanged;
-  final String hintText;
-  final String? value;
-
-  @override
-  Widget build(BuildContext context) {
-    return DropdownButtonFormField<String>(
-      initialValue: value,
-      items: items
-          .map(
-            (item) => DropdownMenuItem<String>(value: item, child: Text(item)),
-          )
-          .toList(),
-      onChanged: onChanged,
-      validator: _requiredValidator,
-      decoration: InputDecoration(
-        hintText: hintText,
-        filled: true,
-        fillColor: const Color(0xFFF4F7FC),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 18,
-          horizontal: 16,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: Color(0xFFE0E6F1)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: Color(0xFF2EC8A6), width: 1.6),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: Color(0xFFE57373)),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: Color(0xFFE57373)),
-        ),
-      ),
-      icon: const Icon(
-        Icons.keyboard_arrow_down_outlined,
-        color: Color(0xFF1A2B4F),
-      ),
-      dropdownColor: Colors.white,
-      borderRadius: BorderRadius.circular(18),
-    );
-  }
-}
-
 class _MaterialStatusDropdown extends StatelessWidget {
   const _MaterialStatusDropdown({
     required this.statuses,
@@ -1437,10 +1249,7 @@ class _MaterialStatusDropdown extends StatelessWidget {
         child: const Text(
           'Нет данных о материальном статусе из бэкенда. '
           'Вы можете отправить запрос без этого поля.',
-          style: TextStyle(
-            color: Color(0xFF9A6B1B),
-            fontSize: 13,
-          ),
+          style: TextStyle(color: Color(0xFF9A6B1B), fontSize: 13),
         ),
       );
     }
@@ -1471,6 +1280,203 @@ class _MaterialStatusDropdown extends StatelessWidget {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: const BorderSide(color: Color(0xFF2EC8A6), width: 1.6),
+        ),
+      ),
+      icon: const Icon(
+        Icons.keyboard_arrow_down_outlined,
+        color: Color(0xFF1A2B4F),
+      ),
+      dropdownColor: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+    );
+  }
+}
+
+class _CategoryDropdown extends StatelessWidget {
+  const _CategoryDropdown({
+    required this.categories,
+    required this.isLoading,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final List<CategoryItem> categories;
+  final bool isLoading;
+  final int? value;
+  final ValueChanged<int?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF4F7FC),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFFE0E6F1)),
+        ),
+        child: Row(
+          children: const [
+            SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            SizedBox(width: 12),
+            Text('Загружаем категории...'),
+          ],
+        ),
+      );
+    }
+
+    if (categories.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFF5E8),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFFF5D7A8)),
+        ),
+        child: const Text(
+          'Нет категорий из бэкенда. '
+          'Попробуйте обновить позже.',
+          style: TextStyle(color: Color(0xFF9A6B1B), fontSize: 13),
+        ),
+      );
+    }
+
+    return DropdownButtonFormField<int>(
+      value: value,
+      validator: (val) => val == null ? 'Выберите категорию' : null,
+      items: categories
+          .map(
+            (item) =>
+                DropdownMenuItem<int>(value: item.id, child: Text(item.title)),
+          )
+          .toList(),
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        hintText: 'Выберите категорию',
+        filled: true,
+        fillColor: const Color(0xFFF4F7FC),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 18,
+          horizontal: 16,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: Color(0xFFE0E6F1)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: Color(0xFF2EC8A6), width: 1.6),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: Color(0xFFE57373)),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: Color(0xFFE57373)),
+        ),
+      ),
+      icon: const Icon(
+        Icons.keyboard_arrow_down_outlined,
+        color: Color(0xFF1A2B4F),
+      ),
+      dropdownColor: Colors.white,
+      borderRadius: BorderRadius.circular(18),
+    );
+  }
+}
+
+class _CompanyDropdown extends StatelessWidget {
+  const _CompanyDropdown({
+    required this.companies,
+    required this.isLoading,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final List<ReferenceItem> companies;
+  final bool isLoading;
+  final int? value;
+  final ValueChanged<int?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF4F7FC),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFFE0E6F1)),
+        ),
+        child: Row(
+          children: const [
+            SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            SizedBox(width: 12),
+            Text('Загружаем фонды...'),
+          ],
+        ),
+      );
+    }
+
+    if (companies.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFF5E8),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFFF5D7A8)),
+        ),
+        child: const Text(
+          'Нет компаний из бэкенда. '
+          'Вы можете продолжить без выбора.',
+          style: TextStyle(color: Color(0xFF9A6B1B), fontSize: 13),
+        ),
+      );
+    }
+
+    return DropdownButtonFormField<int>(
+      value: value,
+      validator: (val) =>
+          companies.isEmpty ? null : (val == null ? 'Выберите фонд' : null),
+      items: companies
+          .map(
+            (item) =>
+                DropdownMenuItem<int>(value: item.id, child: Text(item.title)),
+          )
+          .toList(),
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        hintText: 'Выберите фонд или компанию',
+        filled: true,
+        fillColor: const Color(0xFFF4F7FC),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 18,
+          horizontal: 16,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: Color(0xFFE0E6F1)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: Color(0xFF2EC8A6), width: 1.6),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: Color(0xFFE57373)),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(18),
+          borderSide: const BorderSide(color: Color(0xFFE57373)),
         ),
       ),
       icon: const Icon(

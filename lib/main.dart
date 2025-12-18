@@ -28,7 +28,9 @@ Future<void> main() async {
   const enableMessaging = !kIsWeb;
 
   if (enableMessaging) {
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
   await DBService.initialize();
@@ -42,20 +44,13 @@ Future<void> main() async {
       splitScreenMode: true,
       useInheritedMediaQuery: true,
       builder: (_, child) => child ?? const SizedBox.shrink(),
-      child: SafaApp(
-        prefs: preferences,
-        enableMessaging: enableMessaging,
-      ),
+      child: SafaApp(prefs: preferences, enableMessaging: enableMessaging),
     ),
   );
 }
 
 class SafaApp extends StatefulWidget {
-  const SafaApp({
-    super.key,
-    required this.prefs,
-    this.enableMessaging = true,
-  });
+  const SafaApp({super.key, required this.prefs, this.enableMessaging = true});
 
   final bool enableMessaging;
   final SharedPreferences prefs;
@@ -86,8 +81,12 @@ class _SafaAppState extends State<SafaApp> {
 
     debugPrint('🔐 Permission: ${settings.authorizationStatus.name}');
 
-    final token = await messaging.getToken();
-    debugPrint("🔥 FCM Token: $token");
+    try {
+      final token = await messaging.getToken();
+      debugPrint("🔥 FCM Token: $token");
+    } catch (error) {
+      debugPrint("⚠️ FCM token not available yet: $error");
+    }
 
     FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
       debugPrint("♻️ Token refreshed: $newToken");
@@ -107,15 +106,12 @@ class _SafaAppState extends State<SafaApp> {
   @override
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
-      providers: [
-        RepositoryProvider(create: (_) => TravelRepository()),
-      ],
+      providers: [RepositoryProvider(create: (_) => TravelRepository())],
       child: MultiBlocProvider(
         providers: [
           BlocProvider(
-            create: (context) => TravelCubit(
-              repository: context.read<TravelRepository>(),
-            ),
+            create: (context) =>
+                TravelCubit(repository: context.read<TravelRepository>()),
           ),
           BlocProvider(create: (_) => AppSettingsCubit(widget.prefs)),
         ],

@@ -1,53 +1,31 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:safa_app/features/sadaqa/data/sadaqa_repository.dart';
+import 'package:safa_app/features/sadaqa/models/sadaqa_cause.dart';
 
 enum SadaqaTab { all, favorites }
-
-class SadaqaCause {
-  final String id;
-  final String imagePath;
-  final String title;
-  final String subtitle;
-  final String? companyName;
-  final String? companyLogo;
-  final List<String> gallery;
-  final int amount;
-  final double raised;
-  final double goal;
-  final int donors;
-  final String description;
-
-  const SadaqaCause({
-    required this.id,
-    required this.imagePath,
-    required this.title,
-    required this.subtitle,
-    this.companyName,
-    this.companyLogo,
-    this.gallery = const [],
-    required this.amount,
-    required this.raised,
-    required this.goal,
-    required this.donors,
-    required this.description,
-  });
-}
 
 class SadaqaState {
   final SadaqaTab activeTab;
   final List<SadaqaCause> causes;
   final Set<String> favoriteCauseIds;
+  final bool isLoading;
+  final String? errorMessage;
 
   const SadaqaState({
     required this.activeTab,
     required this.causes,
     required this.favoriteCauseIds,
+    required this.isLoading,
+    required this.errorMessage,
   });
 
-  factory SadaqaState.initial() => SadaqaState(
-        activeTab: SadaqaTab.all,
-        causes: _defaultCauses,
-        favoriteCauseIds: <String>{},
-      );
+  factory SadaqaState.initial() => const SadaqaState(
+    activeTab: SadaqaTab.all,
+    causes: [],
+    favoriteCauseIds: <String>{},
+    isLoading: true,
+    errorMessage: null,
+  );
 
   int get favoritesCount => favoriteCauseIds.length;
 
@@ -61,17 +39,59 @@ class SadaqaState {
     SadaqaTab? activeTab,
     List<SadaqaCause>? causes,
     Set<String>? favoriteCauseIds,
+    bool? isLoading,
+    String? errorMessage,
+    bool resetError = false,
   }) {
     return SadaqaState(
       activeTab: activeTab ?? this.activeTab,
       causes: causes ?? this.causes,
       favoriteCauseIds: favoriteCauseIds ?? this.favoriteCauseIds,
+      isLoading: isLoading ?? this.isLoading,
+      errorMessage: resetError ? null : (errorMessage ?? this.errorMessage),
     );
   }
 }
 
 class SadaqaCubit extends Cubit<SadaqaState> {
-  SadaqaCubit() : super(SadaqaState.initial());
+  SadaqaCubit({SadaqaRepository? repository})
+    : _repository = repository ?? SadaqaRepository(),
+      super(SadaqaState.initial()) {
+    loadCauses();
+  }
+
+  final SadaqaRepository _repository;
+
+  Future<void> loadCauses() async {
+    emit(state.copyWith(isLoading: true, resetError: true));
+    try {
+      final fetched = await _repository.fetchCauses();
+      final publicCauses = _filterPublic(fetched);
+
+      final nextCauses = publicCauses;
+
+      final favorites = state.favoriteCauseIds
+          .where((id) => nextCauses.any((cause) => cause.id == id))
+          .toSet();
+
+      emit(
+        state.copyWith(
+          causes: nextCauses,
+          favoriteCauseIds: favorites,
+          isLoading: false,
+          errorMessage: null,
+        ),
+      );
+    } catch (error) {
+      emit(
+        state.copyWith(
+          causes: const [],
+          isLoading: false,
+          errorMessage: error.toString(),
+        ),
+      );
+    }
+  }
 
   void selectTab(SadaqaTab tab) {
     if (tab == state.activeTab) return;
@@ -79,66 +99,22 @@ class SadaqaCubit extends Cubit<SadaqaState> {
   }
 
   void toggleFavorite(String causeId) {
+    if (!state.causes.any((cause) => cause.id == causeId)) return;
+
     final updated = Set<String>.from(state.favoriteCauseIds);
     if (!updated.add(causeId)) {
       updated.remove(causeId);
     }
     emit(state.copyWith(favoriteCauseIds: updated));
   }
-}
 
-const _defaultCauses = <SadaqaCause>[
-  SadaqaCause(
-    id: 'gaza_children',
-    imagePath: 'assets/images/font1.jpeg',
-    title: 'Набор деньги для детей Газа',
-    subtitle: 'Соберите деньги для детей в Газе',
-    companyName: 'Мерім',
-    companyLogo: 'assets/images/meirim_logo.png',
-    gallery: [
-      'assets/images/font1.jpeg',
-      'assets/images/font2.jpg',
-    ],
-    amount: 5000,
-    raised: 32450,
-    goal: 50000,
-    donors: 1247,
-    description:
-        'Помогите обеспечить детей полноценным питанием и медицинской помощью.',
-  ),
-  SadaqaCause(
-    id: 'orphanage',
-    imagePath: 'assets/images/font2.jpg',
-    title: 'Детский дом – поддержка',
-    subtitle: 'Обеспечьте детей необходимым',
-    companyName: 'Береке',
-    companyLogo: 'assets/images/font2.jpg',
-    gallery: [
-      'assets/images/font2.jpg',
-      'assets/images/font1.jpeg',
-    ],
-    amount: 12000,
-    raised: 16500,
-    goal: 30000,
-    donors: 876,
-    description:
-        'Собираем средства на одежду, книги и бытовые нужды для детей в приюте.',
-  ),
-  SadaqaCause(
-    id: 'education',
-    imagePath: 'assets/images/font1.jpeg',
-    title: 'Образование для сирот',
-    subtitle: 'Подарите возможность учиться',
-    companyName: 'Rahmet',
-    companyLogo: 'assets/images/font1.jpeg',
-    gallery: [
-      'assets/images/font1.jpeg',
-    ],
-    amount: 8000,
-    raised: 9400,
-    goal: 20000,
-    donors: 512,
-    description:
-        'Каждый вклад помогает оплатить школьные принадлежности и обучение.',
-  ),
-];
+  List<SadaqaCause> _filterPublic(List<SadaqaCause> causes) {
+    final seen = <String>{};
+    return causes.where((cause) {
+      if (cause.isPrivate) return false;
+      if (cause.id.isEmpty) return false;
+      if (!seen.add(cause.id)) return false;
+      return true;
+    }).toList();
+  }
+}
