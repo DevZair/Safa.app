@@ -1,8 +1,11 @@
+import 'package:safa_app/features/sadaqa/utils/media_resolver.dart';
+
 class SadaqaCause {
   final String id;
   final String imagePath;
   final String title;
   final String subtitle;
+  final String? companyId;
   final String? companyName;
   final String? companyLogo;
   final List<String> gallery;
@@ -11,6 +14,7 @@ class SadaqaCause {
   final double goal;
   final int donors;
   final String description;
+  final String? noteType;
   final bool isPrivate;
 
   const SadaqaCause({
@@ -18,6 +22,7 @@ class SadaqaCause {
     required this.imagePath,
     required this.title,
     required this.subtitle,
+    this.companyId,
     this.companyName,
     this.companyLogo,
     this.gallery = const [],
@@ -26,6 +31,7 @@ class SadaqaCause {
     required this.goal,
     required this.donors,
     required this.description,
+    this.noteType,
     this.isPrivate = false,
   });
 
@@ -34,6 +40,12 @@ class SadaqaCause {
     final imagePath = gallery.isNotEmpty
         ? gallery.first
         : 'assets/images/font1.jpeg';
+    final company = json['company'] as Map<String, Object?>?;
+    final companyName = _parseCompanyName(json)?.trim();
+    final companyId = _firstNonEmpty([
+      '${json['company_id'] ?? ''}',
+      '${company?['id'] ?? ''}',
+    ]);
 
     final description = _firstNonEmpty([
       '${json['description'] ?? ''}',
@@ -63,7 +75,8 @@ class SadaqaCause {
         '${json['address'] ?? ''}',
         '${json['content'] ?? ''}',
       ]),
-      companyName: _parseCompanyName(json),
+      companyId: companyId.isNotEmpty ? companyId : null,
+      companyName: companyName,
       companyLogo: _parseCompanyLogo(json),
       gallery: gallery,
       amount:
@@ -92,7 +105,44 @@ class SadaqaCause {
           _parseInt(json['count_donors']) ??
           0,
       description: description,
+      noteType: '${json['note_type'] ?? ''}',
       isPrivate: _isPrivate(json),
+    );
+  }
+
+  SadaqaCause copyWith({
+    String? id,
+    String? imagePath,
+    String? title,
+    String? subtitle,
+    String? companyId,
+    String? companyName,
+    String? companyLogo,
+    List<String>? gallery,
+    int? amount,
+    double? raised,
+    double? goal,
+    int? donors,
+    String? description,
+    String? noteType,
+    bool? isPrivate,
+  }) {
+    return SadaqaCause(
+      id: id ?? this.id,
+      imagePath: imagePath ?? this.imagePath,
+      title: title ?? this.title,
+      subtitle: subtitle ?? this.subtitle,
+      companyId: companyId ?? this.companyId,
+      companyName: companyName ?? this.companyName,
+      companyLogo: companyLogo ?? this.companyLogo,
+      gallery: gallery ?? this.gallery,
+      amount: amount ?? this.amount,
+      raised: raised ?? this.raised,
+      goal: goal ?? this.goal,
+      donors: donors ?? this.donors,
+      description: description ?? this.description,
+      noteType: noteType ?? this.noteType,
+      isPrivate: isPrivate ?? this.isPrivate,
     );
   }
 }
@@ -174,16 +224,18 @@ Iterable<String> _coerceStringList(Object? value) sync* {
       if (url != null) yield url;
     }
   } else if (value is String && value.trim().isNotEmpty) {
-    yield value.trim();
+    yield resolveMediaUrl(value);
   }
 }
 
 String? _extractImageUrl(Object? value) {
-  if (value is String && value.trim().isNotEmpty) return value.trim();
+  if (value is String && value.trim().isNotEmpty) {
+    return resolveMediaUrl(value);
+  }
 
   if (value is Map<String, Object?>) {
     final url = value['url'] ?? value['image'] ?? value['path'];
-    if (url is String && url.trim().isNotEmpty) return url.trim();
+    if (url is String && url.trim().isNotEmpty) return resolveMediaUrl(url);
   }
   return null;
 }

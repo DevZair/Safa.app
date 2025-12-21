@@ -1,4 +1,3 @@
-
 import 'package:dio/dio.dart';
 import 'logger.dart';
 
@@ -7,12 +6,13 @@ class CustomInterceptor extends Interceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    final requestData = _formatRequestData(options.data);
     info('''
 ------------------------------------------------------------
         === Request (${options.method}) ===
         === Url: ${options.uri} ===
         === Headers: ${options.headers} ===
-        === Data: ${options.data}
+        === Data: $requestData
 ------------------------------------------------------------''');
     super.onRequest(options, handler);
   }
@@ -40,4 +40,19 @@ class CustomInterceptor extends Interceptor {
 ------------------------------------------------------------''');
     super.onError(err, handler);
   }
+}
+
+String _formatRequestData(Object? data) {
+  if (data is FormData) {
+    final fields = data.fields
+        .map((entry) => '${entry.key}=${entry.value}')
+        .toList();
+    final files = data.files
+        .map(
+          (entry) => '${entry.key}:${entry.value.filename ?? 'unnamed'}',
+        )
+        .toList();
+    return 'FormData{fields: $fields, files: $files}';
+  }
+  return '$data';
 }

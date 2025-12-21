@@ -480,12 +480,12 @@ class _TravelImageCarouselState extends State<_TravelImageCarousel> {
                 ? Image.network(
                     path,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _fallback(),
+                    errorBuilder: (context, error, stackTrace) => _fallback(),
                   )
                 : Image.asset(
                     path,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _fallback(),
+                    errorBuilder: (context, error, stackTrace) => _fallback(),
                   );
           },
         ),

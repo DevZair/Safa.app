@@ -563,6 +563,16 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
       });
       return;
     }
+    final phoneText = _phoneController.text.trim();
+    final sanitizedPhone = phoneText.replaceAll(' ', '');
+    final phoneRegex = RegExp(r'^[0-9+\-]+$');
+    if (!phoneRegex.hasMatch(sanitizedPhone)) {
+      setState(() {
+        _submitError =
+            'Телефон может содержать только цифры, а также символы + или -.';
+      });
+      return;
+    }
     final ageValue = int.tryParse(_ageController.text.trim());
     if (ageValue == null) {
       setState(() {
@@ -581,6 +591,13 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
     if (iinText.isEmpty) {
       setState(() {
         _submitError = 'Введите ИИН.';
+      });
+      return;
+    }
+    final iinDigits = iinText.replaceAll(RegExp(r'\D'), '');
+    if (iinDigits.length != 12) {
+      setState(() {
+        _submitError = 'ИИН должен содержать ровно 12 цифр.';
       });
       return;
     }
@@ -606,11 +623,12 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
         )
         .title;
     final uploadFile = await _buildMultipartFile();
+    if (!mounted) return;
 
     final payload = RequestHelpPayload(
       name: _firstNameController.text.trim(),
       surname: _lastNameController.text.trim(),
-      phoneNumber: _phoneController.text.trim(),
+      phoneNumber: sanitizedPhone,
       email: _emailController.text.trim().isEmpty
           ? null
           : _emailController.text.trim(),
@@ -621,7 +639,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
           : null,
       age: ageValue,
       childInFam: childrenValue,
-      iin: iinText,
+      iin: iinDigits,
       companyName: selectedCompany.isEmpty ? null : selectedCompany,
       materialStatus: int.tryParse(_selectedMaterialStatus ?? ''),
       receivedOtherHelp: false,
@@ -648,31 +666,11 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
       setState(() {
         _isSubmitting = false;
         _submitError = null;
-        _selectedFile = null;
-        _storyLength = 0;
-        _isOtherCategory = false;
-        _selectedCategoryId = null;
-        _selectedMaterialStatus = _materialStatuses.isNotEmpty
-            ? '${_materialStatuses.first.id}'
-            : null;
-        _selectedCompanyId = null;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Ваш запрос отправлен на проверку.')),
       );
-      _formKey.currentState?.reset();
-      _storyController.clear();
-      _amountController.clear();
-      _addressController.clear();
-      _cityController.clear();
-      _emailController.clear();
-      _phoneController.clear();
-      _lastNameController.clear();
-      _firstNameController.clear();
-      _ageController.clear();
-      _childrenController.clear();
-      _iinController.clear();
-      _otherCategoryController.clear();
+      _resetFormFields();
     } catch (error) {
       if (!mounted) return;
       setState(() {
@@ -680,6 +678,32 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
         _submitError = error.toString();
       });
     }
+  }
+
+  void _resetFormFields() {
+    _formKey.currentState?.reset();
+    _storyController.clear();
+    _amountController.clear();
+    _addressController.clear();
+    _cityController.clear();
+    _emailController.clear();
+    _phoneController.clear();
+    _lastNameController.clear();
+    _firstNameController.clear();
+    _ageController.clear();
+    _childrenController.clear();
+    _iinController.clear();
+    _otherCategoryController.clear();
+
+    setState(() {
+      _selectedFile = null;
+      _storyLength = 0;
+      _isOtherCategory = false;
+      _selectedCategoryId = null;
+      _selectedMaterialStatus = null;
+      _selectedCompanyId = null;
+      _submitError = null;
+    });
   }
 }
 
@@ -743,105 +767,6 @@ class _HeroCard extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FieldChip extends StatelessWidget {
-  const _FieldChip({
-    required this.label,
-    required this.backendKey,
-    this.required = false,
-  });
-
-  final String label;
-  final String backendKey;
-  final bool required;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: required ? const Color(0xFFEBFAF4) : const Color(0xFFF4F7FC),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: required ? const Color(0xFF2EC8A6) : const Color(0xFFE1E7F3),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF1A2B4F),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: required
-                  ? const Color.fromRGBO(46, 200, 166, 0.14)
-                  : const Color(0xFFE9EDF7),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Text(
-              backendKey,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF4A5F7D),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PreviewRow extends StatelessWidget {
-  const _PreviewRow({
-    required this.label,
-    required this.value,
-    this.multiline = false,
-  });
-
-  final String label;
-  final String value;
-  final bool multiline;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isEmpty = value.trim().isEmpty;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: const Color(0xFF7D8AA5),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            isEmpty ? '—' : value,
-            maxLines: multiline ? 4 : 1,
-            overflow: multiline ? TextOverflow.fade : TextOverflow.ellipsis,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: const Color(0xFF1A2B4F),
-              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -1346,7 +1271,7 @@ class _CategoryDropdown extends StatelessWidget {
     }
 
     return DropdownButtonFormField<int>(
-      value: value,
+      initialValue: value,
       validator: (val) => val == null ? 'Выберите категорию' : null,
       items: categories
           .map(
@@ -1444,7 +1369,7 @@ class _CompanyDropdown extends StatelessWidget {
     }
 
     return DropdownButtonFormField<int>(
-      value: value,
+      initialValue: value,
       validator: (val) =>
           companies.isEmpty ? null : (val == null ? 'Выберите фонд' : null),
       items: companies

@@ -201,38 +201,6 @@ class _CompanyThumbnail extends StatelessWidget {
   }
 }
 
-class _CompanyError extends StatelessWidget {
-  final String message;
-
-  const _CompanyError({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme.error;
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.error_outline_rounded, color: color),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: Text(
-              message,
-              style: TextStyle(color: color, fontSize: 13.sp),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _CompanyHeader extends StatelessWidget {
   final TravelCompany company;
 

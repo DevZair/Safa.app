@@ -16,7 +16,6 @@ class TravelPage extends StatelessWidget {
   const TravelPage({super.key});
 
   static const routeName = '/travel';
-  static const bool _showErrorBanner = false;
 
   @override
   Widget build(BuildContext context) => const _TravelView();
@@ -50,60 +49,61 @@ class _TravelView extends StatelessWidget {
 
               return SingleChildScrollView(
                 padding: EdgeInsets.only(bottom: 40.h),
-                child: SafeArea(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _HeroHeader(
-                        title: state.heroTitle,
-                        subtitle: state.heroSubtitle,
-                        metrics: state.metrics,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _HeroHeader(
+                      title: state.heroTitle,
+                      subtitle: state.heroSubtitle,
+                      metrics: state.metrics,
+                    ),
+                    SizedBox(height: 90.h),
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: horizontalPadding,
                       ),
-                      SizedBox(height: 90.h),
-                      Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: horizontalPadding),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            buildSegmentedTabs(
-                              context: context,
-                              tabs: [
-                                SegmentedTabConfig(
-                                  label: l10n.t('travel.tabs.companies'),
-                                  icon: Icons.apartment_rounded,
-                                ),
-                            SegmentedTabConfig(
-                              label: l10n.t(
-                                'travel.tabs.saved',
-                                params: {'count': '$favoritesCount'},
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          buildSegmentedTabs(
+                            context: context,
+                            tabs: [
+                              SegmentedTabConfig(
+                                label: l10n.t('travel.tabs.companies'),
+                                icon: Icons.apartment_rounded,
                               ),
-                              icon: Icons.favorite_border_rounded,
-                              activeIcon: Icons.favorite_rounded,
-                            ),
-                          ],
-                          selectedIndex: state.activeTab.index,
-                          onTabSelected: (index) =>
-                              cubit.selectTab(TravelTab.values[index]),
-                        ),
-                        SizedBox(height: 28.h),
-                        if (state.activeTab == TravelTab.all) ...[
-                          _SectionHeader(
-                            title: l10n.t('travel.section.companies'),
+                              SegmentedTabConfig(
+                                label: l10n.t(
+                                  'travel.tabs.saved',
+                                  params: {'count': '$favoritesCount'},
+                                ),
+                                icon: Icons.favorite_border_rounded,
+                                activeIcon: Icons.favorite_rounded,
+                              ),
+                            ],
+                            selectedIndex: state.activeTab.index,
+                            onTabSelected: (index) =>
+                                cubit.selectTab(TravelTab.values[index]),
                           ),
-                          SizedBox(height: 18.h),
-                          if (state.companies.isEmpty)
-                            _PlaceholderText(
-                              text: l10n.t('travel.section.noCompanies'),
-                            )
-                          else
-                            for (final company in state.companies) ...[
-                              _CompanyCard(
-                                    company: company,
-                                    onTap: () => context.pushNamed(
-                                      AppRoute.travelCompany.name,
-                                      extra:
-                                          TravelCompanyDetailArgs(company: company),
+                          SizedBox(height: 28.h),
+                          if (state.activeTab == TravelTab.all) ...[
+                            _SectionHeader(
+                              title: l10n.t('travel.section.companies'),
+                            ),
+                            SizedBox(height: 18.h),
+                            if (state.companies.isEmpty)
+                              _PlaceholderText(
+                                text: l10n.t('travel.section.noCompanies'),
+                              )
+                            else
+                              for (final company in state.companies) ...[
+                                _CompanyCard(
+                                  company: company,
+                                  onTap: () => context.pushNamed(
+                                    AppRoute.travelCompany.name,
+                                    extra: TravelCompanyDetailArgs(
+                                      company: company,
+                                    ),
                                   ),
                                 ),
                                 SizedBox(height: 16.h),
@@ -119,8 +119,7 @@ class _TravelView extends StatelessWidget {
                             if (state.isLoading && favorites.isEmpty)
                               Center(
                                 child: Padding(
-                                  padding:
-                                      EdgeInsets.symmetric(vertical: 30.h),
+                                  padding: EdgeInsets.symmetric(vertical: 30.h),
                                   child: const CircularProgressIndicator(),
                                 ),
                               )
@@ -128,27 +127,26 @@ class _TravelView extends StatelessWidget {
                               Text(
                                 l10n.t('travel.saved.empty'),
                                 style: TextStyle(
-                                    color: theme.textTheme.bodyMedium?.color
-                                        ?.withValues(alpha: 0.7),
-                                    fontSize: 15.sp,
-                                  ),
-                                )
-                              else
-                                for (final package in favorites) ...[
-                                  TravelPackageCard(
-                                    package: package,
-                                    isFavorite: true,
-                                    onFavoriteToggle: () =>
-                                        cubit.toggleFavorite(package.id),
-                                  ),
-                                  SizedBox(height: 16.h),
-                                ],
+                                  color: theme.textTheme.bodyMedium?.color
+                                      ?.withValues(alpha: 0.7),
+                                  fontSize: 15.sp,
+                                ),
+                              )
+                            else
+                              for (final package in favorites) ...[
+                                TravelPackageCard(
+                                  package: package,
+                                  isFavorite: true,
+                                  onFavoriteToggle: () =>
+                                      cubit.toggleFavorite(package.id),
+                                ),
+                                SizedBox(height: 16.h),
+                              ],
                           ],
                         ],
                       ),
                     ),
-                    ],
-                  ),
+                  ],
                 ),
               );
             },
@@ -194,38 +192,6 @@ class _HeroHeader extends StatelessWidget {
   }
 }
 
-class _ErrorBanner extends StatelessWidget {
-  final String message;
-
-  const _ErrorBanner({required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme.error;
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.error_outline_rounded, color: color),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: Text(
-              message,
-              style: TextStyle(color: color, fontSize: 13.sp),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _PlaceholderText extends StatelessWidget {
   final String text;
 
@@ -238,11 +204,9 @@ class _PlaceholderText extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          color: Theme.of(context)
-              .textTheme
-              .bodyMedium
-              ?.color
-              ?.withValues(alpha: 0.7),
+          color: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
           fontSize: 15.sp,
         ),
       ),
@@ -296,8 +260,7 @@ class _MetricTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final valueColor =
-        isDark ? Colors.white : AppColors.textPrimary;
+    final valueColor = isDark ? Colors.white : AppColors.textPrimary;
     final labelColor = isDark
         ? Colors.white.withValues(alpha: 0.7)
         : AppColors.textMuted;
@@ -409,7 +372,8 @@ class _CompanyCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
-                      color: Theme.of(context).textTheme.titleMedium?.color ??
+                      color:
+                          Theme.of(context).textTheme.titleMedium?.color ??
                           AppColors.textPrimary,
                     ),
                   ),
@@ -428,7 +392,7 @@ class _CompanyCard extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                           color:
                               Theme.of(context).textTheme.bodyLarge?.color ??
-                                  AppColors.textPrimary,
+                              AppColors.textPrimary,
                         ),
                       ),
                       SizedBox(width: 10.w),
@@ -438,11 +402,9 @@ class _CompanyCard extends StatelessWidget {
                           params: {'count': '${company.tours}'},
                         ),
                         style: TextStyle(
-                          color: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.color
-                              ?.withValues(alpha: 0.7),
+                          color: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
                           fontSize: 13.sp,
                         ),
                       ),

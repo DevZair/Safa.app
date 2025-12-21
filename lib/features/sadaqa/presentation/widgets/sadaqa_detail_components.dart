@@ -2,6 +2,9 @@
 import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:safa_app/features/sadaqa/utils/media_resolver.dart';
+import 'package:safa_app/features/sadaqa/models/sadaqa_post.dart';
 
 String _formatCurrency(double value) => '${value.toStringAsFixed(0)}₸';
 
@@ -32,7 +35,7 @@ class SadaqaDetailHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 340,
+      constraints: const BoxConstraints(minHeight: 380),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [Color(0xFF1FC8A9), Color(0xFF2A9ED7)],
@@ -46,7 +49,7 @@ class SadaqaDetailHeader extends StatelessWidget {
             child: CustomPaint(painter: SadaqaHeaderPatternPainter()),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(28, 20, 20, 140),
+            padding: const EdgeInsets.fromLTRB(28, 70, 20, 32),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -65,11 +68,8 @@ class SadaqaDetailHeader extends StatelessWidget {
                     ),
                   ],
                 ),
-                const Spacer(),
-                _CompanyHeader(
-                  name: companyName,
-                  logo: companyLogo,
-                ),
+                const SizedBox(height: 16),
+                _CompanyHeader(name: companyName, logo: companyLogo),
                 const SizedBox(height: 10),
                 Text(
                   title,
@@ -82,6 +82,8 @@ class SadaqaDetailHeader extends StatelessWidget {
                 const SizedBox(height: 10),
                 Text(
                   subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(color: Colors.white70, fontSize: 14),
                 ),
               ],
@@ -136,7 +138,7 @@ class _CompanyHeader extends StatelessWidget {
         const SizedBox(width: 10),
         Expanded(
           child: Text(
-            name?.isNotEmpty == true ? name! : 'Фонд',
+            name?.isNotEmpty == true ? name! : 'Без названия',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.titleMedium?.copyWith(
@@ -185,19 +187,21 @@ class _CompanyAvatar extends StatelessWidget {
 
     Widget avatar;
     if (logo != null && logo!.isNotEmpty) {
-      final isNetwork = logo!.startsWith('http');
+      final resolvedLogo = resolveMediaUrl(logo!);
+      final isNetwork = isNetworkUrl(resolvedLogo);
       avatar = ClipRRect(
         borderRadius: radius,
         child: isNetwork
             ? Image.network(
-                logo!,
+                resolvedLogo,
                 width: 52,
                 height: 52,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _FallbackAvatar(fallback),
+                errorBuilder: (context, error, stackTrace) =>
+                    _FallbackAvatar(fallback),
               )
             : Image.asset(
-                logo!,
+                resolvedLogo,
                 width: 52,
                 height: 52,
                 fit: BoxFit.cover,
@@ -216,10 +220,7 @@ class _CompanyAvatar extends StatelessWidget {
         border: border,
         color: Colors.white.withValues(alpha: 0.18),
       ),
-      child: ClipRRect(
-        borderRadius: radius,
-        child: avatar,
-      ),
+      child: ClipRRect(borderRadius: radius, child: avatar),
     );
   }
 }
@@ -232,8 +233,9 @@ class _FallbackAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final trimmed = fallback?.trim() ?? '';
-    final initial =
-        trimmed.isNotEmpty ? trimmed.substring(0, 1).toUpperCase() : 'F';
+    final initial = trimmed.isNotEmpty
+        ? trimmed.substring(0, 1).toUpperCase()
+        : '—';
     return Container(
       color: Colors.white.withValues(alpha: 0.2),
       alignment: Alignment.center,
@@ -245,6 +247,111 @@ class _FallbackAvatar extends StatelessWidget {
           fontSize: 18,
         ),
       ),
+    );
+  }
+}
+
+class _ResolvedImage extends StatelessWidget {
+  const _ResolvedImage({
+    required this.path,
+    this.width,
+    this.height,
+    this.radius,
+  });
+
+  final String path;
+  final double? width;
+  final double? height;
+  final double? radius;
+
+  @override
+  Widget build(BuildContext context) {
+    final resolved = resolveMediaUrl(path);
+    final isNetwork = isNetworkUrl(resolved);
+    final isSvg = isSvgPath(resolved);
+    final borderRadius = radius != null
+        ? BorderRadius.circular(radius!)
+        : BorderRadius.zero;
+
+    final image = _buildImage(resolved, isNetwork, isSvg);
+
+    return ClipRRect(borderRadius: borderRadius, child: image);
+  }
+
+  Widget _placeholder() {
+    return Container(
+      width: width,
+      height: height,
+      color: Colors.grey.shade200,
+      alignment: Alignment.center,
+      child: const Icon(Icons.image_not_supported_outlined),
+    );
+  }
+
+  Widget _buildImage(String resolved, bool isNetwork, bool isSvg) {
+    final safeResolved = (resolved.contains('http'))
+        ? encodeUrlIfNeeded(resolved)
+        : resolved;
+    if (safeResolved.isEmpty) return _placeholder();
+    if (isSvg) {
+      if (safeResolved.contains('http')) {
+        return _networkSvgWithFallback(safeResolved);
+      }
+      return SvgPicture.asset(
+        safeResolved,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        placeholderBuilder: (_) => _placeholder(),
+      );
+    }
+
+    final builder = safeResolved.contains('http') ? Image.network : Image.asset;
+    return builder(
+      safeResolved,
+      width: width,
+      height: height,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        if (isNetwork && safeResolved.startsWith('https://')) {
+          final fallbackUrl = safeResolved.replaceFirst('https://', 'http://');
+          return builder(
+            fallbackUrl,
+            width: width,
+            height: height,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => _placeholder(),
+          );
+        }
+        debugPrint('Image load failed for $safeResolved');
+        return _placeholder();
+      },
+    );
+  }
+
+  Widget _networkSvgWithFallback(String url) {
+    final httpUrl = url.startsWith('https://')
+        ? url.replaceFirst('https://', 'http://')
+        : null;
+
+    return SvgPicture.network(
+      url,
+      width: width,
+      height: height,
+      fit: BoxFit.cover,
+      placeholderBuilder: (_) => _placeholder(),
+      errorBuilder: (context, error, stackTrace) {
+        if (httpUrl != null) {
+          return SvgPicture.network(
+            httpUrl,
+            width: width,
+            height: height,
+            fit: BoxFit.cover,
+            placeholderBuilder: (_) => _placeholder(),
+          );
+        }
+        return _placeholder();
+      },
     );
   }
 }
@@ -489,11 +596,11 @@ class SadaqaBeneficiaryOverviewCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(18),
-                child: Image.asset(
-                  imagePath,
+                child: _ResolvedImage(
+                  path: imagePath,
                   width: 62,
                   height: 62,
-                  fit: BoxFit.cover,
+                  radius: 18,
                 ),
               ),
               const SizedBox(width: 16),
@@ -525,7 +632,7 @@ class SadaqaBeneficiaryOverviewCard extends StatelessWidget {
                               color: Color(0xFF6B7280),
                               fontSize: 13,
                             ),
-                            maxLines: 1,
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -659,6 +766,143 @@ class SadaqaStatusChip extends StatelessWidget {
   }
 }
 
+class SadaqaPinnedFundCard extends StatelessWidget {
+  const SadaqaPinnedFundCard({
+    super.key,
+    required this.companyName,
+    required this.companyLogo,
+    required this.causeTitle,
+    required this.causeSubtitle,
+  });
+
+  final String? companyName;
+  final String? companyLogo;
+  final String causeTitle;
+  final String causeSubtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final titleStyle =
+        theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w700,
+          color: const Color(0xFF0F172A),
+        ) ??
+        const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          color: Color(0xFF0F172A),
+        );
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 24,
+            offset: const Offset(0, 18),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              _CompanyAvatar(logo: companyLogo, fallback: companyName),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      companyName?.trim().isNotEmpty == true
+                          ? companyName!.trim()
+                          : 'Без названия',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style:
+                          theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF0F172A),
+                          ) ??
+                          const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF0F172A),
+                          ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Текущий сбор фонда',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: const Color(0xFF64748B),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0F9FF),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFF38BDF8).withValues(alpha: 0.4),
+                  ),
+                ),
+                child: Row(
+                  children: const [
+                    Icon(
+                      Icons.verified_outlined,
+                      size: 16,
+                      color: Color(0xFF0EA5E9),
+                    ),
+                    SizedBox(width: 6),
+                    Text(
+                      'Фонд',
+                      style: TextStyle(
+                        color: Color(0xFF0EA5E9),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            causeTitle,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: titleStyle,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            causeSubtitle,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style:
+                theme.textTheme.bodyMedium?.copyWith(
+                  color: const Color(0xFF475569),
+                ) ??
+                const TextStyle(color: Color(0xFF475569)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class SadaqaQuickStatsRow extends StatelessWidget {
   const SadaqaQuickStatsRow({super.key});
 
@@ -763,29 +1007,15 @@ class SadaqaStatData {
   final String value;
 }
 
-class SadaqaUpdatesSection extends StatelessWidget {
-  const SadaqaUpdatesSection({super.key});
+class SadaqaCompanyPostsSection extends StatelessWidget {
+  const SadaqaCompanyPostsSection({
+    super.key,
+    required this.futurePosts,
+    this.companyName,
+  });
 
-  static const updates = [
-    SadaqaUpdateData(
-      image: 'assets/images/font1.jpeg',
-      title: 'New Distribution in Rural Areas',
-      timeAgo: '2 days ago',
-      body:
-          'Alhamdulillah, we distributed 500 meals to families across 5 villages. Your support keeps making a real difference.',
-      likes: 234,
-      comments: 45,
-    ),
-    SadaqaUpdateData(
-      image: 'assets/images/font2.jpg',
-      title: 'Ramadan Campaign Progress',
-      timeAgo: '5 days ago',
-      body:
-          'We are grateful for your continuous support. We already reached 65% of our goal and helped over 1000 families.',
-      likes: 198,
-      comments: 28,
-    ),
-  ];
+  final Future<List<SadaqaPost>> futurePosts;
+  final String? companyName;
 
   @override
   Widget build(BuildContext context) {
@@ -793,13 +1023,18 @@ class SadaqaUpdatesSection extends StatelessWidget {
     final bodyColor =
         Theme.of(context).textTheme.bodyLarge?.color ??
         AppColors.darkTextPrimary;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
+    return FutureBuilder<List<SadaqaPost>>(
+      future: futurePosts,
+      builder: (context, snapshot) {
+        final posts = snapshot.data ?? const [];
+        final isLoading = snapshot.connectionState == ConnectionState.waiting;
+        final hasError = snapshot.hasError;
+
+        if (isLoading) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
                 l10n.t('sadaqa.updates.title'),
                 style: TextStyle(
                   fontSize: 20,
@@ -807,39 +1042,95 @@ class SadaqaUpdatesSection extends StatelessWidget {
                   color: bodyColor,
                 ),
               ),
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.primary.withValues(alpha: 0.18),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                l10n.t('sadaqa.updates.count', params: {'count': '3'}),
+              const SizedBox(height: 12),
+              const Center(child: CircularProgressIndicator()),
+            ],
+          );
+        }
+
+        if (hasError) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.t('sadaqa.updates.title'),
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: bodyColor,
                 ),
               ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.t('sadaqaHistory.error.subtitle'),
+                style: TextStyle(color: bodyColor.withValues(alpha: 0.7)),
+              ),
+            ],
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.t('sadaqa.updates.title'),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: bodyColor,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    l10n.t(
+                      'sadaqa.updates.count',
+                      params: {'count': '${posts.length}'},
+                    ),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ),
+            const SizedBox(height: 16),
+            if (posts.isEmpty)
+              Text(
+                l10n.t('sadaqa.placeholder.subtitle'),
+                style: TextStyle(color: bodyColor.withValues(alpha: 0.7)),
+              )
+            else
+              for (final post in posts) ...[
+                SadaqaPostCard(post: post, companyName: companyName),
+                const SizedBox(height: 16),
+              ],
           ],
-        ),
-        const SizedBox(height: 16),
-        for (final update in updates) ...[
-          SadaqaUpdateCard(update: update),
-          const SizedBox(height: 16),
-        ],
-      ],
+        );
+      },
     );
   }
 }
 
-class SadaqaUpdateCard extends StatelessWidget {
-  const SadaqaUpdateCard({super.key, required this.update});
+class SadaqaPostCard extends StatelessWidget {
+  const SadaqaPostCard({super.key, required this.post, this.companyName});
 
-  final SadaqaUpdateData update;
+  final SadaqaPost post;
+  final String? companyName;
 
   @override
   Widget build(BuildContext context) {
@@ -847,6 +1138,8 @@ class SadaqaUpdateCard extends StatelessWidget {
     final bodyColor =
         Theme.of(context).textTheme.bodyMedium?.color ?? Colors.white;
     final mutedColor = bodyColor.withValues(alpha: 0.65);
+    final safeImage = encodeUrlIfNeeded(resolveMediaUrl(post.image));
+
     return Container(
       decoration: BoxDecoration(
         color: cardColor,
@@ -864,71 +1157,49 @@ class SadaqaUpdateCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-            child: Image.asset(
-              update.image,
-              height: 160,
+            child: Image.network(
+              safeImage,
+              height: 180,
               width: double.infinity,
               fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                height: 180,
+                color: Colors.grey.shade200,
+                child: const Center(child: Icon(Icons.image_not_supported)),
+              ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.calendar_today_outlined,
-                      size: 16,
+                if (companyName != null && companyName!.trim().isNotEmpty) ...[
+                  Text(
+                    companyName!,
+                    style: TextStyle(
                       color: mutedColor,
+                      fontWeight: FontWeight.w600,
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      update.timeAgo,
-                      style: TextStyle(color: mutedColor, fontSize: 13),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
+                  ),
+                  const SizedBox(height: 6),
+                ],
                 Text(
-                  update.title,
-                  style: TextStyle(
-                    fontSize: 17,
+                  post.title,
+                  style: const TextStyle(
+                    fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    color: bodyColor,
+                    color: Color(0xFF0F172A),
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 6),
                 Text(
-                  update.body,
+                  post.content,
                   style: TextStyle(
-                    fontSize: 14,
                     color: mutedColor,
-                    height: 1.4,
+                    fontSize: 14,
+                    height: 1.5,
                   ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Icon(Icons.favorite_border, size: 18, color: mutedColor),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${update.likes}',
-                      style: TextStyle(color: mutedColor, fontSize: 13),
-                    ),
-                    const SizedBox(width: 16),
-                    Icon(
-                      Icons.mode_comment_outlined,
-                      size: 18,
-                      color: mutedColor,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '${update.comments} comments',
-                      style: TextStyle(color: mutedColor, fontSize: 13),
-                    ),
-                  ],
                 ),
               ],
             ),
@@ -937,24 +1208,6 @@ class SadaqaUpdateCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class SadaqaUpdateData {
-  const SadaqaUpdateData({
-    required this.image,
-    required this.title,
-    required this.timeAgo,
-    required this.body,
-    required this.likes,
-    required this.comments,
-  });
-
-  final String image;
-  final String title;
-  final String timeAgo;
-  final String body;
-  final int likes;
-  final int comments;
 }
 
 class SadaqaHeaderPatternPainter extends CustomPainter {

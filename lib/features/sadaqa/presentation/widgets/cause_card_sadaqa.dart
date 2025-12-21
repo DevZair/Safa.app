@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
+import 'package:safa_app/features/sadaqa/utils/media_resolver.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class CauseCard extends StatelessWidget {
   final String imagePath;
@@ -121,8 +123,8 @@ class CauseCard extends StatelessWidget {
                         color: isFavorite
                             ? AppColors.primary
                             : Theme.of(context).brightness == Brightness.dark
-                                ? Colors.white
-                                : AppColors.iconColor,
+                            ? Colors.white
+                            : AppColors.iconColor,
                       ),
                     ),
                   ),
@@ -139,10 +141,10 @@ class CauseCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w600) ??
+                    style:
+                        Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ) ??
                         const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -151,10 +153,10 @@ class CauseCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     subtitle,
-                    style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium
-                            ?.copyWith(color: Colors.grey) ??
+                    style:
+                        Theme.of(
+                          context,
+                        ).textTheme.bodyMedium?.copyWith(color: Colors.grey) ??
                         const TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                   const SizedBox(height: 16),
@@ -275,22 +277,9 @@ class _ImageCarouselState extends State<_ImageCarousel> {
               itemCount: images.length,
               itemBuilder: (context, index) {
                 final path = images[index];
-                final isNetwork = path.startsWith('http');
-                final imageWidget = isNetwork
-                    ? Image.network(
-                        path,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: widget.height,
-                        errorBuilder: (_, __, ___) => _fallbackImage(),
-                      )
-                    : Image.asset(
-                        path,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: widget.height,
-                      );
-                return imageWidget;
+                final resolvedPath = resolveMediaUrl(path);
+                // resolveMediaUrl already prefixes the base URL for relative paths
+                return _buildImage(resolvedPath);
               },
             ),
           ),
@@ -328,6 +317,78 @@ class _ImageCarouselState extends State<_ImageCarousel> {
       color: Colors.grey.shade200,
       alignment: Alignment.center,
       child: const Icon(Icons.image_not_supported_outlined, size: 28),
+    );
+  }
+
+  Widget _buildImage(String resolvedPath) {
+    final isNetwork = resolvedPath.contains('http');
+    final isSvg = isSvgPath(resolvedPath);
+    final safePath = isNetwork ? encodeUrlIfNeeded(resolvedPath) : resolvedPath;
+
+    if (safePath.isEmpty) return _fallbackImage();
+
+    if (isSvg) {
+      if (isNetwork) {
+        return _networkSvgWithFallback(safePath);
+      }
+      return SvgPicture.asset(
+        safePath,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: widget.height,
+        placeholderBuilder: (_) => _fallbackImage(),
+      );
+    }
+
+    final builder = isNetwork ? Image.network : Image.asset;
+    return builder(
+      safePath,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: widget.height,
+      errorBuilder: (context, error, stackTrace) {
+        if (isNetwork && resolvedPath.startsWith('https://')) {
+          final fallbackUrl = safePath.replaceFirst('https://', 'http://');
+          return builder(
+            fallbackUrl,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: widget.height,
+            errorBuilder: (context, error, stackTrace) => _fallbackImage(),
+          );
+        }
+        debugPrint('Image load failed for $safePath');
+        return _fallbackImage();
+      },
+    );
+  }
+
+  Widget _networkSvgWithFallback(String url) {
+    final httpUrl = url.startsWith('https://')
+        ? url.replaceFirst('https://', 'http://')
+        : null;
+
+    return SvgPicture.network(
+      url,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: widget.height,
+      placeholderBuilder: (_) => _fallbackImage(),
+      colorFilter: const ColorFilter.mode(Colors.transparent, BlendMode.srcIn),
+      clipBehavior: Clip.hardEdge,
+      excludeFromSemantics: true,
+      errorBuilder: (context, error, stackTrace) {
+        if (httpUrl != null) {
+          return SvgPicture.network(
+            httpUrl,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: widget.height,
+            placeholderBuilder: (_) => _fallbackImage(),
+          );
+        }
+        return _fallbackImage();
+      },
     );
   }
 }

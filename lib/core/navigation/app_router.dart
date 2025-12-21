@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:safa_app/core/navigation/app_shell.dart';
 import 'package:safa_app/features/sadaqa/presentation/pages/request_help.dart';
 import 'package:safa_app/features/sadaqa/presentation/pages/sadaqa_detail.dart';
+import 'package:safa_app/features/sadaqa/presentation/pages/sadaqa_company_page.dart';
 import 'package:safa_app/features/sadaqa/presentation/pages/sadaqa_page.dart';
 import 'package:safa_app/features/sadaqa_history/presentation/pages/sadaqa_history_page.dart';
 import 'package:safa_app/features/settings/presentation/pages/settings_page.dart';
@@ -11,6 +12,7 @@ import 'package:safa_app/features/travel/presentation/pages/travel_page.dart';
 
 enum AppRoute {
   sadaqa,
+  sadaqaCompany,
   sadaqaDetail,
   requestHelp,
   travel,
@@ -60,6 +62,19 @@ class AppRouter {
                         isFavorite: args.isFavorite,
                         onFavoriteChanged: args.onFavoriteChanged,
                       );
+                    },
+                  ),
+                  GoRoute(
+                    path: 'company',
+                    name: AppRoute.sadaqaCompany.name,
+                    builder: (context, state) {
+                      final args = state.extra;
+                      if (args is! SadaqaCompanyArgs) {
+                        throw ArgumentError(
+                          'Expected SadaqaCompanyArgs, but got $args',
+                        );
+                      }
+                      return SadaqaCompanyPage(args: args);
                     },
                   ),
                   GoRoute(

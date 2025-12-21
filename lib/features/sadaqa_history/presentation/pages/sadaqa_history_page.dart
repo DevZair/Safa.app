@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
-import 'package:safa_app/core/styles/app_colors.dart';
 import 'package:safa_app/features/sadaqa_history/models/sadaqa_history_item.dart';
 import 'package:safa_app/features/sadaqa_history/presentation/cubit/sadaqa_history_cubit.dart';
 
@@ -75,7 +74,7 @@ class _SadaqaHistoryView extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
               physics: const AlwaysScrollableScrollPhysics(),
               itemCount: state.items.length,
-              separatorBuilder: (_, _index) => const SizedBox(height: 14),
+              separatorBuilder: (_, index) => const SizedBox(height: 14),
               itemBuilder: (context, index) {
                 final item = state.items[index];
                 return _HistoryTile(item: item, l10n: l10n, theme: theme);
@@ -162,48 +161,6 @@ class _HistoryTile extends StatelessWidget {
     final hours = date.hour.toString().padLeft(2, '0');
     final minutes = date.minute.toString().padLeft(2, '0');
     return '$day.$month.${date.year}, $hours:$minutes';
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.status, required this.l10n});
-
-  final SadaqaHistoryStatus status;
-  final AppLocalizations l10n;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final (label, color) = switch (status) {
-      SadaqaHistoryStatus.success => (
-          l10n.t('sadaqaHistory.status.success'),
-          AppColors.success
-        ),
-      SadaqaHistoryStatus.failed => (
-          l10n.t('sadaqaHistory.status.failed'),
-          AppColors.badgeDanger
-        ),
-      _ => (
-          l10n.t('sadaqaHistory.status.pending'),
-          theme.colorScheme.primary
-        ),
-    };
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withValues(alpha: 0.4)),
-      ),
-      child: Text(
-        label,
-        style: theme.textTheme.bodySmall?.copyWith(
-          fontWeight: FontWeight.w700,
-          color: color,
-        ),
-      ),
-    );
   }
 }
 

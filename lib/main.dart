@@ -83,12 +83,18 @@ class _SafaAppState extends State<SafaApp> {
 
     try {
       final token = await messaging.getToken();
-      debugPrint("🔥 FCM Token: $token");
+      if (token != null && token.isNotEmpty) {
+        DBService.fcmToken = token;
+        debugPrint("🔥 FCM Token: $token");
+      } else {
+        debugPrint("⚠️ FCM token not available yet");
+      }
     } catch (error) {
       debugPrint("⚠️ FCM token not available yet: $error");
     }
 
     FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+      DBService.fcmToken = newToken;
       debugPrint("♻️ Token refreshed: $newToken");
     });
 

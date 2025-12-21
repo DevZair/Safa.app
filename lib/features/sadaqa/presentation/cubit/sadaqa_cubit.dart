@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:safa_app/features/sadaqa/data/sadaqa_repository.dart';
+import 'package:safa_app/features/sadaqa/models/sadaqa_company.dart';
 import 'package:safa_app/features/sadaqa/models/sadaqa_cause.dart';
 
 enum SadaqaTab { all, favorites }
@@ -7,6 +8,7 @@ enum SadaqaTab { all, favorites }
 class SadaqaState {
   final SadaqaTab activeTab;
   final List<SadaqaCause> causes;
+  final List<SadaqaCompany> companies;
   final Set<String> favoriteCauseIds;
   final bool isLoading;
   final String? errorMessage;
@@ -14,6 +16,7 @@ class SadaqaState {
   const SadaqaState({
     required this.activeTab,
     required this.causes,
+    required this.companies,
     required this.favoriteCauseIds,
     required this.isLoading,
     required this.errorMessage,
@@ -22,6 +25,7 @@ class SadaqaState {
   factory SadaqaState.initial() => const SadaqaState(
     activeTab: SadaqaTab.all,
     causes: [],
+    companies: [],
     favoriteCauseIds: <String>{},
     isLoading: true,
     errorMessage: null,
@@ -38,6 +42,7 @@ class SadaqaState {
   SadaqaState copyWith({
     SadaqaTab? activeTab,
     List<SadaqaCause>? causes,
+    List<SadaqaCompany>? companies,
     Set<String>? favoriteCauseIds,
     bool? isLoading,
     String? errorMessage,
@@ -46,6 +51,7 @@ class SadaqaState {
     return SadaqaState(
       activeTab: activeTab ?? this.activeTab,
       causes: causes ?? this.causes,
+      companies: companies ?? this.companies,
       favoriteCauseIds: favoriteCauseIds ?? this.favoriteCauseIds,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: resetError ? null : (errorMessage ?? this.errorMessage),
@@ -65,8 +71,38 @@ class SadaqaCubit extends Cubit<SadaqaState> {
   Future<void> loadCauses() async {
     emit(state.copyWith(isLoading: true, resetError: true));
     try {
+      List<SadaqaCompany> companies = const [];
+      String? companyError;
+      try {
+        companies = await _repository.fetchCompanies();
+        if (companies.isEmpty) {
+          companyError = 'Company not found';
+        }
+      } catch (error) {
+        final message = error.toString();
+        final normalized = message.toLowerCase();
+        if (normalized.contains('company') &&
+            normalized.contains('not found')) {
+          companyError = 'Company not found';
+        } else {
+          companies = const [];
+        }
+      }
+
+      if (companyError != null) {
+        emit(
+          state.copyWith(
+            causes: const [],
+            companies: const [],
+            isLoading: false,
+            errorMessage: companyError,
+          ),
+        );
+        return;
+      }
       final fetched = await _repository.fetchCauses();
-      final publicCauses = _filterPublic(fetched);
+      final enrichedCauses = _applyCompanyData(fetched, companies);
+      final publicCauses = _filterPublic(enrichedCauses);
 
       final nextCauses = publicCauses;
 
@@ -77,6 +113,7 @@ class SadaqaCubit extends Cubit<SadaqaState> {
       emit(
         state.copyWith(
           causes: nextCauses,
+          companies: companies,
           favoriteCauseIds: favorites,
           isLoading: false,
           errorMessage: null,
@@ -86,6 +123,7 @@ class SadaqaCubit extends Cubit<SadaqaState> {
       emit(
         state.copyWith(
           causes: const [],
+          companies: const [],
           isLoading: false,
           errorMessage: error.toString(),
         ),
@@ -115,6 +153,30 @@ class SadaqaCubit extends Cubit<SadaqaState> {
       if (cause.id.isEmpty) return false;
       if (!seen.add(cause.id)) return false;
       return true;
+    }).toList();
+  }
+
+  List<SadaqaCause> _applyCompanyData(
+    List<SadaqaCause> causes,
+    List<SadaqaCompany> companies,
+  ) {
+    if (companies.isEmpty) return causes;
+    final map = {for (final c in companies) c.id: c};
+    return causes.map((cause) {
+      final companyId = cause.companyId;
+      final company = companyId != null ? map[companyId] : null;
+      if (company == null) return cause;
+
+      return cause.copyWith(
+        companyName:
+            (cause.companyName?.trim().isNotEmpty ?? false)
+                ? cause.companyName
+                : company.title,
+        companyLogo:
+            (cause.companyLogo?.trim().isNotEmpty ?? false)
+                ? cause.companyLogo
+                : company.logo ?? company.cover ?? cause.companyLogo,
+      );
     }).toList();
   }
 }

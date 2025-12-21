@@ -113,13 +113,38 @@ class RequestHelpRepository {
     required int helpRequestId,
     required MultipartFile file,
   }) async {
-    final formData = FormData.fromMap({'file': file});
-    final path = '${ApiConstants.requestHelpFileUpload}$helpRequestId';
-    await ApiService.request<Map<String, Object?>>(
-      path,
-      method: Method.post,
-      formData: formData,
-    );
+    final basePath = '${ApiConstants.requestHelpFileUpload}$helpRequestId';
+    final paths = <String>{basePath, '$basePath/'};
+    final formBodies = <FormData>[
+      FormData.fromMap({'file': file}),
+      FormData.fromMap({'files': [file]}),
+    ];
+
+    Object? lastError;
+    for (final path in paths) {
+      for (final formData in formBodies) {
+        try {
+          await ApiService.request<Map<String, Object?>>(
+            path,
+            method: Method.post,
+            formData: formData,
+          );
+          return;
+        } catch (error) {
+          lastError = error;
+          if (error is DioException) {
+            final status = error.response?.statusCode ?? 0;
+            // Retry on validation/server issues with alternate payloads/paths.
+            if (status == 422 || status >= 500) {
+              continue;
+            }
+          }
+          rethrow;
+        }
+      }
+    }
+
+    if (lastError != null) throw lastError;
   }
 
   Future<List<ReferenceItem>> fetchMaterialStatuses() async {

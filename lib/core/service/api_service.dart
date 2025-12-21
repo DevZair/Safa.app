@@ -43,24 +43,58 @@ class ApiService {
     Map<String, Object?>? headers,
     Map<String, Object?>? queryParams,
     FormData? formData,
+    bool followRedirects = false,
   }) async {
+    final rawToken = DBService.accessToken.isNotEmpty
+        ? DBService.accessToken
+        : ApiConstants.apiToken;
+
+    final isMultipart = formData != null;
     final newHeaders = <String, Object?>{
-      'content-Type': formData != null
-          ? 'multipart/form-data'
-          : 'application/json',
-      'X-Api-Token': DBService.token,
       'lang': DBService.languageCode,
     };
 
+    if (rawToken.isNotEmpty) {
+      newHeaders['Authorization'] = 'Bearer $rawToken';
+    }
+
     if (headers != null) newHeaders.addAll(headers);
+
+    final requestData = formData ?? data;
 
     try {
       final response = await _dio.request<Object?>(
         path,
-        data: data ?? formData,
+        data: requestData,
         queryParameters: queryParams,
-        options: Options(method: method.name, headers: newHeaders),
+        options: Options(
+          method: method.name,
+          headers: newHeaders,
+          contentType: isMultipart
+              ? Headers.multipartFormDataContentType
+              : Headers.jsonContentType,
+          followRedirects: followRedirects,
+        ),
       );
+
+      // Manually handle redirects to keep headers/method/payload consistent.
+      if (followRedirects &&
+          response.statusCode != null &&
+          response.statusCode! >= 300 &&
+          response.statusCode! < 400) {
+        final location = response.headers.value('location');
+        if (location != null && location.isNotEmpty) {
+          return await request<T>(
+            location,
+            method: method,
+            data: data,
+            headers: headers,
+            queryParams: queryParams,
+            formData: formData,
+            followRedirects: true,
+          );
+        }
+      }
 
       if (response.statusCode == null || response.statusCode! > 204) {
         final convert = const JsonEncoder().cast<Object?, String?>().convert(

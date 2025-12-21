@@ -1,11 +1,11 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum StorageKeys {
-  token('token'),
+  accessToken('access_token'),
+  refreshToken('refresh_token'),
   languageCode('language_code'),
   fcmToken('fcm_token'),
   baseUrl('base_url');
-  
 
   const StorageKeys(this.key);
   final String key;
@@ -18,12 +18,20 @@ class DBService {
     $storage = await SharedPreferences.getInstance();
   }
 
-  static String get token {
-    return $storage.getString(StorageKeys.token.name) ?? '';
+  static String get accessToken {
+    return $storage.getString(StorageKeys.accessToken.name) ?? '';
   }
 
-  static set token(String token) {
-    $storage.setString(StorageKeys.token.name, token);
+  static set accessToken(String token) {
+    $storage.setString(StorageKeys.accessToken.name, token);
+  }
+
+  static String get refreshToken {
+    return $storage.getString(StorageKeys.refreshToken.name) ?? '';
+  }
+
+  static set refreshToken(String token) {
+    $storage.setString(StorageKeys.refreshToken.name, token);
   }
 
   static String get languageCode {
