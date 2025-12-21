@@ -20,7 +20,6 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
   final _iinController = TextEditingController();
   final _childrenController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _emailController = TextEditingController();
   final _cityController = TextEditingController();
   final _addressController = TextEditingController();
   final _amountController = TextEditingController();
@@ -53,7 +52,6 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
       _iinController,
       _childrenController,
       _phoneController,
-      _emailController,
       _cityController,
       _addressController,
       _amountController,
@@ -80,7 +78,6 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
     _iinController.dispose();
     _childrenController.dispose();
     _phoneController.dispose();
-    _emailController.dispose();
     _cityController.dispose();
     _addressController.dispose();
     _amountController.dispose();
@@ -135,26 +132,6 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
                         keyboardType: TextInputType.phone,
                         validator: _requiredValidator,
                         prefixIcon: Icons.phone_outlined,
-                      ),
-                    ),
-                    _LabeledField(
-                      label: 'Электронная почта',
-                      child: _RequestTextField(
-                        controller: _emailController,
-                        hintText: 'you@example.com',
-                        keyboardType: TextInputType.emailAddress,
-                        validator: (value) {
-                          final text = value?.trim() ?? '';
-                          if (text.isEmpty) return null;
-                          final emailRegex = RegExp(
-                            r'^[\w\.-]+@[\w\.-]+\.[A-Za-z]{2,}$',
-                          );
-                          if (!emailRegex.hasMatch(text)) {
-                            return 'Введите корректный email';
-                          }
-                          return null;
-                        },
-                        prefixIcon: Icons.email_outlined,
                       ),
                     ),
                   ],
@@ -629,9 +606,6 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
       name: _firstNameController.text.trim(),
       surname: _lastNameController.text.trim(),
       phoneNumber: sanitizedPhone,
-      email: _emailController.text.trim().isEmpty
-          ? null
-          : _emailController.text.trim(),
       address: addressCombined,
       whyNeedHelp: _storyController.text.trim(),
       otherCategory: _isOtherCategory
@@ -686,7 +660,6 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
     _amountController.clear();
     _addressController.clear();
     _cityController.clear();
-    _emailController.clear();
     _phoneController.clear();
     _lastNameController.clear();
     _firstNameController.clear();

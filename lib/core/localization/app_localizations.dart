@@ -4,10 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class AppLocalizations {
-  AppLocalizations(this.locale, this._values);
+  AppLocalizations(
+    this.locale,
+    this._values,
+    this._fallbackValues,
+  );
 
   final Locale locale;
   final Map<String, String> _values;
+  final Map<String, String> _fallbackValues;
 
   static const supportedLocales = [
     Locale('ru'),
@@ -26,13 +31,24 @@ class AppLocalizations {
 
     final raw =
         await rootBundle.loadString('assets/i18n/$languageCode.json');
+    final fallbackRaw = await rootBundle
+        .loadString('assets/i18n/${supportedLocales.first.languageCode}.json');
     final Map<String, dynamic> jsonMap = json.decode(raw);
+    final Map<String, dynamic> fallbackJsonMap = json.decode(fallbackRaw);
 
     final values = jsonMap.map(
       (key, value) => MapEntry(key, value.toString()),
     );
 
-    return AppLocalizations(Locale(languageCode), values);
+    final fallbackValues = fallbackJsonMap.map(
+      (key, value) => MapEntry(key, value.toString()),
+    );
+
+    return AppLocalizations(
+      Locale(languageCode),
+      values,
+      fallbackValues,
+    );
   }
 
   static AppLocalizations of(BuildContext context) {
@@ -46,7 +62,7 @@ class AppLocalizations {
     String key, {
     Map<String, String>? params,
   }) {
-    var value = _values[key] ?? key;
+    var value = _values[key] ?? _fallbackValues[key] ?? key;
     if (params != null) {
       params.forEach((paramKey, paramValue) {
         value = value.replaceAll('{$paramKey}', paramValue);

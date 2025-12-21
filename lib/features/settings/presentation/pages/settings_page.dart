@@ -1,6 +1,4 @@
-import 'package:go_router/go_router.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
-import 'package:safa_app/core/navigation/app_router.dart';
 import 'package:safa_app/core/settings/app_settings_cubit.dart';
 import 'package:safa_app/core/settings/app_settings_state.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
@@ -181,17 +179,6 @@ class _SettingsPageState extends State<SettingsPage> {
                               'settings.account.profile.subtitle',
                             ),
                             onTap: () {},
-                          ),
-                          SettingsTile(
-                            icon: Icons.history,
-                            iconColor: const Color(0xFF6D8BFF),
-                            title: l10n.t('settings.account.history.title'),
-                            subtitle: l10n.t(
-                              'settings.account.history.subtitle',
-                            ),
-                            onTap: () {
-                              context.pushNamed(AppRoute.settingsHistory.name);
-                            },
                           ),
                           SettingsTile(
                             icon: Icons.lock_outline,

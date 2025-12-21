@@ -3,7 +3,7 @@ final class ApiConstants {
 
   static const String baseUrl = String.fromEnvironment(
     'BASE_URL',
-    defaultValue: 'https://ea32cfdd73ff.ngrok-free.app',
+    defaultValue: 'https://ba51ccb7a5d0.ngrok-free.app',
   );
   static const String apiToken = String.fromEnvironment(
     'API_TOKEN',
@@ -21,9 +21,13 @@ final class ApiConstants {
   static const String requestHelp = '/api/sadaqa/public/help-requests/';
   static const String requestHelpFileUpload =
       '/api/sadaqa/public/help-request-files/';
+  static const String sadaqaHelpRequests = '/api/sadaqa/private/help-requests/';
   static const String sadaqaCategories = '/api/sadaqa/public/categories/';
   static const String sadaqaCompanies = '/api/sadaqa/public/company/';
   static const String sadaqaMaterialStatuses =
       '/api/sadaqa/public/materials-status/';
-  static const String sadaqaHistory = '/api/sadaqa/donations/history/';
+  static const String sadaqaPrivateMaterialStatuses =
+      '/api/sadaqa/private/materials-status/';
+  static const String sadaqaPrivateHelpCategories =
+      '/api/sadaqa/private/help-categories/';
 }

@@ -16,6 +16,7 @@ class SadaqaCause {
   final String description;
   final String? noteType;
   final bool isPrivate;
+  final String? payment;
 
   const SadaqaCause({
     required this.id,
@@ -33,6 +34,7 @@ class SadaqaCause {
     required this.description,
     this.noteType,
     this.isPrivate = false,
+    this.payment,
   });
 
   factory SadaqaCause.fromJson(Map<String, Object?> json) {
@@ -53,6 +55,12 @@ class SadaqaCause {
       '${json['subtitle'] ?? ''}',
       '${json['content'] ?? ''}',
       '${json['help_reason'] ?? ''}',
+    ]);
+    final payment = _firstNonEmpty([
+      '${json['payment'] ?? ''}',
+      '${json['payment_link'] ?? ''}',
+      '${company?['payment'] ?? ''}',
+      '${company?['payment_link'] ?? ''}',
     ]);
 
     return SadaqaCause(
@@ -107,6 +115,7 @@ class SadaqaCause {
       description: description,
       noteType: '${json['note_type'] ?? ''}',
       isPrivate: _isPrivate(json),
+      payment: payment.isNotEmpty ? payment : null,
     );
   }
 
@@ -126,6 +135,7 @@ class SadaqaCause {
     String? description,
     String? noteType,
     bool? isPrivate,
+    String? payment,
   }) {
     return SadaqaCause(
       id: id ?? this.id,
@@ -143,6 +153,7 @@ class SadaqaCause {
       description: description ?? this.description,
       noteType: noteType ?? this.noteType,
       isPrivate: isPrivate ?? this.isPrivate,
+      payment: payment ?? this.payment,
     );
   }
 }

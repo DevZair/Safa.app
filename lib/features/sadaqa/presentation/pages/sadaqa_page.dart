@@ -23,27 +23,19 @@ class SadaqaPage extends StatelessWidget {
         builder: (context, state) {
           final cubit = context.read<SadaqaCubit>();
           final causes = state.visibleCauses;
+          final isFavoritesTab = state.activeTab == SadaqaTab.favorites;
           var companyGroups = _buildCompanyGroups(
             companies: state.companies,
             causes: causes,
-            favoriteIds: state.favoriteCauseIds,
+            favoriteIds: isFavoritesTab ? state.favoriteCauseIds : null,
           );
-          if (state.activeTab == SadaqaTab.favorites) {
-            companyGroups = companyGroups
-                .where(
-                  (group) => group.causes.any(
-                    (cause) => state.favoriteCauseIds.contains(cause.id),
-                  ),
-                )
-                .toList();
-          }
           final l10n = context.l10n;
           final isLoading = state.isLoading;
           final errorMessage = state.errorMessage;
-          final emptyTitle = state.activeTab == SadaqaTab.favorites
+          final emptyTitle = isFavoritesTab
               ? l10n.t('sadaqa.placeholder.title')
               : 'Публичных сборов пока нет';
-          final emptySubtitle = state.activeTab == SadaqaTab.favorites
+          final emptySubtitle = isFavoritesTab
               ? l10n.t('sadaqa.placeholder.subtitle')
               : 'Попробуйте обновить страницу или зайдите позже.';
 
@@ -193,6 +185,10 @@ List<_CompanyGroup> _buildCompanyGroups({
   required List<SadaqaCause> causes,
   Set<String>? favoriteIds,
 }) {
+  if (favoriteIds != null && favoriteIds.isEmpty) {
+    return [];
+  }
+
   final grouped = <String, _CompanyGroup>{};
 
   String resolveCompanyName(SadaqaCause cause) {
@@ -255,9 +251,8 @@ List<_CompanyGroup> _buildCompanyGroups({
   if (favoriteIds != null) {
     list = list
         .where(
-          (group) => favoriteIds.isEmpty
-              ? true
-              : group.causes.any((c) => favoriteIds.contains(c.id)),
+          (group) =>
+              group.causes.any((c) => favoriteIds.contains(c.id)),
         )
         .toList();
   }
@@ -533,7 +528,7 @@ class _EmptyCausesPlaceholder extends StatelessWidget {
           SizedBox(height: 14.h),
           TextButton(
             onPressed: () => onRefresh(),
-            child: Text(l10n.t('sadaqaHistory.refresh')),
+            child: Text(l10n.t('sadaqa.actions.refresh')),
           ),
         ],
       ),
@@ -569,7 +564,7 @@ class _ErrorBanner extends StatelessWidget {
           if (onRetry != null)
             TextButton(
               onPressed: () => onRetry!(),
-              child: Text(l10n.t('sadaqaHistory.retry')),
+              child: Text(l10n.t('sadaqa.actions.retry')),
             ),
         ],
       ),

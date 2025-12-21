@@ -5,15 +5,58 @@ import 'package:safa_app/core/service/api_service.dart';
 class ReferenceItem {
   final int id;
   final String title;
+  final bool isActive;
 
-  const ReferenceItem({required this.id, required this.title});
+  const ReferenceItem({
+    required this.id,
+    required this.title,
+    this.isActive = true,
+  });
 
   factory ReferenceItem.fromJson(Map<String, Object?> json) {
     return ReferenceItem(
       id: (json['id'] as num?)?.toInt() ?? 0,
       title: '${json['title'] ?? ''}',
+      isActive: _parseMaterialStatusActive(
+            json['status'] ?? json['active'] ?? json['is_active'],
+          ) ??
+          true,
     );
   }
+
+  ReferenceItem copyWith({int? id, String? title, bool? isActive}) {
+    return ReferenceItem(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      isActive: isActive ?? this.isActive,
+    );
+  }
+}
+
+bool? _parseBool(Object? value) {
+  if (value == null) return null;
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+  if (value is String) {
+    final normalized = value.toLowerCase().trim();
+    if (normalized == 'true' || normalized == '1') return true;
+    if (normalized == 'false' || normalized == '0') return false;
+  }
+  return null;
+}
+
+bool? _parseMaterialStatusActive(Object? value) {
+  if (value == null) return null;
+  if (value is bool) return value;
+  if (value is num) return value == 0;
+  if (value is String) {
+    final normalized = value.toLowerCase().trim();
+    final asInt = int.tryParse(normalized);
+    if (asInt != null) return asInt == 0;
+    if (normalized == 'true') return true;
+    if (normalized == 'false') return false;
+  }
+  return null;
 }
 
 class CategoryItem {
@@ -43,7 +86,6 @@ class RequestHelpPayload {
   final String address;
   final String whyNeedHelp;
   final int helpCategory;
-  final String? email;
   final String? otherCategory;
   final String? companyName;
   final int? age;
@@ -62,7 +104,6 @@ class RequestHelpPayload {
     required this.whyNeedHelp,
     required this.helpCategory,
     this.receivedOtherHelp = false,
-    this.email,
     this.otherCategory,
     this.companyName,
     this.age,
@@ -78,7 +119,6 @@ class RequestHelpPayload {
       'name': name,
       'surname': surname,
       'age': age ?? 0,
-      'email': email,
       'phone_number': phoneNumber,
       'other_category': otherCategory,
       'child_num': childInFam ?? 0,
@@ -178,7 +218,7 @@ class RequestHelpRepository {
     return data
         .whereType<Map<String, Object?>>()
         .map(ReferenceItem.fromJson)
-        .where((item) => item.id != 0 && item.title.isNotEmpty)
+        .where((item) => item.id != 0 && item.title.isNotEmpty && item.isActive)
         .toList();
   }
 

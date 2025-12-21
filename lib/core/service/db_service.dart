@@ -5,7 +5,8 @@ enum StorageKeys {
   refreshToken('refresh_token'),
   languageCode('language_code'),
   fcmToken('fcm_token'),
-  baseUrl('base_url');
+  baseUrl('base_url'),
+  materialStatusCache('material_status_cache');
 
   const StorageKeys(this.key);
   final String key;

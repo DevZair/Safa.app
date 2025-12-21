@@ -393,7 +393,6 @@ class SadaqaSummaryCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Убраны все Expanded - используем простые Row и Column
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -465,17 +464,24 @@ class SadaqaPrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isEnabled = onPressed != null;
     return Material(
       color: Colors.transparent,
       child: InkWell(
         borderRadius: BorderRadius.circular(26),
-        onTap: onPressed ?? () {},
+        onTap: () {
+          if (isEnabled) {
+            onPressed!();
+          }
+        },
         child: Ink(
           height: 52,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(26),
-            gradient: const LinearGradient(
-              colors: [Color(0xFF1FC8A9), Color(0xFF2A9ED7)],
+            gradient: LinearGradient(
+              colors: isEnabled
+                  ? const [Color(0xFF1FC8A9), Color(0xFF2A9ED7)]
+                  : const [Color(0xFF9CA3AF), Color(0xFFCBD5E1)],
             ),
             boxShadow: [
               BoxShadow(
@@ -556,6 +562,7 @@ class SadaqaBeneficiaryOverviewCard extends StatelessWidget {
     this.statusColor = const Color(0xFFE11D48),
     required this.donateLabel,
     this.onDonate,
+    this.paymentUrl,
   });
 
   final String imagePath;
@@ -569,7 +576,8 @@ class SadaqaBeneficiaryOverviewCard extends StatelessWidget {
   final String? statusLabel;
   final Color statusColor;
   final String donateLabel;
-  final VoidCallback? onDonate;
+  final ValueChanged<String?>? onDonate;
+  final String? paymentUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -577,6 +585,7 @@ class SadaqaBeneficiaryOverviewCard extends StatelessWidget {
     final percentText = (progress * 100).toStringAsFixed(1);
     return Container(
       padding: const EdgeInsets.all(24),
+      constraints: const BoxConstraints(minHeight: 470),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(32),
@@ -610,6 +619,8 @@ class SadaqaBeneficiaryOverviewCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
@@ -632,7 +643,7 @@ class SadaqaBeneficiaryOverviewCard extends StatelessWidget {
                               color: Color(0xFF6B7280),
                               fontSize: 13,
                             ),
-                            maxLines: 2,
+                            maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -654,6 +665,8 @@ class SadaqaBeneficiaryOverviewCard extends StatelessWidget {
               fontSize: 14,
               height: 1.5,
             ),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 20),
           const Divider(color: Color(0xFFE2E8F0), height: 1),
@@ -728,8 +741,12 @@ class SadaqaBeneficiaryOverviewCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 22),
-          SadaqaPrimaryButton(label: donateLabel, onPressed: onDonate),
+          const SizedBox(height: 12),
+          SadaqaPrimaryButton(
+            label: donateLabel,
+            onPressed:
+                onDonate == null ? null : () => onDonate!(paymentUrl),
+          ),
         ],
       ),
     );
@@ -1062,7 +1079,7 @@ class SadaqaCompanyPostsSection extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                l10n.t('sadaqaHistory.error.subtitle'),
+                l10n.t('sadaqa.updates.error'),
                 style: TextStyle(color: bodyColor.withValues(alpha: 0.7)),
               ),
             ],

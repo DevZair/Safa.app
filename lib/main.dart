@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:safa_app/features/travel/presentation/cubit/travel_cubit.dart';
 import 'package:safa_app/features/travel/data/travel_repository.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
@@ -22,8 +24,30 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   debugPrint("📩 Background message: ${message.notification?.title}");
 }
 
+void _installKeyEventGuard(WidgetsBinding binding) {
+  if (!kDebugMode) return;
+
+  // Drop unmatched key-up events that trigger the HardwareKeyboard debug assert.
+  final originalHandler = binding.platformDispatcher.onKeyData;
+  final pressedPhysicalKeys = <int>{};
+
+  binding.platformDispatcher.onKeyData = (ui.KeyData data) {
+    if (data.type == ui.KeyEventType.down) {
+      pressedPhysicalKeys.add(data.physical);
+    } else if (data.type == ui.KeyEventType.up &&
+        !pressedPhysicalKeys.remove(data.physical)) {
+      debugPrint(
+        'Dropping stray KeyUpEvent for physical key 0x${data.physical.toRadixString(16)}',
+      );
+      return true;
+    }
+    return originalHandler?.call(data) ?? false;
+  };
+}
+
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final binding = WidgetsFlutterBinding.ensureInitialized();
+  _installKeyEventGuard(binding);
 
   const enableMessaging = !kIsWeb;
 

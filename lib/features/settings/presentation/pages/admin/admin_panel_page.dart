@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/features/sadaqa/models/sadaqa_company.dart';
 import 'package:safa_app/features/settings/presentation/pages/admin/admin_company_profile_page.dart';
+import 'package:safa_app/features/settings/presentation/pages/admin/admin_help_requests_page.dart';
 import 'package:safa_app/features/settings/presentation/pages/admin/admin_notes_page.dart';
 import 'package:safa_app/features/settings/presentation/pages/admin/admin_posts_page.dart';
 
@@ -44,7 +45,7 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
         icon: Icons.contact_support_outlined,
         color: const Color(0xFF22B573),
         title: l10n.t('settings.admin.menu.help'),
-        onTap: () {},
+        onTap: () => _openHelpRequests(context, _companyName),
       ),
     ];
 
@@ -219,6 +220,14 @@ void _openNotes(BuildContext context, String? companyName) {
   Navigator.of(context, rootNavigator: true).push(
     MaterialPageRoute(
       builder: (_) => AdminNotesPage(companyName: companyName),
+    ),
+  );
+}
+
+void _openHelpRequests(BuildContext context, String? companyName) {
+  Navigator.of(context, rootNavigator: true).push(
+    MaterialPageRoute(
+      builder: (_) => AdminHelpRequestsPage(companyName: companyName),
     ),
   );
 }

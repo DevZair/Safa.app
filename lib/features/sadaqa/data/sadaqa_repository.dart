@@ -1,17 +1,22 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:safa_app/core/constants/api_constants.dart';
 import 'package:safa_app/core/service/api_service.dart';
 import 'package:safa_app/core/service/db_service.dart';
+import 'package:safa_app/features/sadaqa/data/request_help_repository.dart'
+    show ReferenceItem;
 import 'package:safa_app/features/sadaqa/models/sadaqa_company.dart';
 import 'package:safa_app/features/sadaqa/models/sadaqa_cause.dart';
+import 'package:safa_app/features/sadaqa/models/help_request.dart';
 import 'package:safa_app/features/sadaqa/models/sadaqa_post.dart';
 import 'package:safa_app/features/sadaqa/utils/media_resolver.dart';
 
 class SadaqaRepository {
   static const _postsCacheKey = 'cache_sadaqa_posts';
   static const _notesCacheKey = 'cache_sadaqa_notes';
+  static const _activeNoteCacheKey = 'cache_sadaqa_active_note';
 
   Future<List<SadaqaCause>> fetchCauses() async {
     final basePaths = <String>{
@@ -75,6 +80,20 @@ class SadaqaRepository {
     return [];
   }
 
+  SadaqaPost? _extractActiveNote(Object? data) {
+    if (data is Map<String, Object?>) {
+      return SadaqaPost.fromJson(data);
+    }
+    if (data is List && data.isNotEmpty) {
+      final first =
+          data.firstWhere((e) => e is Map<String, Object?>, orElse: () => null);
+      if (first is Map<String, Object?>) {
+        return SadaqaPost.fromJson(first);
+      }
+    }
+    return null;
+  }
+
   Future<List<SadaqaCompany>> fetchCompanies() async {
     final basePaths = <String>{
       ApiConstants.sadaqaCompanies,
@@ -110,6 +129,48 @@ class SadaqaRepository {
         .map(SadaqaCompany.fromJson)
         .where((company) => company.id.isNotEmpty)
         .toList();
+  }
+
+  Future<SadaqaCompany?> fetchCompanyDetail(String companyId) async {
+    if (companyId.isEmpty) return null;
+
+    final basePaths = <String>{
+      '${ApiConstants.sadaqaCompanies}$companyId',
+      '${ApiConstants.sadaqaCompanies}$companyId/',
+      '/api/sadaqa/public/company/$companyId',
+      '/api/sadaqa/public/company/$companyId/',
+      '/sadaqa/public/company/$companyId',
+      '/sadaqa/public/company/$companyId/',
+    };
+
+    Object? lastError;
+
+    for (final path in basePaths) {
+      try {
+        final response = await ApiService.request<Object?>(
+          path,
+          method: Method.get,
+          followRedirects: true,
+        );
+
+        if (response is Map<String, Object?>) {
+          final data = response['data'];
+          if (data is Map<String, Object?>) {
+            return SadaqaCompany.fromJson(data);
+          }
+          return SadaqaCompany.fromJson(response);
+        }
+      } catch (error) {
+        lastError = error;
+        continue;
+      }
+    }
+
+    if (lastError != null) {
+      debugPrint('Failed to load company detail: $lastError');
+    }
+
+    return null;
   }
 
   Future<List<SadaqaPost>> fetchPosts({String? companyId}) async {
@@ -223,6 +284,465 @@ class SadaqaRepository {
         .toList();
   }
 
+  Future<List<HelpRequest>> fetchHelpRequests() async {
+    final basePaths = <String>{
+      ApiConstants.sadaqaHelpRequests,
+      '${ApiConstants.sadaqaHelpRequests}/',
+      '${ApiConstants.sadaqaHelpRequests}my',
+      '${ApiConstants.sadaqaHelpRequests}my/',
+    };
+
+    Object? data;
+    Object? lastError;
+
+    for (final path in basePaths) {
+      try {
+        data = await ApiService.request<Object?>(
+          path,
+          method: Method.get,
+          followRedirects: true,
+        );
+        lastError = null;
+        break;
+      } catch (error) {
+        lastError = error;
+        continue;
+      }
+    }
+
+    if (data == null && lastError != null) throw lastError;
+
+    final list = _unwrapList(data);
+    final requests = list
+        .map(HelpRequest.fromJson)
+        .where((item) => item.id.isNotEmpty)
+        .toList();
+
+    if (requests.isEmpty) return requests;
+
+    Map<int, String> categoryTitles = const {};
+    Map<int, String> materialStatusTitles = const {};
+
+    try {
+    final lookups = await Future.wait([
+      _fetchPrivateHelpCategories(),
+      _fetchPrivateMaterialStatuses(),
+    ]);
+    final categories = lookups[0] as List<ReferenceItem>;
+    final materials = lookups[1] as List<ReferenceItem>;
+    categoryTitles = {for (final item in categories) item.id: item.title};
+    materialStatusTitles = {for (final item in materials) item.id: item.title};
+    } catch (error) {
+      debugPrint('Failed to enrich help requests: $error');
+    }
+
+    if (categoryTitles.isEmpty && materialStatusTitles.isEmpty) {
+      return requests;
+    }
+
+    return requests.map((item) {
+      final categoryTitle = item.helpCategoryTitle ??
+          (item.helpCategoryId != null
+              ? categoryTitles[item.helpCategoryId!]
+              : null);
+      final materialTitle = item.materialStatusTitle ??
+          (item.materialStatusId != null
+              ? materialStatusTitles[item.materialStatusId!]
+              : null);
+
+      if (categoryTitle == item.helpCategoryTitle &&
+          materialTitle == item.materialStatusTitle) {
+        return item;
+      }
+
+      return item.copyWith(
+        helpCategoryTitle: categoryTitle,
+        materialStatusTitle: materialTitle,
+      );
+    }).toList(growable: false);
+  }
+
+  Future<HelpRequest?> updateHelpRequestStatus({
+    required String id,
+    required HelpRequestStatus status,
+  }) async {
+    final basePaths = <String>{
+      '${ApiConstants.sadaqaHelpRequests}$id',
+      '${ApiConstants.sadaqaHelpRequests}$id/',
+    };
+
+    Object? lastError;
+
+    for (final path in basePaths) {
+      try {
+        final response = await ApiService.request<Object?>(
+          path,
+          method: Method.put,
+          data: {'status': status.value},
+          queryParams: {'help_request_id': id},
+          followRedirects: true,
+        );
+
+        if (response is Map<String, Object?>) {
+          final data = response['data'];
+          if (data is Map<String, Object?>) {
+            return HelpRequest.fromJson(data);
+          }
+          return HelpRequest.fromJson(response);
+        }
+
+        return null;
+      } catch (error) {
+        lastError = error;
+        continue;
+      }
+    }
+
+    if (lastError != null) throw lastError;
+    return null;
+  }
+
+  Future<List<ReferenceItem>> fetchPrivateMaterialStatusList() async {
+    return _fetchPrivateMaterialStatuses();
+  }
+
+  Future<List<ReferenceItem>> fetchPrivateHelpCategoryList() async {
+    return _fetchPrivateHelpCategories();
+  }
+
+  Future<ReferenceItem?> createMaterialStatus(String title,
+      {bool isActive = true}) async {
+    final created = await _createLookup(
+      basePath: ApiConstants.sadaqaPrivateMaterialStatuses,
+      title: title,
+      extra: {
+        'language_id': _languageId(),
+        'status': isActive ? 0 : 1,
+        'is_active': isActive ? 0 : 1,
+        'active': isActive ? 0 : 1,
+      },
+    );
+    if (created != null) {
+      _cacheMaterialStatus(created.id, isActive);
+    }
+    return created;
+  }
+
+  Future<bool> deleteMaterialStatus(int id) async {
+    final deleted = await _deleteLookup(
+      basePath: ApiConstants.sadaqaPrivateMaterialStatuses,
+      id: id,
+    );
+    if (deleted) {
+      _removeMaterialStatusFromCache(id);
+    }
+    return deleted;
+  }
+
+  Future<ReferenceItem?> updateMaterialStatus({
+    required int id,
+    required String title,
+    bool isActive = true,
+  }) async {
+    final updated = await _updateLookup(
+      basePath: ApiConstants.sadaqaPrivateMaterialStatuses,
+      id: id,
+      title: title,
+      extra: {
+        'language_id': _languageId(),
+        'status': isActive ? 0 : 1,
+        'is_active': isActive ? 0 : 1,
+        'active': isActive ? 0 : 1,
+      },
+    );
+    if (updated != null) {
+      _cacheMaterialStatus(updated.id, isActive);
+    }
+    return updated;
+  }
+
+  Future<ReferenceItem?> createHelpCategory(
+    String title, {
+    bool isOther = false,
+  }) async {
+    return _createLookup(
+      basePath: ApiConstants.sadaqaPrivateHelpCategories,
+      title: title,
+      extra: {
+        'language_id': _languageId(),
+        'is_other': isOther,
+      },
+    );
+  }
+
+  Future<bool> deleteHelpCategory(int id) async {
+    return _deleteLookup(
+      basePath: ApiConstants.sadaqaPrivateHelpCategories,
+      id: id,
+    );
+  }
+
+  Future<ReferenceItem?> updateHelpCategory({
+    required int id,
+    required String title,
+    bool isOther = false,
+  }) async {
+    return _updateLookup(
+      basePath: ApiConstants.sadaqaPrivateHelpCategories,
+      id: id,
+      title: title,
+      extra: {
+        'language_id': _languageId(),
+        'is_other': isOther,
+      },
+    );
+  }
+
+  Future<List<ReferenceItem>> _fetchPrivateMaterialStatuses() async {
+    final paths = <String>{
+      ApiConstants.sadaqaPrivateMaterialStatuses,
+      '${ApiConstants.sadaqaPrivateMaterialStatuses}my',
+      '/api/sadaqa/private/materials-status/',
+      '/api/sadaqa/private/materials-status/my',
+      '/sadaqa/private/materials-status/',
+      '/sadaqa/private/materials-status/my',
+      '/api/sadaqa/private/materials_status/',
+      '/sadaqa/private/materials_status/',
+    };
+
+    final normalized = <String>{};
+    for (final path in paths) {
+      normalized.add(path);
+      if (!path.endsWith('/')) normalized.add('$path/');
+    }
+
+    List<Map<String, Object?>> data = const [];
+    Object? lastError;
+
+    for (final path in normalized) {
+      try {
+        final response = await ApiService.request<Object?>(
+          path,
+          method: Method.get,
+          followRedirects: true,
+        );
+        data = _unwrapList(response);
+        lastError = null;
+        break;
+      } catch (error) {
+        lastError = error;
+        continue;
+      }
+    }
+
+    if (data.isEmpty && lastError != null) {
+      debugPrint('Failed to load material statuses: $lastError');
+    }
+
+    final cachedStates = _readCachedMaterialStatuses();
+
+    final list = <ReferenceItem>[];
+    for (final item in data) {
+      final id = _asInt(item['id']);
+      final title = _asString(item['title'] ?? item['name']);
+      final rawStatus = _parseMaterialStatusActive(
+        item['status'] ?? item['is_active'] ?? item['active'],
+      );
+      final status = rawStatus ?? cachedStates[id] ?? true;
+      if (id != null && id > 0 && title != null && title.isNotEmpty) {
+        list.add(ReferenceItem(id: id, title: title, isActive: status));
+        _cacheMaterialStatus(id, status);
+      }
+    }
+    return list;
+  }
+
+  Future<List<ReferenceItem>> _fetchPrivateHelpCategories() async {
+    final paths = <String>{
+      ApiConstants.sadaqaPrivateHelpCategories,
+      '${ApiConstants.sadaqaPrivateHelpCategories}my',
+      '/api/sadaqa/private/help-categories/',
+      '/api/sadaqa/private/help-categories/my',
+      '/sadaqa/private/help-categories/',
+      '/sadaqa/private/help-categories/my',
+      '/api/sadaqa/private/help_categories/',
+      '/sadaqa/private/help_categories/',
+    };
+
+    final normalized = <String>{};
+    for (final path in paths) {
+      normalized.add(path);
+      if (!path.endsWith('/')) normalized.add('$path/');
+    }
+
+    List<Map<String, Object?>> data = const [];
+    Object? lastError;
+
+    for (final path in normalized) {
+      try {
+        final response = await ApiService.request<Object?>(
+          path,
+          method: Method.get,
+          followRedirects: true,
+        );
+        data = _unwrapList(response);
+        lastError = null;
+        break;
+      } catch (error) {
+        lastError = error;
+        continue;
+      }
+    }
+
+    if (data.isEmpty && lastError != null) {
+      debugPrint('Failed to load help categories: $lastError');
+    }
+
+    final list = <ReferenceItem>[];
+    for (final item in data) {
+      final id = _asInt(item['id']);
+      final title = _asString(item['title'] ?? item['name']);
+      final isOther = _asBool(item['is_other']) ?? false;
+      final status =
+          _asBool(item['status'] ?? item['is_active'] ?? item['active']) ??
+              true;
+      if (id != null && id > 0 && title != null && title.isNotEmpty) {
+        list.add(
+          ReferenceItem(
+            id: id,
+            title: title,
+            isActive: status,
+          ),
+        );
+      }
+    }
+    return list;
+  }
+
+  Future<ReferenceItem?> _createLookup({
+    required String basePath,
+    required String title,
+    Map<String, Object?> extra = const {},
+  }) async {
+    final paths = <String>{
+      basePath,
+      '$basePath/',
+      basePath.replaceAll('_', '-'),
+      '${basePath.replaceAll('_', '-')}/',
+    };
+
+    final payload = {'title': title, ...extra};
+
+    for (final path in paths) {
+      try {
+        final response = await ApiService.request<Object?>(
+          path,
+          method: Method.post,
+          data: payload,
+          followRedirects: true,
+        );
+
+        if (response is Map<String, Object?>) {
+          final data = response['data'];
+          final body = data is Map<String, Object?> ? data : response;
+          final id = _asInt(body['id']);
+          final resolvedTitle = _asString(body['title']) ?? title;
+          final resolvedStatus = _resolveLookupStatus(
+            basePath: basePath,
+            body: body,
+            extra: extra,
+          );
+          if (id != null) {
+            return ReferenceItem(
+              id: id,
+              title: resolvedTitle,
+              isActive: resolvedStatus ?? true,
+            );
+          }
+        }
+      } catch (error) {
+        debugPrint('Failed to create lookup $basePath: $error');
+        continue;
+      }
+    }
+    return null;
+  }
+
+  Future<ReferenceItem?> _updateLookup({
+    required String basePath,
+    required int id,
+    required String title,
+    Map<String, Object?> extra = const {},
+  }) async {
+    final normalizedBase = <String>{basePath, basePath.replaceAll('_', '-')};
+    final paths = <String>{};
+    for (final base in normalizedBase) {
+      paths.add('$base$id');
+      paths.add('$base$id/');
+    }
+
+    final payload = {'title': title, ...extra};
+
+    for (final path in paths) {
+      try {
+        final response = await ApiService.request<Object?>(
+          path,
+          method: Method.put,
+          data: payload,
+          followRedirects: true,
+        );
+
+        if (response is Map<String, Object?>) {
+          final data = response['data'];
+          final body = data is Map<String, Object?> ? data : response;
+          final resolvedId = _asInt(body['id']) ?? id;
+          final resolvedTitle = _asString(body['title']) ?? title;
+          final resolvedStatus = _resolveLookupStatus(
+            basePath: basePath,
+            body: body,
+            extra: extra,
+          );
+          return ReferenceItem(
+            id: resolvedId,
+            title: resolvedTitle,
+            isActive: resolvedStatus ?? true,
+          );
+        }
+      } catch (error) {
+        debugPrint('Failed to update lookup $basePath/$id: $error');
+        continue;
+      }
+    }
+    return null;
+  }
+
+  Future<bool> _deleteLookup({
+    required String basePath,
+    required int id,
+  }) async {
+    final normalizedBase = <String>{basePath, basePath.replaceAll('_', '-')};
+    final paths = <String>{};
+    for (final base in normalizedBase) {
+      paths.add('$base$id');
+      paths.add('$base$id/');
+    }
+
+    for (final path in paths) {
+      try {
+        await ApiService.request<String?>(
+          path,
+          method: Method.delete,
+          followRedirects: true,
+        );
+        return true;
+      } catch (error) {
+        debugPrint('Failed to delete lookup $path: $error');
+        continue;
+      }
+    }
+    return false;
+  }
+
   Future<List<SadaqaPost>> fetchNotes({String? companyId}) async {
     final cacheKey = _cacheKey(_notesCacheKey, companyId);
     final cached = _readCachedPosts(cacheKey);
@@ -300,15 +820,10 @@ class SadaqaRepository {
           followRedirects: true,
         );
 
-        if (data is Map<String, Object?>) {
-          return SadaqaPost.fromJson(data);
-        }
-        if (data is List && data.isNotEmpty) {
-          final first =
-              data.firstWhere((e) => e is Map<String, Object?>, orElse: () => {});
-          if (first is Map<String, Object?>) {
-            return SadaqaPost.fromJson(first);
-          }
+        final note = _extractActiveNote(data);
+        if (note != null) {
+          _writeCachedActiveNote(companyId, note);
+          return note;
         }
       } catch (error) {
         lastError = error;
@@ -323,6 +838,23 @@ class SadaqaRepository {
   String _cacheKey(String base, String? companyId) {
     if (companyId == null || companyId.isEmpty) return base;
     return '$base:$companyId';
+  }
+
+  List<SadaqaPost>? readCachedPosts({String? companyId}) {
+    final cacheKey = _cacheKey(_postsCacheKey, companyId);
+    return _readCachedPosts(cacheKey);
+  }
+
+  SadaqaPost? readCachedActiveNote({String? companyId}) {
+    final cacheKey = _cacheKey(_activeNoteCacheKey, companyId);
+    final cached = _readCachedPosts(cacheKey);
+    if (cached == null || cached.isEmpty) return null;
+    return cached.first;
+  }
+
+  void _writeCachedActiveNote(String? companyId, SadaqaPost note) {
+    final cacheKey = _cacheKey(_activeNoteCacheKey, companyId);
+    _writeCachedPosts(cacheKey, [note]);
   }
 
   List<SadaqaPost>? _readCachedPosts(String key) {
@@ -345,6 +877,104 @@ class SadaqaRepository {
   void _writeCachedPosts(String key, List<SadaqaPost> posts) {
     final jsonList = posts.map((e) => e.toJson()).toList();
     $storage.setString(key, jsonEncode(jsonList));
+  }
+
+  bool? _resolveLookupStatus({
+    required String basePath,
+    required Map<String, Object?> body,
+    required Map<String, Object?> extra,
+  }) {
+    final raw = body['status'] ??
+        body['is_active'] ??
+        body['active'] ??
+        extra['status'] ??
+        extra['is_active'] ??
+        extra['active'];
+    if (basePath.contains('materials-status')) {
+      return _parseMaterialStatusActive(raw);
+    }
+    return _asBool(raw);
+  }
+
+  bool? _parseMaterialStatusActive(Object? value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is num) return value == 0;
+    if (value is String) {
+      final normalized = value.trim().toLowerCase();
+      final asInt = int.tryParse(normalized);
+      if (asInt != null) return asInt == 0;
+      if (normalized == 'true') return true;
+      if (normalized == 'false') return false;
+    }
+    return null;
+  }
+
+  Map<int, bool> _readCachedMaterialStatuses() {
+    final raw = $storage.getString(StorageKeys.materialStatusCache.name);
+    if (raw == null || raw.isEmpty) return {};
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is Map<String, dynamic>) {
+        return decoded.map(
+          (key, value) => MapEntry(int.parse(key), value == true),
+        );
+      }
+    } catch (_) {
+      return {};
+    }
+    return {};
+  }
+
+  void _cacheMaterialStatus(int id, bool isActive) {
+    if (id <= 0) return;
+    final current = _readCachedMaterialStatuses();
+    current[id] = isActive;
+    $storage.setString(
+      StorageKeys.materialStatusCache.name,
+      jsonEncode(current.map((key, value) => MapEntry(key.toString(), value))),
+    );
+  }
+
+  void _removeMaterialStatusFromCache(int id) {
+    if (id <= 0) return;
+    final current = _readCachedMaterialStatuses();
+    if (!current.containsKey(id)) return;
+    current.remove(id);
+    $storage.setString(
+      StorageKeys.materialStatusCache.name,
+      jsonEncode(current.map((key, value) => MapEntry(key.toString(), value))),
+    );
+  }
+
+  int? _asInt(Object? value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse('$value');
+  }
+
+  String? _asString(Object? value) {
+    if (value == null) return null;
+    final text = '$value'.trim();
+    return text.isEmpty ? null : text;
+  }
+
+  bool? _asBool(Object? value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is num) return value != 0;
+    if (value is String) {
+      final normalized = value.toLowerCase().trim();
+      if (normalized == 'true' || normalized == '1') return true;
+      if (normalized == 'false' || normalized == '0') return false;
+    }
+    return null;
+  }
+
+  int _languageId() {
+    // API currently expects explicit language_id; default to RU=1 unless specified.
+    return 1;
   }
 
   Future<SadaqaCompany> updateCompanyProfile({
@@ -536,11 +1166,36 @@ class SadaqaRepository {
       followRedirects: true,
     );
 
-    final url = response['url'] ?? response['path'] ?? response['file'];
-    if (url is String && url.isNotEmpty) {
-      return resolveMediaUrl(url);
-    }
+    final url = _normalizeUploadUrl(
+      response['url'] ?? response['path'] ?? response['file'],
+    );
+    if (url.isNotEmpty) return url;
     throw Exception('Не удалось загрузить файл');
+  }
+
+  /// Always return an HTTPS URL on the current API host, even if backend
+  /// responds with an absolute URL from another tunnel or an http link.
+  String _normalizeUploadUrl(Object? value) {
+    final raw = '${value ?? ''}'.trim();
+    if (raw.isEmpty) return '';
+
+    final normalizedBase =
+        ApiConstants.baseUrl.startsWith('http')
+            ? ApiConstants.baseUrl
+            : 'https://${ApiConstants.baseUrl}';
+    final baseUri = Uri.tryParse(normalizedBase);
+    if (baseUri == null || baseUri.host.isEmpty) {
+      return resolveMediaUrl(raw);
+    }
+
+    final parsed = Uri.tryParse(raw);
+    final path = switch (parsed) {
+      Uri(:final String path) when path.isNotEmpty => path,
+      _ => raw,
+    };
+    final sanitizedPath = path.startsWith('/') ? path : '/$path';
+    final query = parsed?.hasQuery == true ? '?${parsed!.query}' : '';
+    return '${baseUri.scheme}://${baseUri.authority}$sanitizedPath$query';
   }
 
   Future<void> deletePost(String postId) async {
