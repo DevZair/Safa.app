@@ -6,6 +6,7 @@ import 'package:safa_app/core/styles/app_colors.dart';
 import 'package:safa_app/features/travel/models/travel_company.dart';
 import 'package:safa_app/features/travel/presentation/cubit/travel_cubit.dart';
 import 'package:safa_app/features/travel/presentation/widgets/travel_package_card.dart';
+import 'package:safa_app/features/travel/presentation/widgets/company_image.dart';
 import 'package:safa_app/widgets/segmented_tabs.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -173,34 +174,6 @@ class _TravelCompanyPageState extends State<TravelCompanyPage> {
   }
 }
 
-class _CompanyThumbnail extends StatelessWidget {
-  final String imagePath;
-
-  const _CompanyThumbnail({required this.imagePath});
-
-  @override
-  Widget build(BuildContext context) {
-    if (imagePath.startsWith('http')) {
-      return Image.network(
-        imagePath,
-        width: 76.r,
-        height: 76.r,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) =>
-            const Icon(Icons.image_not_supported),
-      );
-    }
-    return Image.asset(
-      imagePath,
-      width: 76.r,
-      height: 76.r,
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) =>
-          const Icon(Icons.image_not_supported),
-    );
-  }
-}
-
 class _CompanyHeader extends StatelessWidget {
   final TravelCompany company;
 
@@ -237,7 +210,10 @@ class _CompanyHeader extends StatelessWidget {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(18.r),
-              child: _CompanyThumbnail(imagePath: company.thumbnail),
+              child: CompanyImage(
+                imagePath: company.thumbnail,
+                size: 76.r,
+              ),
             ),
           ),
           SizedBox(height: 14.h),

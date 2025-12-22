@@ -88,6 +88,7 @@ class RequestHelpPayload {
   final int helpCategory;
   final String? otherCategory;
   final String? companyName;
+  final int? companyId;
   final int? age;
   final int? childInFam;
   final String? iin;
@@ -106,6 +107,7 @@ class RequestHelpPayload {
     this.receivedOtherHelp = false,
     this.otherCategory,
     this.companyName,
+    this.companyId,
     this.age,
     this.childInFam,
     this.iin,
@@ -127,6 +129,7 @@ class RequestHelpPayload {
       'help_reason': whyNeedHelp,
       'received_other_help': receivedOtherHelp,
       'company_name': companyName,
+      'company_id': companyId,
       'status': status,
       'materials_status_id': materialStatus ?? 0,
       'help_category_id': helpCategory,

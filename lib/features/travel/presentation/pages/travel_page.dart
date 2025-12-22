@@ -2,6 +2,7 @@ import 'package:safa_app/features/travel/presentation/widgets/travel_package_car
 import 'package:safa_app/features/travel/presentation/pages/travel_company_page.dart';
 import 'package:safa_app/features/travel/presentation/cubit/travel_cubit.dart';
 import 'package:safa_app/features/travel/models/travel_company.dart';
+import 'package:safa_app/features/travel/presentation/widgets/company_image.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/core/navigation/app_router.dart';
 import 'package:safa_app/widgets/gradient_header.dart';
@@ -359,7 +360,10 @@ class _CompanyCard extends StatelessWidget {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(18.r),
-                child: _CompanyAvatar(imagePath: company.thumbnail),
+                child: CompanyImage(
+                  imagePath: company.thumbnail,
+                  size: 56.r,
+                ),
               ),
             ),
             SizedBox(width: 16.w),
@@ -434,35 +438,6 @@ class _CompanyCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _CompanyAvatar extends StatelessWidget {
-  final String imagePath;
-
-  const _CompanyAvatar({required this.imagePath});
-
-  @override
-  Widget build(BuildContext context) {
-    if (imagePath.startsWith('http')) {
-      return Image.network(
-        imagePath,
-        width: 56.r,
-        height: 56.r,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) =>
-            const Icon(Icons.image_not_supported_outlined),
-      );
-    }
-
-    return Image.asset(
-      imagePath,
-      width: 56.r,
-      height: 56.r,
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) =>
-          const Icon(Icons.image_not_supported_outlined),
     );
   }
 }

@@ -10,7 +10,7 @@ final class ApiConstants {
     defaultValue: '',
   );
 
-  static const String travelCompanies = '/api/travel/companies';
+  static const String travelCompanies = '/api/tour/public/companies/';
   static const String travelPackages = '/api/travel/packages';
 
   static const String sadaqaCauses = '/api/sadaqa/public/notes/';

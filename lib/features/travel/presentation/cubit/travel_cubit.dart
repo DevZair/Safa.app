@@ -124,29 +124,7 @@ class TravelState {
       ],
       selectedCategoryId: 'all',
       activeTab: TravelTab.all,
-      companies: const [
-        TravelCompany(
-          id: 'al-haramain',
-          name: 'Al-Haramain Tours',
-          rating: 4.9,
-          tours: 156,
-          thumbnail: 'assets/images/travel_card2.jpg',
-        ),
-        TravelCompany(
-          id: 'noor-travel',
-          name: 'Noor Travel Group',
-          rating: 4.8,
-          tours: 243,
-          thumbnail: 'assets/images/travel_card1.jpg',
-        ),
-        TravelCompany(
-          id: 'safa-marwa',
-          name: 'Safa & Marwa Tours',
-          rating: 4.7,
-          tours: 187,
-          thumbnail: 'assets/images/travel_card2.jpg',
-        ),
-      ],
+      companies: const [],
       packages: _defaultPackages,
       favoritePackageIds: <String>{},
       isLoading: true,
@@ -168,16 +146,14 @@ class TravelCubit extends Cubit<TravelState> {
     emit(state.copyWith(isLoading: true, resetError: true));
     try {
       final companies = await _repository.fetchCompanies();
-      final packages = await _repository.fetchPackages();
 
       final favorites = state.favoritePackageIds
-          .where((id) => packages.any((pkg) => pkg.id == id))
+          .where((id) => state.packages.any((pkg) => pkg.id == id))
           .toSet();
 
       emit(
         state.copyWith(
-          companies: companies.isEmpty ? state.companies : companies,
-          packages: packages.isEmpty ? state.packages : packages,
+          companies: companies,
           favoritePackageIds: favorites,
           isLoading: false,
           errorMessage: null,

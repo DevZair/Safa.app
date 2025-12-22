@@ -15,15 +15,22 @@ class TravelCompany {
 
   factory TravelCompany.fromJson(Map<String, Object?> json) {
     final rating = json['rating'] ?? json['rating_avg'] ?? 0;
-    final tours = json['tours'] ?? json['tours_count'] ?? 0;
+    final tours = json['tours'] ??
+        json['tours_count'] ??
+        json['tour_count'] ??
+        json['tourCount'] ??
+        0;
+    final name = '${json['name'] ?? json['comp_name'] ?? json['company_name'] ?? ''}';
+    final thumbnail =
+        '${json['thumbnail'] ?? json['image'] ?? json['logo'] ?? ''}';
     return TravelCompany(
       id: '${json['id'] ?? ''}',
-      name: '${json['name'] ?? ''}',
+      name: name,
       rating: rating is num
           ? rating.toDouble()
           : double.tryParse('$rating') ?? 0,
       tours: tours is num ? tours.toInt() : int.tryParse('$tours') ?? 0,
-      thumbnail: '${json['thumbnail'] ?? json['image'] ?? ''}',
+      thumbnail: thumbnail,
     );
   }
 }

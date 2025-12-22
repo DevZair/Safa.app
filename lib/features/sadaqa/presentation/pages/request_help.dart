@@ -615,6 +615,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
       childInFam: childrenValue,
       iin: iinDigits,
       companyName: selectedCompany.isEmpty ? null : selectedCompany,
+      companyId: _selectedCompanyId,
       materialStatus: int.tryParse(_selectedMaterialStatus ?? ''),
       receivedOtherHelp: false,
       money: amountValue,
