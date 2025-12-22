@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
 import 'package:safa_app/features/travel/data/travel_repository.dart';
+import 'package:safa_app/features/travel/models/travel_category.dart';
 import 'package:safa_app/features/travel/models/travel_company.dart';
+import 'package:safa_app/features/travel/models/travel_guide.dart';
 import 'package:safa_app/features/travel/presentation/widgets/travel_package_card.dart';
 
 enum TravelTab { all, saved }
@@ -21,18 +23,6 @@ class TravelMetric {
   });
 }
 
-class TravelCategory {
-  final String id;
-  final String label;
-  final IconData icon;
-
-  const TravelCategory({
-    required this.id,
-    required this.label,
-    required this.icon,
-  });
-}
-
 class TravelState {
   final String heroTitle;
   final String heroSubtitle;
@@ -42,6 +32,7 @@ class TravelState {
   final TravelTab activeTab;
   final List<TravelCompany> companies;
   final List<TravelPackage> packages;
+  final List<TravelGuide> guides;
   final Set<String> favoritePackageIds;
   final bool isLoading;
   final String? errorMessage;
@@ -55,6 +46,7 @@ class TravelState {
     required this.activeTab,
     required this.companies,
     required this.packages,
+    required this.guides,
     required this.favoritePackageIds,
     required this.isLoading,
     required this.errorMessage,
@@ -69,6 +61,7 @@ class TravelState {
     TravelTab? activeTab,
     List<TravelCompany>? companies,
     List<TravelPackage>? packages,
+    List<TravelGuide>? guides,
     Set<String>? favoritePackageIds,
     bool? isLoading,
     String? errorMessage,
@@ -83,6 +76,7 @@ class TravelState {
       activeTab: activeTab ?? this.activeTab,
       companies: companies ?? this.companies,
       packages: packages ?? this.packages,
+      guides: guides ?? this.guides,
       favoritePackageIds: favoritePackageIds ?? this.favoritePackageIds,
       isLoading: isLoading ?? this.isLoading,
       errorMessage: resetError ? null : (errorMessage ?? this.errorMessage),
@@ -113,19 +107,12 @@ class TravelState {
           icon: Icons.place_outlined,
         ),
       ],
-      categories: const [
-        TravelCategory(
-          id: 'all',
-          label: 'Все туры',
-          icon: Icons.flight_takeoff_rounded,
-        ),
-        TravelCategory(id: 'umrah', label: 'Умра', icon: Icons.mosque_rounded),
-        TravelCategory(id: 'hajj', label: 'Хадж', icon: Icons.mosque_sharp),
-      ],
-      selectedCategoryId: 'all',
+      categories: List<TravelCategory>.from(TravelCategory.coreCategories),
+      selectedCategoryId: TravelCategory.all.id,
       activeTab: TravelTab.all,
       companies: const [],
       packages: _defaultPackages,
+      guides: const [],
       favoritePackageIds: <String>{},
       isLoading: true,
       errorMessage: null,
@@ -146,14 +133,31 @@ class TravelCubit extends Cubit<TravelState> {
     emit(state.copyWith(isLoading: true, resetError: true));
     try {
       final companies = await _repository.fetchCompanies();
-
+      final packages = await _repository.fetchPackages();
+      final guides = await _repository.fetchGuides();
+      final apiCategories = await _repository.fetchCategories();
+      final categoryResult = _mergeCategories(apiCategories);
+      final mergedCategories = categoryResult.categories;
+      final selectedCategoryId = mergedCategories
+              .any((category) => category.id == state.selectedCategoryId)
+          ? state.selectedCategoryId
+          : TravelCategory.all.id;
+      final packagesWithGuides = _applyGuideInfo(packages, guides);
+      final packagesWithCategoryLabels = _applyCategoryData(
+        packagesWithGuides,
+        categoryResult.normalizedByRawId,
+      );
       final favorites = state.favoritePackageIds
-          .where((id) => state.packages.any((pkg) => pkg.id == id))
+          .where((id) => packagesWithCategoryLabels.any((pkg) => pkg.id == id))
           .toSet();
 
       emit(
         state.copyWith(
           companies: companies,
+          packages: packagesWithCategoryLabels,
+          categories: mergedCategories,
+          selectedCategoryId: selectedCategoryId,
+          guides: guides,
           favoritePackageIds: favorites,
           isLoading: false,
           errorMessage: null,
@@ -190,11 +194,123 @@ class TravelCubit extends Cubit<TravelState> {
   }
 }
 
+class _CategoryMergeResult {
+  final List<TravelCategory> categories;
+  final Map<String, TravelCategory> normalizedByRawId;
+
+  const _CategoryMergeResult({
+    required this.categories,
+    required this.normalizedByRawId,
+  });
+}
+
+_CategoryMergeResult _mergeCategories(List<TravelCategory> fetched) {
+  final addedIds = <String>{};
+  final categories = <TravelCategory>[];
+  final normalizedByRawId = <String, TravelCategory>{};
+
+  void addCategory(TravelCategory category) {
+    final id = category.id.trim().toLowerCase();
+    if (id.isEmpty || id == TravelCategory.all.id) return;
+    if (addedIds.contains(id)) return;
+    addedIds.add(id);
+    categories.add(category);
+  }
+
+  for (final category in fetched) {
+    final normalized = _normalizeCategory(category);
+    final rawKey = category.id.trim().toLowerCase();
+    if (rawKey.isNotEmpty && !_isTestCategory(normalized)) {
+      normalizedByRawId[rawKey] = normalized;
+    }
+    if (_isTestCategory(normalized)) continue;
+    addCategory(normalized);
+  }
+
+  addCategory(TravelCategory.umrah);
+  addCategory(TravelCategory.hajj);
+
+  return _CategoryMergeResult(
+    categories: [
+      TravelCategory.all,
+      ...categories,
+    ],
+    normalizedByRawId: normalizedByRawId,
+  );
+}
+
+bool _isTestCategory(TravelCategory category) {
+  final normalizedId = category.id.trim().toLowerCase();
+  final normalizedLabel = category.label.trim().toLowerCase();
+  for (final candidate in ['test', 'тест']) {
+    if (normalizedId.contains(candidate) ||
+        normalizedLabel.contains(candidate)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+List<TravelPackage> _applyGuideInfo(
+  List<TravelPackage> packages,
+  List<TravelGuide> guides,
+) {
+  if (guides.isEmpty) return packages;
+  final guideById = <String, TravelGuide>{};
+  for (final guide in guides) {
+    final key = guide.id.trim().toLowerCase();
+    if (key.isEmpty) continue;
+    guideById[key] = guide;
+  }
+
+  return packages.map((package) {
+    final key = package.guideId.trim().toLowerCase();
+    final guide = guideById[key];
+    if (guide == null) return package;
+    final updatedRating = guide.rating > 0 ? guide.rating : package.guideRating;
+    return package.copyWith(
+      guideName: guide.fullName,
+      guideRating: updatedRating,
+    );
+  }).toList();
+}
+
+List<TravelPackage> _applyCategoryData(
+  List<TravelPackage> packages,
+  Map<String, TravelCategory> normalizedByRawId,
+) {
+  if (normalizedByRawId.isEmpty) return packages;
+  return packages.map((package) {
+    final rawKey = package.categoryId.trim().toLowerCase();
+    final normalized = normalizedByRawId[rawKey];
+    if (normalized == null) return package;
+    return package.copyWith(
+      categoryId: normalized.id,
+      categoryLabel: normalized.label,
+    );
+  }).toList();
+}
+
+TravelCategory _normalizeCategory(TravelCategory category) {
+  final id = category.id.trim().toLowerCase();
+  final label = category.label.trim().toLowerCase();
+
+  if (id.contains('haj') || label.contains('haj') || label.contains('хадж')) {
+    return TravelCategory.hajj;
+  }
+  if (id.contains('umrah') || label.contains('umrah') || label.contains('умра')) {
+    return TravelCategory.umrah;
+  }
+  return category;
+}
+
 const _defaultPackages = <TravelPackage>[
   TravelPackage(
     id: 'umrah-economy',
     companyId: 'al-haramain',
     categoryId: 'umrah',
+    categoryLabel: 'Умра',
+    guideId: 'guide-umrah-1',
     title: 'Умра 2024 – Эконом',
     location: 'Makkah & Madinah',
     imagePath: 'assets/images/travel_card1.jpg',
@@ -206,21 +322,16 @@ const _defaultPackages = <TravelPackage>[
     guideRating: 4.9,
     priceUsd: 2500,
     availabilityLabel: 'Оставшиеся места: 8',
+    isNew: true,
     startDateLabel: '15.12.2024',
     durationLabel: '10 дней',
-    tags: [
-      TravelBadgeData('Новинка', AppColors.badgeNew),
-      TravelBadgeData(
-        'Умра',
-        AppColors.badgeLightBackground,
-        AppColors.headingDeep,
-      ),
-    ],
   ),
   TravelPackage(
     id: 'umrah-comfort',
     companyId: 'al-haramain',
     categoryId: 'umrah',
+    categoryLabel: 'Умра',
+    guideId: 'guide-umrah-2',
     title: 'Умра 2025 – Комфорт',
     location: 'Makkah & Madinah',
     imagePath: 'assets/images/travel_card1.jpg',
@@ -232,25 +343,16 @@ const _defaultPackages = <TravelPackage>[
     guideRating: 4.8,
     priceUsd: 3100,
     availabilityLabel: 'Оставшиеся места: 12',
+    isNew: false,
     startDateLabel: '20.02.2025',
     durationLabel: '12 дней',
-    tags: [
-      TravelBadgeData(
-        'Популярно',
-        AppColors.badgeLightBackground,
-        AppColors.headingDeep,
-      ),
-      TravelBadgeData(
-        'Умра',
-        AppColors.badgeLightBackground,
-        AppColors.headingDeep,
-      ),
-    ],
   ),
   TravelPackage(
     id: 'hajj-premium',
     companyId: 'noor-travel',
     categoryId: 'hajj',
+    categoryLabel: 'Хадж',
+    guideId: 'guide-hajj-1',
     title: 'Хадж 2025 – Премиум',
     location: 'Saudi Arabia',
     imagePath: 'assets/images/travel_card2.jpg',
@@ -262,21 +364,16 @@ const _defaultPackages = <TravelPackage>[
     guideRating: 4.8,
     priceUsd: 5500,
     availabilityLabel: 'Оставшиеся места: 5',
+    isNew: true,
     startDateLabel: '10.06.2025',
     durationLabel: '15 дней',
-    tags: [
-      TravelBadgeData('Новинка', AppColors.badgeNew),
-      TravelBadgeData(
-        'Хадж',
-        AppColors.surfaceLight,
-        AppColors.favoriteInactive,
-      ),
-    ],
   ),
   TravelPackage(
     id: 'hajj-standard',
     companyId: 'safa-marwa',
     categoryId: 'hajj',
+    categoryLabel: 'Хадж',
+    guideId: 'guide-hajj-2',
     title: 'Хадж 2025 – Стандарт',
     location: 'Saudi Arabia',
     imagePath: 'assets/images/travel_card2.jpg',
@@ -288,15 +385,8 @@ const _defaultPackages = <TravelPackage>[
     guideRating: 4.6,
     priceUsd: 4200,
     availabilityLabel: 'Оставшиеся места: 14',
+    isNew: false,
     startDateLabel: '05.06.2025',
     durationLabel: '12 дней',
-    tags: [
-      TravelBadgeData('Раннее бронирование', AppColors.badgeNew),
-      TravelBadgeData(
-        'Хадж',
-        AppColors.surfaceLight,
-        AppColors.favoriteInactive,
-      ),
-    ],
   ),
 ];

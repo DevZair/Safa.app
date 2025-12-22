@@ -3,7 +3,7 @@ final class ApiConstants {
 
   static const String baseUrl = String.fromEnvironment(
     'BASE_URL',
-    defaultValue: 'https://ba51ccb7a5d0.ngrok-free.app',
+    defaultValue: 'https://6680a54c943b.ngrok-free.app',
   );
   static const String apiToken = String.fromEnvironment(
     'API_TOKEN',
@@ -11,7 +11,9 @@ final class ApiConstants {
   );
 
   static const String travelCompanies = '/api/tour/public/companies/';
-  static const String travelPackages = '/api/travel/packages';
+  static const String travelPackages = '/api/tour/public/tours/';
+  static const String travelCategories = '/api/tour/public/categories/';
+  static const String travelGuides = '/api/tour/public/guides/';
 
   static const String sadaqaCauses = '/api/sadaqa/public/notes/';
   static const String sadaqaAdminLogin = '/api/sadaqa/private/company/login';

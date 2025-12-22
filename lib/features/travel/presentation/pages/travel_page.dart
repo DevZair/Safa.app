@@ -11,7 +11,10 @@ import 'package:safa_app/widgets/segmented_tabs.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 
 class TravelPage extends StatelessWidget {
   const TravelPage({super.key});
@@ -48,107 +51,124 @@ class _TravelView extends StatelessWidget {
                 return const Center(child: CircularProgressIndicator());
               }
 
-              return SingleChildScrollView(
+              final content = ListView(
                 padding: EdgeInsets.only(bottom: 40.h),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _HeroHeader(
-                      title: state.heroTitle,
-                      subtitle: state.heroSubtitle,
-                      metrics: state.metrics,
-                    ),
-                    SizedBox(height: 90.h),
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: horizontalPadding,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _HeroHeader(
+                        title: state.heroTitle,
+                        subtitle: state.heroSubtitle,
+                        metrics: state.metrics,
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          buildSegmentedTabs(
-                            context: context,
-                            tabs: [
-                              SegmentedTabConfig(
-                                label: l10n.t('travel.tabs.companies'),
-                                icon: Icons.apartment_rounded,
+                      SizedBox(height: 90.h),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: horizontalPadding,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            buildSegmentedTabs(
+                              context: context,
+                              tabs: [
+                                SegmentedTabConfig(
+                                  label: l10n.t('travel.tabs.companies'),
+                                  icon: Icons.apartment_rounded,
+                                ),
+                                SegmentedTabConfig(
+                                  label: l10n.t(
+                                    'travel.tabs.saved',
+                                    params: {'count': '$favoritesCount'},
+                                  ),
+                                  icon: Icons.favorite_border_rounded,
+                                  activeIcon: Icons.favorite_rounded,
+                                ),
+                              ],
+                              selectedIndex: state.activeTab.index,
+                              onTabSelected: (index) =>
+                                  cubit.selectTab(TravelTab.values[index]),
+                            ),
+                            SizedBox(height: 28.h),
+                            if (state.activeTab == TravelTab.all) ...[
+                              _SectionHeader(
+                                title: l10n.t('travel.section.companies'),
                               ),
-                              SegmentedTabConfig(
-                                label: l10n.t(
+                              SizedBox(height: 18.h),
+                              if (state.companies.isEmpty)
+                                _PlaceholderText(
+                                  text: l10n.t('travel.section.noCompanies'),
+                                )
+                              else
+                                for (final company in state.companies) ...[
+                                  _CompanyCard(
+                                    company: company,
+                                    onTap: () => context.pushNamed(
+                                      AppRoute.travelCompany.name,
+                                      extra: TravelCompanyDetailArgs(
+                                        company: company,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 16.h),
+                                ],
+                            ] else ...[
+                              _SectionHeader(
+                                title: l10n.t(
                                   'travel.tabs.saved',
                                   params: {'count': '$favoritesCount'},
                                 ),
-                                icon: Icons.favorite_border_rounded,
-                                activeIcon: Icons.favorite_rounded,
                               ),
-                            ],
-                            selectedIndex: state.activeTab.index,
-                            onTabSelected: (index) =>
-                                cubit.selectTab(TravelTab.values[index]),
-                          ),
-                          SizedBox(height: 28.h),
-                          if (state.activeTab == TravelTab.all) ...[
-                            _SectionHeader(
-                              title: l10n.t('travel.section.companies'),
-                            ),
-                            SizedBox(height: 18.h),
-                            if (state.companies.isEmpty)
-                              _PlaceholderText(
-                                text: l10n.t('travel.section.noCompanies'),
-                              )
-                            else
-                              for (final company in state.companies) ...[
-                                _CompanyCard(
-                                  company: company,
-                                  onTap: () => context.pushNamed(
-                                    AppRoute.travelCompany.name,
-                                    extra: TravelCompanyDetailArgs(
-                                      company: company,
+                              SizedBox(height: 14.h),
+                              if (state.isLoading && favorites.isEmpty)
+                                Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      vertical: 30.h,
                                     ),
+                                    child: const CircularProgressIndicator(),
                                   ),
-                                ),
-                                SizedBox(height: 16.h),
-                              ],
-                          ] else ...[
-                            _SectionHeader(
-                              title: l10n.t(
-                                'travel.tabs.saved',
-                                params: {'count': '$favoritesCount'},
-                              ),
-                            ),
-                            SizedBox(height: 14.h),
-                            if (state.isLoading && favorites.isEmpty)
-                              Center(
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 30.h),
-                                  child: const CircularProgressIndicator(),
-                                ),
-                              )
-                            else if (favorites.isEmpty)
-                              Text(
-                                l10n.t('travel.saved.empty'),
-                                style: TextStyle(
-                                  color: theme.textTheme.bodyMedium?.color
-                                      ?.withValues(alpha: 0.7),
-                                  fontSize: 15.sp,
-                                ),
-                              )
-                            else
-                              for (final package in favorites) ...[
-                                TravelPackageCard(
-                                  package: package,
-                                  isFavorite: true,
-                                  onFavoriteToggle: () =>
-                                      cubit.toggleFavorite(package.id),
-                                ),
-                                SizedBox(height: 16.h),
-                              ],
+                                )
+                              else if (favorites.isEmpty)
+                                Text(
+                                  l10n.t('travel.saved.empty'),
+                                  style: TextStyle(
+                                    color: theme.textTheme.bodyMedium?.color
+                                        ?.withValues(alpha: 0.7),
+                                    fontSize: 15.sp,
+                                  ),
+                                )
+                              else
+                                for (final package in favorites) ...[
+                                  TravelPackageCard(
+                                    package: package,
+                                    isFavorite: true,
+                                    onFavoriteToggle: () =>
+                                        cubit.toggleFavorite(package.id),
+                                  ),
+                                  SizedBox(height: 16.h),
+                                ],
+                            ],
                           ],
-                        ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+
+              return Stack(
+                children: [
+                  content,
+                  if (state.isLoading)
+                    const Positioned.fill(
+                      child: IgnorePointer(
+                        ignoring: true,
+                        child: _TravelLoadingOverlay(),
                       ),
                     ),
-                  ],
-                ),
+                ],
               );
             },
           ),
@@ -248,6 +268,71 @@ class _MetricsCard extends StatelessWidget {
               ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _TravelLoadingOverlay extends StatelessWidget {
+  const _TravelLoadingOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+      child: Container(
+        color: theme.scaffoldBackgroundColor.withOpacity(0.65),
+        alignment: Alignment.center,
+        padding: EdgeInsets.symmetric(horizontal: 40.w),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 26.w, vertical: 30.h),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24.r),
+            gradient: const LinearGradient(
+              colors: [Color(0xFF48C6B6), Color(0xFF35A0D3)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 24.r,
+                offset: Offset(0, 12.h),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 160.w,
+                height: 160.h,
+                child: Lottie.asset(
+                  'assets/lotties/loading_plane.json',
+                  fit: BoxFit.contain,
+                  repeat: true,
+                ),
+              ),
+              SizedBox(height: 10.h),
+              Text(
+                'Загружаем туры',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(height: 6.h),
+              Text(
+                'Формируем персональные предложения, подождите...',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: Colors.white70,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -360,10 +445,7 @@ class _CompanyCard extends StatelessWidget {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(18.r),
-                child: CompanyImage(
-                  imagePath: company.thumbnail,
-                  size: 56.r,
-                ),
+                child: CompanyImage(imagePath: company.thumbnail, size: 56.r),
               ),
             ),
             SizedBox(width: 16.w),

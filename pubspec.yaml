@@ -24,6 +24,7 @@ dependencies:
   file_picker: ^10.3.7
   shared_preferences: ^2.5.3
   url_launcher: ^6.3.2
+  lottie: ^2.4.0
 
 dev_dependencies:
   flutter_test:
@@ -38,6 +39,7 @@ flutter:
     - assets/i18n/
     - assets/icons/
     - assets/images/
+    - assets/lotties/loading_plane.json
 
      
 

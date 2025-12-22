@@ -1,6 +1,8 @@
 import 'package:safa_app/core/constants/api_constants.dart';
 import 'package:safa_app/core/service/api_service.dart';
 import 'package:safa_app/features/travel/models/travel_company.dart';
+import 'package:safa_app/features/travel/models/travel_category.dart';
+import 'package:safa_app/features/travel/models/travel_guide.dart';
 import 'package:safa_app/features/travel/presentation/widgets/travel_package_card.dart';
 
 class TravelRepository {
@@ -24,6 +26,34 @@ class TravelRepository {
     final list = _unwrapList(data);
 
     return list.map(TravelPackage.fromJson).toList();
+  }
+
+  Future<List<TravelGuide>> fetchGuides() async {
+    final data = await ApiService.request<Object?>(
+      ApiConstants.travelGuides,
+      method: Method.get,
+    );
+
+    final list = _unwrapList(data);
+
+    return list
+        .map(TravelGuide.fromJson)
+        .where((guide) => guide.id.isNotEmpty)
+        .toList();
+  }
+
+  Future<List<TravelCategory>> fetchCategories() async {
+    final data = await ApiService.request<Object?>(
+      ApiConstants.travelCategories,
+      method: Method.get,
+    );
+
+    final list = _unwrapList(data);
+
+    return list
+        .map(TravelCategory.fromJson)
+        .where((category) => category.id.isNotEmpty)
+        .toList();
   }
 
   List<Map<String, Object?>> _unwrapList(Object? data) {
