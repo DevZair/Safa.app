@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/features/sadaqa/data/sadaqa_repository.dart';
-import 'package:safa_app/features/settings/presentation/pages/admin/admin_post_edit_page.dart';
-import 'package:safa_app/features/settings/presentation/pages/admin/admin_post_create_page.dart';
+import 'package:safa_app/features/settings/presentation/pages/admin_sadaqa/admin_post_edit_page.dart';
+import 'package:safa_app/features/settings/presentation/pages/admin_sadaqa/admin_post_create_page.dart';
 import 'package:safa_app/features/sadaqa/models/sadaqa_post.dart';
 import 'package:safa_app/features/sadaqa/utils/media_resolver.dart';
 

@@ -14,6 +14,8 @@ final class ApiConstants {
   static const String travelPackages = '/api/tour/public/tours/';
   static const String travelCategories = '/api/tour/public/categories/';
   static const String travelGuides = '/api/tour/public/guides/';
+  static const String travelActiveToursCount =
+      '/api/tour/public/companies/active-tours-count';
 
   static const String sadaqaCauses = '/api/sadaqa/public/notes/';
   static const String sadaqaAdminLogin = '/api/sadaqa/private/company/login';

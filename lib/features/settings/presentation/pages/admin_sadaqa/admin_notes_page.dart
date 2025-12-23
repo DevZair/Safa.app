@@ -3,8 +3,8 @@ import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/features/sadaqa/models/sadaqa_post.dart';
 import 'package:safa_app/features/sadaqa/utils/media_resolver.dart';
 import 'package:safa_app/features/sadaqa/data/sadaqa_repository.dart';
-import 'package:safa_app/features/settings/presentation/pages/admin/admin_note_edit_page.dart';
-import 'package:safa_app/features/settings/presentation/pages/admin/admin_note_create_page.dart';
+import 'package:safa_app/features/settings/presentation/pages/admin_sadaqa/admin_note_edit_page.dart';
+import 'package:safa_app/features/settings/presentation/pages/admin_sadaqa/admin_note_create_page.dart';
 
 class AdminNotesPage extends StatefulWidget {
   const AdminNotesPage({super.key, this.companyName});

@@ -23,6 +23,39 @@ class TravelMetric {
   });
 }
 
+const List<TravelMetric> _kStaticTravelMetrics = [
+  TravelMetric(
+    id: 'travelers',
+    value: '12K+',
+    label: 'Счастливые путешественники',
+    icon: Icons.person_outline_rounded,
+  ),
+  TravelMetric(
+    id: 'destinations',
+    value: '45+',
+    label: 'Направления',
+    icon: Icons.place_outlined,
+  ),
+];
+
+List<TravelMetric> _buildTravelMetrics({int? activeToursCount}) {
+  return [
+    TravelMetric(
+      id: 'active',
+      value: _formatActiveToursValue(activeToursCount),
+      label: 'Активные туры',
+      icon: Icons.flight_class_rounded,
+    ),
+    ..._kStaticTravelMetrics,
+  ];
+}
+
+String _formatActiveToursValue(int? count) {
+  if (count == null) return '--';
+  if (count <= 0) return '0';
+  return count.toString();
+}
+
 class TravelState {
   final String heroTitle;
   final String heroSubtitle;
@@ -87,26 +120,7 @@ class TravelState {
     return TravelState(
       heroTitle: 'Путешествия',
       heroSubtitle: 'Откройте для себя уникальные путешествия',
-      metrics: const [
-        TravelMetric(
-          id: 'active',
-          value: '156+',
-          label: 'Активные туры',
-          icon: Icons.flight_class_rounded,
-        ),
-        TravelMetric(
-          id: 'travelers',
-          value: '12K+',
-          label: 'Счастливые путешественники',
-          icon: Icons.person_outline_rounded,
-        ),
-        TravelMetric(
-          id: 'destinations',
-          value: '45+',
-          label: 'Направления',
-          icon: Icons.place_outlined,
-        ),
-      ],
+      metrics: _buildTravelMetrics(),
       categories: List<TravelCategory>.from(TravelCategory.coreCategories),
       selectedCategoryId: TravelCategory.all.id,
       activeTab: TravelTab.all,
@@ -132,6 +146,7 @@ class TravelCubit extends Cubit<TravelState> {
   Future<void> loadTravelData() async {
     emit(state.copyWith(isLoading: true, resetError: true));
     try {
+      final activeToursCountFuture = _loadActiveToursCount();
       final companies = await _repository.fetchCompanies();
       final packages = await _repository.fetchPackages();
       final guides = await _repository.fetchGuides();
@@ -150,9 +165,14 @@ class TravelCubit extends Cubit<TravelState> {
       final favorites = state.favoritePackageIds
           .where((id) => packagesWithCategoryLabels.any((pkg) => pkg.id == id))
           .toSet();
+      final apiActiveToursCount = await activeToursCountFuture;
+      final companyActiveToursCount = companies
+          .fold<int>(0, (sum, company) => sum + company.activeTourIds.length);
+      final activeToursCount = apiActiveToursCount ?? companyActiveToursCount;
 
       emit(
         state.copyWith(
+          metrics: _buildTravelMetrics(activeToursCount: activeToursCount),
           companies: companies,
           packages: packagesWithCategoryLabels,
           categories: mergedCategories,
@@ -170,6 +190,15 @@ class TravelCubit extends Cubit<TravelState> {
           errorMessage: error.toString(),
         ),
       );
+    }
+  }
+
+  Future<int?> _loadActiveToursCount() async {
+    try {
+      return await _repository.fetchActiveToursCount();
+    } on Object catch (error) {
+      debugPrint('Failed to load active tours count: $error');
+      return null;
     }
   }
 
@@ -192,6 +221,7 @@ class TravelCubit extends Cubit<TravelState> {
     }
     emit(state.copyWith(favoritePackageIds: updated));
   }
+
 }
 
 class _CategoryMergeResult {
@@ -325,6 +355,8 @@ const _defaultPackages = <TravelPackage>[
     isNew: true,
     startDateLabel: '15.12.2024',
     durationLabel: '10 дней',
+    returnDateLabel: '25.12.2024',
+    maxPeople: 100,
   ),
   TravelPackage(
     id: 'umrah-comfort',
@@ -346,6 +378,8 @@ const _defaultPackages = <TravelPackage>[
     isNew: false,
     startDateLabel: '20.02.2025',
     durationLabel: '12 дней',
+    returnDateLabel: '02.03.2025',
+    maxPeople: 120,
   ),
   TravelPackage(
     id: 'hajj-premium',
@@ -367,6 +401,8 @@ const _defaultPackages = <TravelPackage>[
     isNew: true,
     startDateLabel: '10.06.2025',
     durationLabel: '15 дней',
+    returnDateLabel: '25.06.2025',
+    maxPeople: 80,
   ),
   TravelPackage(
     id: 'hajj-standard',
@@ -388,5 +424,7 @@ const _defaultPackages = <TravelPackage>[
     isNew: false,
     startDateLabel: '05.06.2025',
     durationLabel: '12 дней',
+    returnDateLabel: '17.06.2025',
+    maxPeople: 90,
   ),
 ];

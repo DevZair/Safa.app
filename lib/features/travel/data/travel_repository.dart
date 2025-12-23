@@ -70,4 +70,48 @@ class TravelRepository {
 
     return [];
   }
+
+  Future<int> fetchActiveToursCount() async {
+    final data = await ApiService.request<Object?>(
+      ApiConstants.travelActiveToursCount,
+      method: Method.get,
+    );
+
+    return _parseActiveToursCount(data);
+  }
+
+  static int _parseActiveToursCount(Object? raw) {
+    return _extractActiveToursCount(raw) ?? 0;
+  }
+
+  static int? _extractActiveToursCount(Object? raw) {
+    final direct = _asInt(raw);
+    if (direct != null) return direct;
+
+    if (raw is Map<String, Object?>) {
+      for (final key in [
+        'active_tours_count',
+        'activeToursCount',
+        'count',
+        'value',
+        'data',
+        'active',
+      ]) {
+        if (!raw.containsKey(key)) continue;
+        final nested = raw[key];
+        final parsed = _extractActiveToursCount(nested);
+        if (parsed != null) return parsed;
+      }
+    }
+
+    return null;
+  }
+
+  static int? _asInt(Object? value) {
+    if (value is num) return value.toInt();
+    if (value is String) {
+      return int.tryParse(value);
+    }
+    return null;
+  }
 }

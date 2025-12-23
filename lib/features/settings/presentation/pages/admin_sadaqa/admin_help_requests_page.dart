@@ -3,7 +3,7 @@ import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/features/sadaqa/data/sadaqa_repository.dart';
 import 'package:safa_app/features/sadaqa/data/request_help_repository.dart';
 import 'package:safa_app/features/sadaqa/models/help_request.dart';
-import 'package:safa_app/features/settings/presentation/pages/admin/admin_help_request_detail_page.dart';
+import 'package:safa_app/features/settings/presentation/pages/admin_sadaqa/admin_help_request_detail_page.dart';
 import 'package:safa_app/features/settings/presentation/widgets/help_request_status.dart';
 
 class AdminHelpRequestsPage extends StatefulWidget {

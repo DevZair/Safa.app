@@ -11,8 +11,6 @@ import 'package:safa_app/widgets/segmented_tabs.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
@@ -40,6 +38,11 @@ class _TravelView extends StatelessWidget {
             .where((p) => state.favoritePackageIds.contains(p.id))
             .toList();
         final favoritesCount = favorites.length;
+        final packageCountByCompany = <String, int>{};
+        for (final package in packages) {
+          packageCountByCompany[package.companyId] =
+              (packageCountByCompany[package.companyId] ?? 0) + 1;
+        }
         final horizontalPadding = 20.w;
         return Scaffold(
           backgroundColor: theme.scaffoldBackgroundColor,
@@ -96,7 +99,9 @@ class _TravelView extends StatelessWidget {
                                 title: l10n.t('travel.section.companies'),
                               ),
                               SizedBox(height: 18.h),
-                              if (state.companies.isEmpty)
+                              if (state.isLoading && state.companies.isEmpty)
+                                const _TravelLoadingCard()
+                              else if (state.companies.isEmpty)
                                 _PlaceholderText(
                                   text: l10n.t('travel.section.noCompanies'),
                                 )
@@ -104,6 +109,8 @@ class _TravelView extends StatelessWidget {
                                 for (final company in state.companies) ...[
                                   _CompanyCard(
                                     company: company,
+                                    toursCount:
+                                        packageCountByCompany[company.id] ?? 0,
                                     onTap: () => context.pushNamed(
                                       AppRoute.travelCompany.name,
                                       extra: TravelCompanyDetailArgs(
@@ -158,18 +165,7 @@ class _TravelView extends StatelessWidget {
                 ],
               );
 
-              return Stack(
-                children: [
-                  content,
-                  if (state.isLoading)
-                    const Positioned.fill(
-                      child: IgnorePointer(
-                        ignoring: true,
-                        child: _TravelLoadingOverlay(),
-                      ),
-                    ),
-                ],
-              );
+              return content;
             },
           ),
         );
@@ -273,66 +269,55 @@ class _MetricsCard extends StatelessWidget {
   }
 }
 
-class _TravelLoadingOverlay extends StatelessWidget {
-  const _TravelLoadingOverlay();
+class _TravelLoadingCard extends StatelessWidget {
+  const _TravelLoadingCard();
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-      child: Container(
-        color: theme.scaffoldBackgroundColor.withOpacity(0.65),
-        alignment: Alignment.center,
-        padding: EdgeInsets.symmetric(horizontal: 40.w),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 26.w, vertical: 30.h),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24.r),
-            gradient: const LinearGradient(
-              colors: [Color(0xFF48C6B6), Color(0xFF35A0D3)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.15),
-                blurRadius: 24.r,
-                offset: Offset(0, 12.h),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                width: 160.w,
-                height: 160.h,
-                child: Lottie.asset(
-                  'assets/lotties/loading_plane.json',
-                  fit: BoxFit.contain,
-                  repeat: true,
-                ),
-              ),
-              SizedBox(height: 10.h),
-              Text(
-                'Загружаем туры',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              SizedBox(height: 6.h),
-              Text(
-                'Формируем персональные предложения, подождите...',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: Colors.white70,
-                ),
-              ),
-            ],
-          ),
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 28.h),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28.r),
+        gradient: const LinearGradient(
+          colors: [Color(0xFF48C6B6), Color(0xFF35A0D3)],
+          end: Alignment.bottomRight,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 28.r,
+            offset: const Offset(0, 14),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 140.w,
+            height: 140.h,
+            child: Lottie.asset(
+              'assets/lotties/loading_plane.json',
+              fit: BoxFit.contain,
+            ),
+          ),
+          SizedBox(height: 10.h),
+          Text(
+            'Загружаем туры',
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(height: 6.h),
+          Text(
+            'Собираем лучшие предложения прямо сейчас',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white70),
+          ),
+        ],
       ),
     );
   }
@@ -412,9 +397,14 @@ class _SectionHeader extends StatelessWidget {
 
 class _CompanyCard extends StatelessWidget {
   final TravelCompany company;
+  final int toursCount;
   final VoidCallback onTap;
 
-  const _CompanyCard({required this.company, required this.onTap});
+  const _CompanyCard({
+    required this.company,
+    required this.toursCount,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -485,7 +475,7 @@ class _CompanyCard extends StatelessWidget {
                       Text(
                         l10n.t(
                           'travel.company.toursCount',
-                          params: {'count': '${company.tours}'},
+                          params: {'count': '$toursCount'},
                         ),
                         style: TextStyle(
                           color: Theme.of(

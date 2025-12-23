@@ -8,7 +8,7 @@ import 'package:safa_app/features/settings/presentation/widgets/settings_section
 import 'package:safa_app/features/settings/presentation/widgets/settings_tile.dart';
 import 'package:safa_app/features/settings/presentation/widgets/settings_user_card.dart';
 import 'package:safa_app/features/settings/presentation/widgets/admin_sheet.dart';
-import 'package:safa_app/features/settings/presentation/pages/admin/admin_panel_page.dart';
+import 'package:safa_app/features/settings/presentation/pages/admin_sadaqa/admin_panel_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
