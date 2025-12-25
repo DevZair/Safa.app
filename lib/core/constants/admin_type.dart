@@ -1,0 +1,4 @@
+enum AdminType {
+  sadaqa,
+  tour,
+}
