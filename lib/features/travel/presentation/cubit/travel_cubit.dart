@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:safa_app/core/styles/app_colors.dart';
-import 'package:safa_app/features/travel/data/travel_repository.dart';
-import 'package:safa_app/features/travel/models/travel_category.dart';
-import 'package:safa_app/features/travel/models/travel_company.dart';
-import 'package:safa_app/features/travel/models/travel_guide.dart';
-import 'package:safa_app/features/travel/presentation/widgets/travel_package_card.dart';
+import 'package:safa_app/features/travel/data/repositories/travel_repository_impl.dart';
+import 'package:safa_app/features/travel/domain/entities/travel_category.dart';
+import 'package:safa_app/features/travel/domain/entities/travel_company.dart';
+import 'package:safa_app/features/travel/domain/entities/travel_guide.dart';
+import 'package:safa_app/features/travel/domain/entities/travel_package.dart';
+import 'package:safa_app/features/travel/domain/repositories/travel_repository.dart';
 
 enum TravelTab { all, saved }
 
@@ -136,7 +136,7 @@ class TravelState {
 
 class TravelCubit extends Cubit<TravelState> {
   TravelCubit({TravelRepository? repository})
-      : _repository = repository ?? TravelRepository(),
+      : _repository = repository ?? TravelRepositoryImpl(),
         super(TravelState.initial()) {
     loadTravelData();
   }

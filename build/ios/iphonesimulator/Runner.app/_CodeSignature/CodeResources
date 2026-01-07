@@ -317,7 +317,7 @@
 		</data>
 		<key>Frameworks/App.framework/App</key>
 		<data>
-		JNAvd1WXlDwUXjYCy2++/3BbThQ=
+		Wsa+/mHmd1X5YMglBfqnQyxDFrE=
 		</data>
 		<key>Frameworks/App.framework/Info.plist</key>
 		<data>
@@ -325,7 +325,7 @@
 		</data>
 		<key>Frameworks/App.framework/_CodeSignature/CodeResources</key>
 		<data>
-		71sooWxfIBSW+VaRC722i7pvsrw=
+		j/ktqyVpk59fuqMLyuIlRKv7qIY=
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/AssetManifest.bin</key>
 		<data>
@@ -345,15 +345,15 @@
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/assets/i18n/kk.json</key>
 		<data>
-		Ac1pC6F/usZkq/JCdWP0NEO9XqY=
+		3Ne7uDZYcvNQjkNaRb4OU90clt0=
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/assets/i18n/ru.json</key>
 		<data>
-		hnQLKhuZXC8Ef61NazXjf4l4dqY=
+		d1jVKcWurY1IaYbC4QrFs3AZHl8=
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/assets/i18n/uz.json</key>
 		<data>
-		1MlIdMTQQmQHjlM8p/wg8ZR31C8=
+		dfAoGQFYe/1qazAg+1+F8+Z+qd8=
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/assets/icons/airplane-outline.svg</key>
 		<data>
@@ -409,7 +409,7 @@
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/kernel_blob.bin</key>
 		<data>
-		46K1vdzTwXlcOsbgNzw7yDe/PU0=
+		/t1gVURX8F7aoYqd7OH+lH4dz2k=
 		</data>
 		<key>Frameworks/App.framework/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf</key>
 		<data>
@@ -549,7 +549,7 @@
 		</data>
 		<key>Info.plist</key>
 		<data>
-		CWsMHK8Pq9XYFhEca/aqpX4+Yf8=
+		L8Oi2WHrHVMlU1qH/v5s2U7JqWg=
 		</data>
 		<key>PkgInfo</key>
 		<data>
@@ -1011,7 +1011,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			4vf3neiNtAiVNYPuKcBbXxy/Uvj7gbpsHkbSKFSIPkk=
+			WVzg4bi6fAhRsk+KycGh0GvggKK6MgBrkoS1TaTHFVY=
 			</data>
 		</dict>
 		<key>Frameworks/App.framework/Info.plist</key>
@@ -1025,7 +1025,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			7RUq8mxJ+Xv+qv2cIhMcq6D+356ams6xBnmNbxNvFfk=
+			G8cqwtRNLgeT2IrmuGNvC2qY5eB6clOowMBshcon5qk=
 			</data>
 		</dict>
 		<key>Frameworks/App.framework/flutter_assets/AssetManifest.bin</key>
@@ -1060,21 +1060,21 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			Z6Jz+vp8GOvu7PiUa6sxhPr1Ux4IUXj15W5vLsqr/vc=
+			teUi4wdQSMyqfWoshMrpXvAjhTyFIbqsxMyr6d1lJbg=
 			</data>
 		</dict>
 		<key>Frameworks/App.framework/flutter_assets/assets/i18n/ru.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			8n+ILUN39VlnaqXnIo+1ez7Yoki6NM6s/gGhrNNQyc8=
+			jivXwIMUBq/UA6oyr+MvfgSMalSqDhAv1DbzL5E1PzA=
 			</data>
 		</dict>
 		<key>Frameworks/App.framework/flutter_assets/assets/i18n/uz.json</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			TXNJG9lR6rOKEeFhO6dRnB+r3P0G3+xudybAgNf5W6I=
+			cd8qjnE5trfB5K1EFe5x0CsBGXm0wq9z1MhC6H7yikg=
 			</data>
 		</dict>
 		<key>Frameworks/App.framework/flutter_assets/assets/icons/airplane-outline.svg</key>
@@ -1172,7 +1172,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			nBE8bs2KOzUh3yjW2XxxinDDddI5cDKkb9v3wwE2QAo=
+			RPZswxPGcQHv00dyUUqZibz7D0y5xf4KXNMWiDw/PF8=
 			</data>
 		</dict>
 		<key>Frameworks/App.framework/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf</key>

@@ -1,7 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:safa_app/features/sadaqa/data/sadaqa_repository.dart';
-import 'package:safa_app/features/sadaqa/models/sadaqa_company.dart';
-import 'package:safa_app/features/sadaqa/models/sadaqa_cause.dart';
+import 'package:safa_app/features/sadaqa/data/repositories/sadaqa_repository_impl.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_cause.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_company.dart';
+import 'package:safa_app/features/sadaqa/domain/repositories/sadaqa_repository.dart';
 
 enum SadaqaTab { all, favorites }
 
@@ -61,7 +62,7 @@ class SadaqaState {
 
 class SadaqaCubit extends Cubit<SadaqaState> {
   SadaqaCubit({SadaqaRepository? repository})
-    : _repository = repository ?? SadaqaRepository(),
+    : _repository = repository ?? SadaqaRepositoryImpl(),
       super(SadaqaState.initial()) {
     loadCauses();
   }

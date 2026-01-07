@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
-import 'package:safa_app/features/sadaqa/data/sadaqa_repository.dart';
-import 'package:safa_app/features/sadaqa/data/request_help_repository.dart';
-import 'package:safa_app/features/sadaqa/models/help_request.dart';
+import 'package:safa_app/features/sadaqa/data/repositories/sadaqa_repository_impl.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/help_request.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/reference_item.dart';
+import 'package:safa_app/features/sadaqa/domain/repositories/sadaqa_repository.dart';
 import 'package:safa_app/features/settings/presentation/pages/admin_sadaqa/admin_help_request_detail_page.dart';
 import 'package:safa_app/features/settings/presentation/widgets/help_request_status.dart';
 
@@ -17,7 +18,7 @@ class AdminHelpRequestsPage extends StatefulWidget {
 
 class _AdminHelpRequestsPageState extends State<AdminHelpRequestsPage>
     with SingleTickerProviderStateMixin {
-  final _repository = SadaqaRepository();
+  final SadaqaRepository _repository = SadaqaRepositoryImpl();
   bool _isLoading = true;
   String? _error;
   String? _updatingId;

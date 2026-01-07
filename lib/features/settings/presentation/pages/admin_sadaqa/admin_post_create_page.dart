@@ -1,7 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:safa_app/features/sadaqa/data/sadaqa_repository.dart';
-import 'package:safa_app/features/sadaqa/utils/media_resolver.dart';
+import 'package:safa_app/features/sadaqa/domain/repositories/sadaqa_repository.dart';
+import 'package:safa_app/features/sadaqa/domain/utils/media_resolver.dart';
 
 class AdminPostCreatePage extends StatefulWidget {
   const AdminPostCreatePage({super.key, required this.repository});
@@ -316,7 +316,6 @@ class _StyledField extends StatelessWidget {
     required this.controller,
     required this.label,
     this.hint,
-    this.keyboardType,
     this.minLines = 1,
     this.maxLines = 1,
   });
@@ -324,7 +323,6 @@ class _StyledField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
   final String? hint;
-  final TextInputType? keyboardType;
   final int minLines;
   final int maxLines;
 
@@ -332,7 +330,6 @@ class _StyledField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
-      keyboardType: keyboardType,
       minLines: minLines,
       maxLines: maxLines,
       decoration: InputDecoration(

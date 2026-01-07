@@ -3,8 +3,8 @@ import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:safa_app/features/sadaqa/utils/media_resolver.dart';
-import 'package:safa_app/features/sadaqa/models/sadaqa_post.dart';
+import 'package:safa_app/features/sadaqa/domain/utils/media_resolver.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_post.dart';
 
 String _formatCurrency(double value) => '${value.toStringAsFixed(0)}₸';
 

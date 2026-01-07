@@ -1,14 +1,14 @@
+import 'package:safa_app/features/travel/data/repositories/tour_repository_impl.dart';
+import 'package:safa_app/features/travel/domain/repositories/tour_repository.dart';
+import 'package:safa_app/features/travel/domain/entities/tour_category.dart';
+import 'package:safa_app/features/travel/domain/entities/tour_guide.dart';
+import 'package:safa_app/features/travel/domain/entities/tour.dart';
 import 'package:safa_app/core/constants/api_constants.dart';
-import 'dart:io';
-
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:safa_app/features/travel/data/tour_repository.dart';
-import 'package:safa_app/features/travel/models/tour.dart';
-import 'package:safa_app/features/travel/models/tour_category.dart';
-import 'package:safa_app/features/travel/models/tour_guide.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:intl/intl.dart';
+import 'dart:io';
 
 class CreateEditTourPage extends StatefulWidget {
   final Tour? tour;
@@ -21,7 +21,7 @@ class CreateEditTourPage extends StatefulWidget {
 
 class _CreateEditTourPageState extends State<CreateEditTourPage> {
   final _formKey = GlobalKey<FormState>();
-  final _tourRepository = TourRepository();
+  final TourRepository _tourRepository = TourRepositoryImpl();
 
   // Futures for dropdown data
   late Future<List<TourCategory>> _categoriesFuture;

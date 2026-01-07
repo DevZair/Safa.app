@@ -1,7 +1,7 @@
 import 'package:safa_app/features/travel/presentation/widgets/travel_package_card.dart';
 import 'package:safa_app/features/travel/presentation/pages/travel_company_page.dart';
 import 'package:safa_app/features/travel/presentation/cubit/travel_cubit.dart';
-import 'package:safa_app/features/travel/models/travel_company.dart';
+import 'package:safa_app/features/travel/domain/entities/travel_company.dart';
 import 'package:safa_app/features/travel/presentation/widgets/company_image.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/core/navigation/app_router.dart';

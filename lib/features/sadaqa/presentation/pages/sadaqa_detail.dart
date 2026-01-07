@@ -6,9 +6,10 @@ import 'package:go_router/go_router.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/core/constants/api_constants.dart';
 import 'package:safa_app/core/service/db_service.dart';
-import 'package:safa_app/features/sadaqa/data/sadaqa_repository.dart';
-import 'package:safa_app/features/sadaqa/models/sadaqa_cause.dart';
-import 'package:safa_app/features/sadaqa/models/sadaqa_post.dart';
+import 'package:safa_app/features/sadaqa/data/repositories/sadaqa_repository_impl.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_cause.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_post.dart';
+import 'package:safa_app/features/sadaqa/domain/repositories/sadaqa_repository.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../widgets/sadaqa_detail_components.dart';
 
@@ -48,7 +49,7 @@ class _SadaqaDetailState extends State<SadaqaDetail> {
   List<SadaqaPost>? _postsSnapshot;
   String? _paymentUrl;
   String? _currentCompanyId;
-  final _repository = SadaqaRepository();
+  final SadaqaRepository _repository = SadaqaRepositoryImpl();
 
   @override
   void initState() {

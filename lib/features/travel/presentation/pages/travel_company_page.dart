@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
-import 'package:safa_app/features/travel/models/travel_company.dart';
+import 'package:safa_app/features/travel/domain/entities/travel_company.dart';
 import 'package:safa_app/features/travel/presentation/cubit/travel_cubit.dart';
 import 'package:safa_app/features/travel/presentation/widgets/travel_package_card.dart';
 import 'package:safa_app/features/travel/presentation/widgets/company_image.dart';

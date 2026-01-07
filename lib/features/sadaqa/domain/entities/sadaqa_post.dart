@@ -1,4 +1,4 @@
-import 'package:safa_app/features/sadaqa/utils/media_resolver.dart';
+import 'package:safa_app/features/sadaqa/domain/utils/media_resolver.dart';
 
 class SadaqaPost {
   const SadaqaPost({

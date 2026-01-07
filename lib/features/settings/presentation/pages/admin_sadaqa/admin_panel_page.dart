@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
-import 'package:safa_app/features/sadaqa/models/sadaqa_company.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_company.dart';
 import 'package:safa_app/features/settings/presentation/pages/admin_sadaqa/admin_company_profile_page.dart';
 import 'package:safa_app/features/settings/presentation/pages/admin_sadaqa/admin_help_requests_page.dart';
 import 'package:safa_app/features/settings/presentation/pages/admin_sadaqa/admin_notes_page.dart';

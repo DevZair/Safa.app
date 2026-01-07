@@ -1,20 +1,10 @@
 import 'package:safa_app/core/constants/api_constants.dart';
 import 'package:safa_app/core/service/api_service.dart';
 import 'package:safa_app/core/service/db_service.dart';
+import 'package:safa_app/features/settings/domain/entities/admin_auth_tokens.dart';
+import 'package:safa_app/features/settings/domain/repositories/admin_auth_repository.dart';
 
-class AdminAuthTokens {
-  AdminAuthTokens({
-    required this.accessToken,
-    required this.refreshToken,
-    required this.tokenType,
-  });
-
-  final String accessToken;
-  final String? refreshToken;
-  final String tokenType;
-}
-
-class AdminAuthRepository {
+class AdminAuthRepositoryImpl implements AdminAuthRepository {
   Future<AdminAuthTokens> login({
     required String login,
     required String password,

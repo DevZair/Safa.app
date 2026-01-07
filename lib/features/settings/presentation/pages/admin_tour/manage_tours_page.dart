@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:safa_app/core/constants/api_constants.dart';
 import 'package:safa_app/features/settings/presentation/pages/admin_tour/create_edit_tour_page.dart';
-import 'package:safa_app/features/travel/data/tour_repository.dart';
-import 'package:safa_app/features/travel/models/tour.dart';
-import 'package:intl/intl.dart';
+import 'package:safa_app/features/travel/data/repositories/tour_repository_impl.dart';
+import 'package:safa_app/features/travel/domain/entities/tour.dart';
+import 'package:safa_app/features/travel/domain/repositories/tour_repository.dart';
 
 
 class ManageToursPage extends StatefulWidget {
@@ -14,7 +15,7 @@ class ManageToursPage extends StatefulWidget {
 }
 
 class _ManageToursPageState extends State<ManageToursPage> {
-  final TourRepository _tourRepository = TourRepository();
+  final TourRepository _tourRepository = TourRepositoryImpl();
   late Future<List<Tour>> _toursFuture;
 
   @override

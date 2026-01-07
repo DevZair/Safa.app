@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
-import 'package:safa_app/features/sadaqa/data/sadaqa_repository.dart';
-import 'package:safa_app/features/sadaqa/models/help_request.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/help_request.dart';
+import 'package:safa_app/features/sadaqa/domain/repositories/sadaqa_repository.dart';
 import 'package:safa_app/features/settings/presentation/widgets/help_request_status.dart';
 
 class AdminHelpRequestDetailPage extends StatefulWidget {

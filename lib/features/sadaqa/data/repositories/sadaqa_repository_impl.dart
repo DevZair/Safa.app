@@ -5,15 +5,15 @@ import 'package:flutter/foundation.dart';
 import 'package:safa_app/core/constants/api_constants.dart';
 import 'package:safa_app/core/service/api_service.dart';
 import 'package:safa_app/core/service/db_service.dart';
-import 'package:safa_app/features/sadaqa/data/request_help_repository.dart'
-    show ReferenceItem;
-import 'package:safa_app/features/sadaqa/models/sadaqa_company.dart';
-import 'package:safa_app/features/sadaqa/models/sadaqa_cause.dart';
-import 'package:safa_app/features/sadaqa/models/help_request.dart';
-import 'package:safa_app/features/sadaqa/models/sadaqa_post.dart';
-import 'package:safa_app/features/sadaqa/utils/media_resolver.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_company.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_cause.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/help_request.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_post.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/reference_item.dart';
+import 'package:safa_app/features/sadaqa/domain/repositories/sadaqa_repository.dart';
+import 'package:safa_app/features/sadaqa/domain/utils/media_resolver.dart';
 
-class SadaqaRepository {
+class SadaqaRepositoryImpl implements SadaqaRepository {
   static const _postsCacheKey = 'cache_sadaqa_posts';
   static const _notesCacheKey = 'cache_sadaqa_notes';
   static const _activeNoteCacheKey = 'cache_sadaqa_active_note';
@@ -324,12 +324,12 @@ class SadaqaRepository {
     Map<int, String> materialStatusTitles = const {};
 
     try {
-    final lookups = await Future.wait([
+    final lookups = await Future.wait<List<ReferenceItem>>([
       _fetchPrivateHelpCategories(),
       _fetchPrivateMaterialStatuses(),
     ]);
-    final categories = lookups[0] as List<ReferenceItem>;
-    final materials = lookups[1] as List<ReferenceItem>;
+    final categories = lookups[0];
+    final materials = lookups[1];
     categoryTitles = {for (final item in categories) item.id: item.title};
     materialStatusTitles = {for (final item in materials) item.id: item.title};
     } catch (error) {
@@ -502,12 +502,8 @@ class SadaqaRepository {
     final paths = <String>{
       ApiConstants.sadaqaPrivateMaterialStatuses,
       '${ApiConstants.sadaqaPrivateMaterialStatuses}my',
-      '/api/sadaqa/private/materials-status/',
-      '/api/sadaqa/private/materials-status/my',
-      '/sadaqa/private/materials-status/',
-      '/sadaqa/private/materials-status/my',
       '/api/sadaqa/private/materials_status/',
-      '/sadaqa/private/materials_status/',
+      '/api/sadaqa/private/materials_status/my',
     };
 
     final normalized = <String>{};
@@ -561,12 +557,8 @@ class SadaqaRepository {
     final paths = <String>{
       ApiConstants.sadaqaPrivateHelpCategories,
       '${ApiConstants.sadaqaPrivateHelpCategories}my',
-      '/api/sadaqa/private/help-categories/',
-      '/api/sadaqa/private/help-categories/my',
-      '/sadaqa/private/help-categories/',
-      '/sadaqa/private/help-categories/my',
       '/api/sadaqa/private/help_categories/',
-      '/sadaqa/private/help_categories/',
+      '/api/sadaqa/private/help_categories/my',
     };
 
     final normalized = <String>{};
@@ -602,7 +594,6 @@ class SadaqaRepository {
     for (final item in data) {
       final id = _asInt(item['id']);
       final title = _asString(item['title'] ?? item['name']);
-      final isOther = _asBool(item['is_other']) ?? false;
       final status =
           _asBool(item['status'] ?? item['is_active'] ?? item['active']) ??
               true;

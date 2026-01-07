@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
-import 'package:safa_app/features/sadaqa/utils/media_resolver.dart';
+import 'package:safa_app/features/sadaqa/domain/utils/media_resolver.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class CauseCard extends StatelessWidget {

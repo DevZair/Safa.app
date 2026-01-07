@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
-import 'package:safa_app/features/sadaqa/data/sadaqa_repository.dart';
-import 'package:safa_app/features/settings/presentation/pages/admin_sadaqa/admin_post_edit_page.dart';
+import 'package:safa_app/features/sadaqa/data/repositories/sadaqa_repository_impl.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_post.dart';
+import 'package:safa_app/features/sadaqa/domain/repositories/sadaqa_repository.dart';
+import 'package:safa_app/features/sadaqa/domain/utils/media_resolver.dart';
 import 'package:safa_app/features/settings/presentation/pages/admin_sadaqa/admin_post_create_page.dart';
-import 'package:safa_app/features/sadaqa/models/sadaqa_post.dart';
-import 'package:safa_app/features/sadaqa/utils/media_resolver.dart';
+import 'package:safa_app/features/settings/presentation/pages/admin_sadaqa/admin_post_edit_page.dart';
 
 class AdminPostsPage extends StatefulWidget {
   const AdminPostsPage({super.key, this.companyName});
@@ -16,7 +17,7 @@ class AdminPostsPage extends StatefulWidget {
 }
 
 class _AdminPostsPageState extends State<AdminPostsPage> {
-  final _repository = SadaqaRepository();
+  final SadaqaRepository _repository = SadaqaRepositoryImpl();
   bool _isLoading = true;
   String? _error;
   List<SadaqaPost> _posts = const [];

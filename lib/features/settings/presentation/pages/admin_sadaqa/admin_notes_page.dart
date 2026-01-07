@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
-import 'package:safa_app/features/sadaqa/models/sadaqa_post.dart';
-import 'package:safa_app/features/sadaqa/utils/media_resolver.dart';
-import 'package:safa_app/features/sadaqa/data/sadaqa_repository.dart';
+import 'package:safa_app/features/sadaqa/data/repositories/sadaqa_repository_impl.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_post.dart';
+import 'package:safa_app/features/sadaqa/domain/repositories/sadaqa_repository.dart';
+import 'package:safa_app/features/sadaqa/domain/utils/media_resolver.dart';
 import 'package:safa_app/features/settings/presentation/pages/admin_sadaqa/admin_note_edit_page.dart';
 import 'package:safa_app/features/settings/presentation/pages/admin_sadaqa/admin_note_create_page.dart';
 
@@ -16,7 +17,7 @@ class AdminNotesPage extends StatefulWidget {
 }
 
 class _AdminNotesPageState extends State<AdminNotesPage> {
-  final _repository = SadaqaRepository();
+  final SadaqaRepository _repository = SadaqaRepositoryImpl();
   bool _isLoading = true;
   String? _error;
   List<SadaqaPost> _notes = const [];

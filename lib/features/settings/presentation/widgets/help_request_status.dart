@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
-import 'package:safa_app/features/sadaqa/models/help_request.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/help_request.dart';
 
 String helpRequestStatusLabel(
   AppLocalizations l10n,

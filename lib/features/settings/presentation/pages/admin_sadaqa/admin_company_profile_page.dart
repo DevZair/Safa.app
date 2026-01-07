@@ -1,8 +1,9 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:safa_app/features/sadaqa/data/sadaqa_repository.dart';
-import 'package:safa_app/features/sadaqa/models/sadaqa_company.dart';
-import 'package:safa_app/features/sadaqa/utils/media_resolver.dart';
+import 'package:safa_app/features/sadaqa/data/repositories/sadaqa_repository_impl.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_company.dart';
+import 'package:safa_app/features/sadaqa/domain/repositories/sadaqa_repository.dart';
+import 'package:safa_app/features/sadaqa/domain/utils/media_resolver.dart';
 
 class AdminCompanyProfilePage extends StatefulWidget {
   const AdminCompanyProfilePage({super.key, this.companyName});
@@ -15,7 +16,7 @@ class AdminCompanyProfilePage extends StatefulWidget {
 }
 
 class _AdminCompanyProfilePageState extends State<AdminCompanyProfilePage> {
-  final _repository = SadaqaRepository();
+  final SadaqaRepository _repository = SadaqaRepositoryImpl();
   final _nameController = TextEditingController();
   final _logoController = TextEditingController();
   final _coverController = TextEditingController();

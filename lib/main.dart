@@ -1,7 +1,6 @@
-import 'dart:ui' as ui;
-
+import 'package:safa_app/features/travel/data/repositories/travel_repository_impl.dart';
+import 'package:safa_app/features/travel/domain/repositories/travel_repository.dart';
 import 'package:safa_app/features/travel/presentation/cubit/travel_cubit.dart';
-import 'package:safa_app/features/travel/data/travel_repository.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:safa_app/core/settings/app_settings_state.dart';
@@ -18,6 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'dart:ui' as ui;
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -27,7 +27,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void _installKeyEventGuard(WidgetsBinding binding) {
   if (!kDebugMode) return;
 
-  // Drop unmatched key-up events that trigger the HardwareKeyboard debug assert.
   final originalHandler = binding.platformDispatcher.onKeyData;
   final pressedPhysicalKeys = <int>{};
 
@@ -136,7 +135,11 @@ class _SafaAppState extends State<SafaApp> {
   @override
   Widget build(BuildContext context) {
     return MultiRepositoryProvider(
-      providers: [RepositoryProvider(create: (_) => TravelRepository())],
+      providers: [
+        RepositoryProvider<TravelRepository>(
+          create: (_) => TravelRepositoryImpl(),
+        ),
+      ],
       child: MultiBlocProvider(
         providers: [
           BlocProvider(

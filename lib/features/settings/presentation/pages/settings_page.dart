@@ -2,13 +2,14 @@ import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/core/settings/app_settings_cubit.dart';
 import 'package:safa_app/core/settings/app_settings_state.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
-import 'package:safa_app/features/settings/data/admin_auth_repository.dart';
+import 'package:safa_app/features/settings/data/repositories/admin_auth_repository_impl.dart';
+import 'package:safa_app/features/settings/domain/repositories/admin_auth_repository.dart';
+import 'package:safa_app/features/settings/presentation/pages/admin_sadaqa/admin_panel_page.dart';
+import 'package:safa_app/features/settings/presentation/widgets/admin_sheet.dart';
 import 'package:safa_app/features/settings/presentation/widgets/settings_header.dart';
 import 'package:safa_app/features/settings/presentation/widgets/settings_section.dart';
 import 'package:safa_app/features/settings/presentation/widgets/settings_tile.dart';
 import 'package:safa_app/features/settings/presentation/widgets/settings_user_card.dart';
-import 'package:safa_app/features/settings/presentation/widgets/admin_sheet.dart';
-import 'package:safa_app/features/settings/presentation/pages/admin_sadaqa/admin_panel_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,7 @@ class _SettingsPageState extends State<SettingsPage> {
   bool _notificationsEnabled = true;
   late final TextEditingController _adminLoginController;
   late final TextEditingController _adminPasswordController;
-  final _adminRepository = AdminAuthRepository();
+  final AdminAuthRepository _adminRepository = AdminAuthRepositoryImpl();
   bool _isAdminSubmitting = false;
 
   static const _languageFlags = {'ru': '🇷🇺', 'kk': '🇰🇿', 'uz': '🇺🇿'};

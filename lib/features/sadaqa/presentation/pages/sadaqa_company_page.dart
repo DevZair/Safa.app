@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:safa_app/core/navigation/app_router.dart';
-import 'package:safa_app/features/sadaqa/models/sadaqa_cause.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_cause.dart';
 import 'package:safa_app/features/sadaqa/presentation/pages/sadaqa_detail.dart';
-import 'package:safa_app/features/sadaqa/utils/media_resolver.dart';
+import 'package:safa_app/features/sadaqa/domain/utils/media_resolver.dart';
 
 class SadaqaCompanyArgs {
   const SadaqaCompanyArgs({

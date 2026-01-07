@@ -1,7 +1,7 @@
 import 'package:safa_app/features/sadaqa/presentation/cubit/sadaqa_cubit.dart';
-import 'package:safa_app/features/sadaqa/utils/media_resolver.dart';
-import 'package:safa_app/features/sadaqa/models/sadaqa_company.dart';
-import 'package:safa_app/features/sadaqa/models/sadaqa_cause.dart';
+import 'package:safa_app/features/sadaqa/domain/utils/media_resolver.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_company.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_cause.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safa_app/core/navigation/app_router.dart';

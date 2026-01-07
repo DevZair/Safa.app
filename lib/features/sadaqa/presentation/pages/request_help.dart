@@ -1,7 +1,11 @@
-import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:safa_app/features/sadaqa/data/request_help_repository.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:safa_app/features/sadaqa/data/repositories/request_help_repository_impl.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/reference_item.dart';
+import 'package:safa_app/features/sadaqa/domain/entities/request_help_payload.dart';
+import 'package:safa_app/features/sadaqa/domain/repositories/request_help_repository.dart';
 
 class RequestHelpPage extends StatefulWidget {
   const RequestHelpPage({super.key});
@@ -11,7 +15,7 @@ class RequestHelpPage extends StatefulWidget {
 }
 
 class _RequestHelpPageState extends State<RequestHelpPage> {
-  final _repository = RequestHelpRepository();
+  final RequestHelpRepository _repository = RequestHelpRepositoryImpl();
 
   final _formKey = GlobalKey<FormState>();
   final _firstNameController = TextEditingController();
@@ -32,7 +36,8 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
   final List<ReferenceItem> _companies = [];
   PlatformFile? _selectedFile;
   bool _isPickingFile = false;
-  bool _isLoadingCategories = true;
+  bool _isLoadingMaterialStatuses = false;
+  bool _isLoadingCategories = false;
   bool _isLoadingCompanies = true;
   int? _selectedCategoryId;
   int? _selectedCompanyId;
@@ -40,7 +45,6 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
   int _storyLength = 0;
   bool _isSubmitting = false;
   String? _submitError;
-  bool _isLoadingRefs = true;
 
   @override
   void initState() {
@@ -61,8 +65,6 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
       controller.addListener(_handleFieldChanged);
     }
     _storyController.addListener(_handleStoryChanged);
-    _loadMaterialStatuses();
-    _loadCategories();
     _loadCompanies();
   }
 
@@ -95,6 +97,23 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          _SectionCard(
+            title: 'Фонд / компания',
+            subtitle:
+                'Сначала выберите организацию, затем заполните детали запроса.',
+            child: _LabeledField(
+              label: 'Фонд / компания *',
+              child: _CompanyDropdown(
+                companies: _companies,
+                isLoading: _isLoadingCompanies,
+                value: _selectedCompanyId,
+                onChanged: (value) {
+                  _onCompanySelected(value);
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
           _SectionCard(
             title: 'Личные данные',
             subtitle:
@@ -130,7 +149,8 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
                         controller: _phoneController,
                         hintText: '+7 700 123 45 67',
                         keyboardType: TextInputType.phone,
-                        validator: _requiredValidator,
+                        validator: _kazakhPhoneValidator,
+                        inputFormatters: const [_KazakhPhoneInputFormatter()],
                         prefixIcon: Icons.phone_outlined,
                       ),
                     ),
@@ -173,14 +193,19 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
                     ),
                     _LabeledField(
                       label: 'Материальное положение',
-                      child: _MaterialStatusDropdown(
-                        isLoading: _isLoadingRefs,
-                        statuses: _materialStatuses,
-                        value: _selectedMaterialStatus,
-                        onChanged: (value) {
-                          setState(() => _selectedMaterialStatus = value);
-                        },
-                      ),
+                      child: _selectedCompanyId == null
+                          ? const _LookupGuard(
+                              message:
+                                  'Сначала выберите фонд/компанию, чтобы увидеть статусы.',
+                            )
+                          : _MaterialStatusDropdown(
+                              isLoading: _isLoadingMaterialStatuses,
+                              statuses: _materialStatuses,
+                              value: _selectedMaterialStatus,
+                              onChanged: (value) {
+                                setState(() => _selectedMaterialStatus = value);
+                              },
+                            ),
                     ),
                   ],
                 ),
@@ -225,25 +250,31 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
               children: [
                 _LabeledField(
                   label: 'Категория помощи *',
-                  child: _CategoryDropdown(
-                    categories: _categories,
-                    isLoading: _isLoadingCategories,
-                    value: _selectedCategoryId,
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedCategoryId = value;
-                        final selected = _categories.firstWhere(
-                          (item) => item.id == value,
-                          orElse: () => const CategoryItem(
-                            id: 0,
-                            title: '',
-                            isOther: false,
-                          ),
-                        );
-                        _isOtherCategory = selected.isOther && value != null;
-                      });
-                    },
-                  ),
+                  child: _selectedCompanyId == null
+                      ? const _LookupGuard(
+                          message:
+                              'Сначала выберите фонд/компанию, чтобы увидеть категории помощи.',
+                        )
+                      : _CategoryDropdown(
+                          categories: _categories,
+                          isLoading: _isLoadingCategories,
+                          value: _selectedCategoryId,
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedCategoryId = value;
+                              final selected = _categories.firstWhere(
+                                (item) => item.id == value,
+                                orElse: () => const CategoryItem(
+                                  id: 0,
+                                  title: '',
+                                  isOther: false,
+                                ),
+                              );
+                              _isOtherCategory =
+                                  selected.isOther && value != null;
+                            });
+                          },
+                        ),
                 ),
                 if (_isOtherCategory) ...[
                   const SizedBox(height: 12),
@@ -256,18 +287,6 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
                     ),
                   ),
                 ],
-                const SizedBox(height: 16),
-                _LabeledField(
-                  label: 'Фонд / компания *',
-                  child: _CompanyDropdown(
-                    companies: _companies,
-                    isLoading: _isLoadingCompanies,
-                    value: _selectedCompanyId,
-                    onChanged: (value) {
-                      setState(() => _selectedCompanyId = value);
-                    },
-                  ),
-                ),
                 const SizedBox(height: 16),
                 _LabeledField(
                   label: 'Необходимая сумма (ТГ)',
@@ -353,30 +372,35 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
         ),
       ),
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1100),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (_submitError != null) ...[
-                        _SubmitError(message: _submitError!),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1100),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (_submitError != null) ...[
+                          _SubmitError(message: _submitError!),
+                          const SizedBox(height: 16),
+                        ],
+                        const _HeroCard(),
                         const SizedBox(height: 16),
+                        const SizedBox(height: 24),
+                        form,
                       ],
-                      const _HeroCard(),
-                      const SizedBox(height: 16),
-                      const SizedBox(height: 24),
-                      form,
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
@@ -392,9 +416,32 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
     });
   }
 
-  Future<void> _loadMaterialStatuses() async {
+  Future<void> _onCompanySelected(int? companyId) async {
+    setState(() {
+      _selectedCompanyId = companyId;
+      _selectedMaterialStatus = null;
+      _selectedCategoryId = null;
+      _isOtherCategory = false;
+      _materialStatuses.clear();
+      _categories.clear();
+      _submitError = null;
+      _isLoadingMaterialStatuses = companyId != null;
+      _isLoadingCategories = companyId != null;
+    });
+
+    if (companyId == null) return;
+
+    await Future.wait([
+      _loadMaterialStatuses(companyId: companyId),
+      _loadCategories(companyId: companyId),
+    ]);
+  }
+
+  Future<void> _loadMaterialStatuses({required int companyId}) async {
     try {
-      final items = await _repository.fetchMaterialStatuses();
+      final items =
+          await _repository.fetchMaterialStatuses(companyId: companyId);
+      if (!mounted || _selectedCompanyId != companyId) return;
       _materialStatuses
         ..clear()
         ..addAll(items);
@@ -402,29 +449,32 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
           ? '${_materialStatuses.first.id}'
           : null;
     } catch (_) {
+      if (!mounted || _selectedCompanyId != companyId) return;
       _materialStatuses.clear();
       _selectedMaterialStatus = null;
     } finally {
-      if (mounted) {
-        setState(() => _isLoadingRefs = false);
+      if (mounted && _selectedCompanyId == companyId) {
+        setState(() => _isLoadingMaterialStatuses = false);
       }
     }
   }
 
-  Future<void> _loadCategories() async {
+  Future<void> _loadCategories({required int companyId}) async {
     try {
-      final items = await _repository.fetchCategories();
+      final items = await _repository.fetchCategories(companyId: companyId);
+      if (!mounted || _selectedCompanyId != companyId) return;
       _categories
         ..clear()
         ..addAll(items);
       _selectedCategoryId = null;
       _isOtherCategory = false;
     } catch (_) {
+      if (!mounted || _selectedCompanyId != companyId) return;
       _categories.clear();
       _selectedCategoryId = null;
       _isOtherCategory = false;
     } finally {
-      if (mounted) {
+      if (mounted && _selectedCompanyId == companyId) {
         setState(() => _isLoadingCategories = false);
       }
     }
@@ -510,9 +560,24 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
     if (!isValid) {
       return;
     }
+    if (_selectedCompanyId == null) {
+      setState(() {
+        _submitError = _isLoadingCompanies
+            ? 'Дождитесь загрузки списка фондов.'
+            : 'Сначала выберите фонд/компанию.';
+      });
+      return;
+    }
+    if (_isLoadingMaterialStatuses || _isLoadingCategories) {
+      setState(() {
+        _submitError = 'Дождитесь загрузки данных выбранного фонда.';
+      });
+      return;
+    }
     if (_categories.isEmpty) {
       setState(() {
-        _submitError = 'Категории не загружены. Попробуйте позже.';
+        _submitError =
+            'Категории не загружены для выбранного фонда. Попробуйте выбрать фонд заново.';
       });
       return;
     }
@@ -528,28 +593,28 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
       });
       return;
     }
+    if (_materialStatuses.isEmpty) {
+      setState(() {
+        _submitError =
+            'Материальные статусы не загружены для выбранного фонда.';
+      });
+      return;
+    }
     if (_selectedMaterialStatus == null || _selectedMaterialStatus!.isEmpty) {
       setState(() {
         _submitError = 'Выберите материальный статус.';
       });
       return;
     }
-    if (_companies.isNotEmpty && _selectedCompanyId == null) {
-      setState(() {
-        _submitError = 'Пожалуйста, выберите фонд/компанию.';
-      });
-      return;
-    }
     final phoneText = _phoneController.text.trim();
-    final sanitizedPhone = phoneText.replaceAll(' ', '');
-    final phoneRegex = RegExp(r'^[0-9+\-]+$');
-    if (!phoneRegex.hasMatch(sanitizedPhone)) {
+    final phoneError = _kazakhPhoneValidator(phoneText);
+    if (phoneError != null) {
       setState(() {
-        _submitError =
-            'Телефон может содержать только цифры, а также символы + или -.';
+        _submitError = phoneError;
       });
       return;
     }
+    final sanitizedPhone = _normalizeKazakhPhone(phoneText);
     final ageValue = int.tryParse(_ageController.text.trim());
     if (ageValue == null) {
       setState(() {
@@ -677,6 +742,10 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
       _selectedMaterialStatus = null;
       _selectedCompanyId = null;
       _submitError = null;
+      _materialStatuses.clear();
+      _categories.clear();
+      _isLoadingMaterialStatuses = false;
+      _isLoadingCategories = false;
     });
   }
 }
@@ -924,6 +993,77 @@ String? _optionalNumberValidator(String? value) {
   return null;
 }
 
+String? _kazakhPhoneValidator(String? value) {
+  if (value == null || value.trim().isEmpty) {
+    return 'Обязательное поле';
+  }
+  final digits = _extractDigits(value);
+  if (digits.length != 11) {
+    return 'Номер должен содержать 11 цифр.';
+  }
+  if (!(digits.startsWith('7') || digits.startsWith('8'))) {
+    return 'Номер должен начинаться с +7 или 8.';
+  }
+  return null;
+}
+
+String _normalizeKazakhPhone(String value) {
+  final digits = _extractDigits(value);
+  if (digits.isEmpty) return '';
+  final normalized = digits.startsWith('8') ? '7${digits.substring(1)}' : digits;
+  return '+$normalized';
+}
+
+String _extractDigits(String input) {
+  return input.replaceAll(RegExp(r'\D'), '');
+}
+
+class _KazakhPhoneInputFormatter extends TextInputFormatter {
+  const _KazakhPhoneInputFormatter();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final digits = _extractDigits(newValue.text);
+    if (digits.isEmpty) {
+      return const TextEditingValue(
+        text: '',
+        selection: TextSelection.collapsed(offset: 0),
+      );
+    }
+
+    var normalized = digits;
+    if (normalized.startsWith('8')) {
+      normalized = '7${normalized.substring(1)}';
+    } else if (!normalized.startsWith('7')) {
+      normalized = '7$normalized';
+    }
+
+    if (normalized.length > 11) {
+      normalized = normalized.substring(0, 11);
+    }
+
+    final formatted = _formatKazakhPhoneDisplay(normalized);
+    final cursorPos = formatted.length;
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: cursorPos),
+    );
+  }
+
+  String _formatKazakhPhoneDisplay(String digits) {
+    final buffer = StringBuffer('+');
+    for (var i = 0; i < digits.length; i++) {
+      buffer.write(digits[i]);
+      if (i == 0) buffer.write(' ');
+      if (i == 3 || i == 6 || i == 8) buffer.write(' ');
+    }
+    return buffer.toString().trimRight();
+  }
+}
+
 String _formatFileSize(int bytes) {
   const kb = 1024;
   const mb = kb * 1024;
@@ -939,23 +1079,65 @@ class _SubmitError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFE8E8),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE57373)),
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFEEF0), Color(0xFFFFF5F7)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFFF9CA0).withValues(alpha: 0.6)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x22FF5F6D),
+            blurRadius: 18,
+            offset: Offset(0, 10),
+          ),
+        ],
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.error_outline, color: Color(0xFFD32F2F)),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(color: Color(0xFFD32F2F), fontSize: 13),
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: const Color(0xFFFF5F6D).withValues(alpha: 0.1),
+            ),
+            child: const Icon(
+              Icons.error_outline,
+              color: Color(0xFFFF5F6D),
             ),
           ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Не удалось отправить',
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: const Color(0xFFB0252D),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  message,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: const Color(0xFFB0252D),
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          const Icon(Icons.chevron_right, color: Color(0xFFB0252D)),
         ],
       ),
     );
@@ -1040,6 +1222,41 @@ class _LabeledField extends StatelessWidget {
   }
 }
 
+class _LookupGuard extends StatelessWidget {
+  const _LookupGuard({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE8F5FF),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFCDE5FF)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.info_outline, color: Color(0xFF2A5B9C)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(
+                color: Color(0xFF1A2B4F),
+                fontSize: 13,
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _RequestTextField extends StatelessWidget {
   const _RequestTextField({
     required this.controller,
@@ -1049,6 +1266,7 @@ class _RequestTextField extends StatelessWidget {
     this.maxLength,
     this.validator,
     this.prefixIcon,
+    this.inputFormatters,
   });
 
   final TextEditingController controller;
@@ -1058,15 +1276,18 @@ class _RequestTextField extends StatelessWidget {
   final int? maxLength;
   final FormFieldValidator<String>? validator;
   final IconData? prefixIcon;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
       validator: validator,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       keyboardType: keyboardType,
       maxLines: maxLines,
       maxLength: maxLength,
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
         hintText: hintText,
         filled: true,
@@ -1146,9 +1367,9 @@ class _MaterialStatusDropdown extends StatelessWidget {
           border: Border.all(color: const Color(0xFFF5D7A8)),
         ),
         child: const Text(
-          'Нет данных о материальном статусе из бэкенда. '
-          'Вы можете отправить запрос без этого поля.',
-          style: TextStyle(color: Color(0xFF9A6B1B), fontSize: 13),
+          'Для выбранного фонда статусы не загружены. '
+          'Попробуйте обновить или выбрать другой фонд.',
+          style: TextStyle(color: Color(0xFF9A6B1B), fontSize: 13, height: 1.35),
         ),
       );
     }
