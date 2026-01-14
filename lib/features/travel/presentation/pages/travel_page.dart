@@ -288,7 +288,7 @@ class _TravelLoadingCard extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 28.r,
-            offset: const Offset(0, 14),
+            offset: Offset(0, 14.h),
           ),
         ],
       ),

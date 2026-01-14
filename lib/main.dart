@@ -12,12 +12,14 @@ import 'package:safa_app/core/navigation/app_router.dart';
 import 'package:safa_app/core/service/db_service.dart';
 import 'package:safa_app/core/styles/app_theme.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:safa_app/firebase_options.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:safa_app/firebase_options.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
+
+const Size _designSize = Size(440, 956);
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -62,7 +64,7 @@ Future<void> main() async {
 
   runApp(
     ScreenUtilInit(
-      designSize: const Size(440, 956),
+      designSize: _designSize,
       minTextAdapt: true,
       splitScreenMode: true,
       useInheritedMediaQuery: true,

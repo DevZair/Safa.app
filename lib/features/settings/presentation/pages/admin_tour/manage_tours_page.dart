@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:safa_app/core/utils/error_messages.dart';
 import 'package:safa_app/core/constants/api_constants.dart';
 import 'package:safa_app/features/settings/presentation/pages/admin_tour/create_edit_tour_page.dart';
 import 'package:safa_app/features/travel/data/repositories/tour_repository_impl.dart';
 import 'package:safa_app/features/travel/domain/entities/tour.dart';
 import 'package:safa_app/features/travel/domain/repositories/tour_repository.dart';
-
 
 class ManageToursPage extends StatefulWidget {
   const ManageToursPage({super.key});
@@ -32,9 +33,7 @@ class _ManageToursPageState extends State<ManageToursPage> {
 
   Future<void> _navigateToCreateEditPage({Tour? tour}) async {
     final result = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (context) => CreateEditTourPage(tour: tour),
-      ),
+      MaterialPageRoute(builder: (context) => CreateEditTourPage(tour: tour)),
     );
 
     if (result == true) {
@@ -44,10 +43,9 @@ class _ManageToursPageState extends State<ManageToursPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Manage Tours'),
-      ),
+      appBar: AppBar(title: const Text('Manage Tours')),
       body: FutureBuilder<List<Tour>>(
         future: _toursFuture,
         builder: (context, snapshot) {
@@ -59,8 +57,16 @@ class _ManageToursPageState extends State<ManageToursPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Error: ${snapshot.error}'),
-                  const SizedBox(height: 8),
+                  const Text('Не удалось загрузить туры'),
+                  SizedBox(height: 8.h),
+                  Text(
+                    friendlyError(snapshot.error),
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.hintColor,
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
                   ElevatedButton(
                     onPressed: _refreshTours,
                     child: const Text('Retry'),
@@ -75,7 +81,7 @@ class _ManageToursPageState extends State<ManageToursPage> {
 
           final tours = snapshot.data!;
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16.r),
             itemCount: tours.length,
             itemBuilder: (context, index) {
               final tour = tours[index];
@@ -116,8 +122,8 @@ class _TourCard extends StatelessWidget {
 
     return Card(
       elevation: 4,
-      margin: const EdgeInsets.only(bottom: 16),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: EdgeInsets.only(bottom: 16.h),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
@@ -125,7 +131,7 @@ class _TourCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              height: 180,
+              height: 180.h,
               width: double.infinity,
               child: Image.network(
                 imageUrl,
@@ -133,7 +139,11 @@ class _TourCard extends StatelessWidget {
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
                     color: Colors.grey[200],
-                    child: const Icon(Icons.broken_image, color: Colors.grey, size: 48),
+                    child: Icon(
+                      Icons.broken_image,
+                      color: Colors.grey,
+                      size: 48.sp,
+                    ),
                   );
                 },
                 loadingBuilder: (context, child, loadingProgress) {
@@ -141,7 +151,8 @@ class _TourCard extends StatelessWidget {
                   return Center(
                     child: CircularProgressIndicator(
                       value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                          ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
                           : null,
                     ),
                   );
@@ -149,19 +160,25 @@ class _TourCard extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16.r),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     tour.location,
-                    style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8.h),
                   Row(
                     children: [
-                      Icon(Icons.price_change, color: theme.primaryColor, size: 20),
-                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.price_change,
+                        color: theme.primaryColor,
+                        size: 20.sp,
+                      ),
+                      SizedBox(width: 8.w),
                       Text(
                         currencyFormatter.format(tour.price),
                         style: theme.textTheme.titleMedium?.copyWith(
@@ -170,18 +187,22 @@ class _TourCard extends StatelessWidget {
                         ),
                       ),
                       const Spacer(),
-                      Icon(Icons.timer_outlined, color: Colors.grey[600], size: 20),
-                      const SizedBox(width: 8),
+                      Icon(
+                        Icons.timer_outlined,
+                        color: Colors.grey[600],
+                        size: 20.sp,
+                      ),
+                      SizedBox(width: 8.w),
                       Text(
                         '${tour.duration} days',
                         style: theme.textTheme.bodyLarge,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   const Divider(),
-                  const SizedBox(height: 12),
-                   Row(
+                  SizedBox(height: 12.h),
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _buildDateInfo(
@@ -207,7 +228,12 @@ class _TourCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDateInfo(BuildContext context, {required IconData icon, required String label, required String date}) {
+  Widget _buildDateInfo(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required String date,
+  }) {
     final theme = Theme.of(context);
     DateTime? parsedDate;
     try {
@@ -223,14 +249,18 @@ class _TourCard extends StatelessWidget {
           label,
           style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey[600]),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: 4.h),
         Row(
           children: [
-            Icon(icon, size: 18, color: Colors.grey[700]),
-            const SizedBox(width: 6),
+            Icon(icon, size: 18.sp, color: Colors.grey[700]),
+            SizedBox(width: 6.w),
             Text(
-              parsedDate != null ? DateFormat.yMMMd().format(parsedDate) : 'N/A',
-              style: theme.textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+              parsedDate != null
+                  ? DateFormat.yMMMd().format(parsedDate)
+                  : 'N/A',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),

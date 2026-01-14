@@ -2,6 +2,7 @@
 import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:safa_app/features/sadaqa/domain/utils/media_resolver.dart';
 import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_post.dart';
@@ -35,7 +36,7 @@ class SadaqaDetailHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: const BoxConstraints(minHeight: 380),
+      constraints: BoxConstraints(minHeight: 380.h),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [Color(0xFF1FC8A9), Color(0xFF2A9ED7)],
@@ -49,7 +50,7 @@ class SadaqaDetailHeader extends StatelessWidget {
             child: CustomPaint(painter: SadaqaHeaderPatternPainter()),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(28, 70, 20, 32),
+            padding: EdgeInsets.fromLTRB(28.w, 70.h, 20.w, 32.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -61,30 +62,30 @@ class SadaqaDetailHeader extends StatelessWidget {
                       icon: isFavorite ? Icons.favorite : Icons.favorite_border,
                       onTap: onFavorite ?? () {},
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12.w),
                     SadaqaCircleAction(
                       icon: Icons.share_outlined,
                       onTap: onShare ?? () {},
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 _CompanyHeader(name: companyName, logo: companyLogo),
-                const SizedBox(height: 10),
+                SizedBox(height: 10.h),
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white,
-                    fontSize: 24,
+                    fontSize: 24.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: 10.h),
                 Text(
                   subtitle,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(color: Colors.white70, fontSize: 14),
+                  style: TextStyle(color: Colors.white70, fontSize: 14.sp),
                 ),
               ],
             ),
@@ -110,13 +111,13 @@ class SadaqaCircleAction extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 42,
-        height: 42,
+        width: 42.r,
+        height: 42.r,
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.18),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: Colors.white, size: 22),
+        child: Icon(icon, color: Colors.white, size: 22.sp),
       ),
     );
   }
@@ -135,7 +136,7 @@ class _CompanyHeader extends StatelessWidget {
     return Row(
       children: [
         _CompanyAvatar(logo: logo, fallback: name),
-        const SizedBox(width: 10),
+        SizedBox(width: 10.w),
         Expanded(
           child: Text(
             name?.isNotEmpty == true ? name! : 'Без названия',
@@ -148,22 +149,22 @@ class _CompanyHeader extends StatelessWidget {
           ),
         ),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
           decoration: BoxDecoration(
             color: bg,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             border: Border.all(color: Colors.white.withValues(alpha: 0.28)),
           ),
           child: Row(
-            children: const [
-              Icon(Icons.verified_rounded, size: 16, color: Colors.white),
-              SizedBox(width: 6),
+            children: [
+              Icon(Icons.verified_rounded, size: 16.sp, color: Colors.white),
+              SizedBox(width: 6.w),
               Text(
                 'Фонд',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.w600,
-                  fontSize: 12,
+                  fontSize: 12.sp,
                 ),
               ),
             ],
@@ -183,7 +184,7 @@ class _CompanyAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final border = Border.all(color: Colors.white.withValues(alpha: 0.35));
-    final radius = BorderRadius.circular(14);
+    final radius = BorderRadius.circular(14.r);
 
     Widget avatar;
     if (logo != null && logo!.isNotEmpty) {
@@ -193,28 +194,28 @@ class _CompanyAvatar extends StatelessWidget {
         borderRadius: radius,
         child: isNetwork
             ? Image.network(
-                resolvedLogo,
-                width: 52,
-                height: 52,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    _FallbackAvatar(fallback),
-              )
-            : Image.asset(
-                resolvedLogo,
-                width: 52,
-                height: 52,
-                fit: BoxFit.cover,
-              ),
-      );
-    } else {
+          resolvedLogo,
+          width: 52.r,
+          height: 52.r,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+              _FallbackAvatar(fallback),
+        )
+      : Image.asset(
+          resolvedLogo,
+          width: 52.r,
+          height: 52.r,
+          fit: BoxFit.cover,
+        ),
+    );
+  } else {
       avatar = _FallbackAvatar(fallback);
     }
 
     return Container(
-      width: 56,
-      height: 56,
-      padding: const EdgeInsets.all(2),
+      width: 56.r,
+      height: 56.r,
+      padding: EdgeInsets.all(2.r),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border: border,
@@ -241,10 +242,10 @@ class _FallbackAvatar extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         initial,
-        style: const TextStyle(
+        style: TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.w700,
-          fontSize: 18,
+          fontSize: 18.sp,
         ),
       ),
     );
@@ -377,15 +378,15 @@ class SadaqaSummaryCard extends StatelessWidget {
     final l10n = context.l10n;
     final percentText = (progress * 100).toStringAsFixed(1);
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(24.r),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(28.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.07),
-            blurRadius: 18,
-            offset: const Offset(0, 10),
+            blurRadius: 18.r,
+            offset: Offset(0, 10.h),
           ),
         ],
       ),
@@ -403,7 +404,7 @@ class SadaqaSummaryCard extends StatelessWidget {
                   valueColor: const Color(0xFF0F9D58),
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16.w),
               Expanded(
                 child: SadaqaSummaryColumn(
                   label: l10n.t('sadaqa.detail.goal'),
@@ -412,11 +413,11 @@ class SadaqaSummaryCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24.h),
           ClipRRect(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(10.r),
             child: SizedBox(
-              height: 12,
+              height: 12.h,
               child: LinearProgressIndicator(
                 value: progress,
                 backgroundColor: const Color(0xFFE2E8F0),
@@ -424,7 +425,7 @@ class SadaqaSummaryCard extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -433,19 +434,19 @@ class SadaqaSummaryCard extends StatelessWidget {
                   'sadaqa.detail.funded',
                   params: {'percent': percentText},
                 ),
-                style: const TextStyle(
+                style: TextStyle(
                   color: Color(0xFF16A34A),
                   fontWeight: FontWeight.w600,
-                  fontSize: 13,
+                  fontSize: 13.sp,
                 ),
               ),
               Text(
                 l10n.t('sadaqa.detail.donors', params: {'count': '$donors'}),
-                style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                style: TextStyle(color: Color(0xFF64748B), fontSize: 13.sp),
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24.h),
           SadaqaPrimaryButton(
             label: l10n.t('sadaqa.detail.donateNow'),
             onPressed: onDonate,
@@ -468,16 +469,16 @@ class SadaqaPrimaryButton extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: BorderRadius.circular(26.r),
         onTap: () {
           if (isEnabled) {
             onPressed!();
           }
         },
         child: Ink(
-          height: 52,
+          height: 52.h,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(26),
+            borderRadius: BorderRadius.circular(26.r),
             gradient: LinearGradient(
               colors: isEnabled
                   ? const [Color(0xFF1FC8A9), Color(0xFF2A9ED7)]
@@ -486,17 +487,17 @@ class SadaqaPrimaryButton extends StatelessWidget {
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 18,
-                offset: const Offset(0, 10),
+                blurRadius: 18.r,
+                offset: Offset(0, 10.h),
               ),
             ],
           ),
           child: Center(
             child: Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
-                fontSize: 16,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -531,14 +532,14 @@ class SadaqaSummaryColumn extends StatelessWidget {
           label,
           style:
               labelStyle ??
-              const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+              TextStyle(color: Color(0xFF64748B), fontSize: 13.sp),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: 6.h),
         Text(
           value,
           style: TextStyle(
             color: valueColor,
-            fontSize: 20,
+            fontSize: 20.sp,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -584,16 +585,16 @@ class SadaqaBeneficiaryOverviewCard extends StatelessWidget {
     final l10n = context.l10n;
     final percentText = (progress * 100).toStringAsFixed(1);
     return Container(
-      padding: const EdgeInsets.all(24),
-      constraints: const BoxConstraints(minHeight: 470),
+      padding: EdgeInsets.all(24.r),
+      constraints: BoxConstraints(minHeight: 470.h),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(32.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 32,
-            offset: const Offset(0, 24),
+            blurRadius: 32.r,
+            offset: Offset(0, 24.h),
           ),
         ],
       ),
@@ -604,15 +605,15 @@ class SadaqaBeneficiaryOverviewCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(18.r),
                 child: _ResolvedImage(
                   path: imagePath,
-                  width: 62,
-                  height: 62,
-                  radius: 18,
+                  width: 62.r,
+                  height: 62.r,
+                  radius: 18.r,
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -621,27 +622,27 @@ class SadaqaBeneficiaryOverviewCard extends StatelessWidget {
                       title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 18,
+                      style: TextStyle(
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.w700,
                         color: Color(0xFF0F172A),
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4.h),
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.location_on_outlined,
-                          size: 16,
+                          size: 16.sp,
                           color: Color(0xFF6B7280),
                         ),
-                        const SizedBox(width: 4),
+                        SizedBox(width: 4.w),
                         Expanded(
                           child: Text(
                             subtitle,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Color(0xFF6B7280),
-                              fontSize: 13,
+                              fontSize: 13.sp,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -652,25 +653,25 @@ class SadaqaBeneficiaryOverviewCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               if (statusLabel != null)
                 SadaqaStatusChip(label: statusLabel!, color: statusColor),
             ],
           ),
-          const SizedBox(height: 18),
+          SizedBox(height: 18.h),
           Text(
             description,
-            style: const TextStyle(
+            style: TextStyle(
               color: Color(0xFF475569),
-              fontSize: 14,
+              fontSize: 14.sp,
               height: 1.5,
             ),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 20),
-          const Divider(color: Color(0xFFE2E8F0), height: 1),
-          const SizedBox(height: 20),
+          SizedBox(height: 20.h),
+          Divider(color: const Color(0xFFE2E8F0), height: 1.h),
+          SizedBox(height: 20.h),
           Row(
             children: [
               Expanded(
@@ -680,7 +681,7 @@ class SadaqaBeneficiaryOverviewCard extends StatelessWidget {
                   valueColor: const Color(0xFF0F9D58),
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16.w),
               Expanded(
                 child: SadaqaSummaryColumn(
                   label: l10n.t('sadaqa.detail.goal'),
@@ -689,11 +690,11 @@ class SadaqaBeneficiaryOverviewCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20.h),
           ClipRRect(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             child: SizedBox(
-              height: 12,
+              height: 12.h,
               child: LinearProgressIndicator(
                 value: progress,
                 backgroundColor: const Color(0xFFE2E8F0),
@@ -703,7 +704,7 @@ class SadaqaBeneficiaryOverviewCard extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           Row(
             children: [
               Expanded(
@@ -712,36 +713,36 @@ class SadaqaBeneficiaryOverviewCard extends StatelessWidget {
                     'sadaqa.detail.funded',
                     params: {'percent': percentText},
                   ),
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Color(0xFF16A34A),
                     fontWeight: FontWeight.w700,
-                    fontSize: 13,
+                    fontSize: 13.sp,
                   ),
                 ),
               ),
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.people_alt_outlined,
-                    size: 16,
+                    size: 16.sp,
                     color: Color(0xFF94A3B8),
                   ),
-                  const SizedBox(width: 4),
+                  SizedBox(width: 4.w),
                   Text(
                     l10n.t(
                       'sadaqa.detail.donors',
                       params: {'count': '$donors'},
                     ),
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Color(0xFF94A3B8),
-                      fontSize: 13,
+                      fontSize: 13.sp,
                     ),
                   ),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           SadaqaPrimaryButton(
             label: donateLabel,
             onPressed:
@@ -766,17 +767,17 @@ class SadaqaStatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(18.r),
       ),
       child: Text(
         label,
         style: TextStyle(
           color: color,
           fontWeight: FontWeight.w700,
-          fontSize: 12,
+          fontSize: 12.sp,
         ),
       ),
     );
@@ -805,22 +806,22 @@ class SadaqaPinnedFundCard extends StatelessWidget {
           fontWeight: FontWeight.w700,
           color: const Color(0xFF0F172A),
         ) ??
-        const TextStyle(
-          fontSize: 18,
+        TextStyle(
+          fontSize: 18.sp,
           fontWeight: FontWeight.w700,
           color: Color(0xFF0F172A),
         );
 
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: EdgeInsets.all(18.r),
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 24,
-            offset: const Offset(0, 18),
+            blurRadius: 24.r,
+            offset: Offset(0, 18.h),
           ),
         ],
       ),
@@ -830,7 +831,7 @@ class SadaqaPinnedFundCard extends StatelessWidget {
           Row(
             children: [
               _CompanyAvatar(logo: companyLogo, fallback: companyName),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -846,13 +847,13 @@ class SadaqaPinnedFundCard extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                             color: const Color(0xFF0F172A),
                           ) ??
-                          const TextStyle(
-                            fontSize: 14,
+                          TextStyle(
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.w700,
                             color: Color(0xFF0F172A),
                           ),
                     ),
-                    const SizedBox(height: 2),
+                    SizedBox(height: 2.h),
                     Text(
                       'Текущий сбор фонда',
                       style: theme.textTheme.bodySmall?.copyWith(
@@ -864,31 +865,31 @@ class SadaqaPinnedFundCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
+                padding: EdgeInsets.symmetric(
+                  horizontal: 10.w,
+                  vertical: 6.h,
                 ),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF0F9FF),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                   border: Border.all(
                     color: const Color(0xFF38BDF8).withValues(alpha: 0.4),
                   ),
                 ),
                 child: Row(
-                  children: const [
+                  children: [
                     Icon(
                       Icons.verified_outlined,
-                      size: 16,
+                      size: 16.sp,
                       color: Color(0xFF0EA5E9),
                     ),
-                    SizedBox(width: 6),
+                    SizedBox(width: 6.w),
                     Text(
                       'Фонд',
                       style: TextStyle(
                         color: Color(0xFF0EA5E9),
                         fontWeight: FontWeight.w700,
-                        fontSize: 12,
+                        fontSize: 12.sp,
                       ),
                     ),
                   ],
@@ -896,14 +897,14 @@ class SadaqaPinnedFundCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 14),
+          SizedBox(height: 14.h),
           Text(
             causeTitle,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: titleStyle,
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6.h),
           Text(
             causeSubtitle,
             maxLines: 2,
@@ -949,7 +950,9 @@ class SadaqaQuickStatsRow extends StatelessWidget {
         stats.length,
         (index) => Expanded(
           child: Padding(
-            padding: EdgeInsets.only(right: index == stats.length - 1 ? 0 : 12),
+            padding: EdgeInsets.only(
+              right: index == stats.length - 1 ? 0 : 12.w,
+            ),
             child: SadaqaStatCard(stat: stats[index]),
           ),
         ),
@@ -971,16 +974,16 @@ class SadaqaStatCard extends StatelessWidget {
         AppColors.darkTextPrimary;
     final mutedColor = bodyColor.withValues(alpha: 0.65);
     return Container(
-      constraints: const BoxConstraints(minHeight: 120),
-      padding: const EdgeInsets.all(18),
+      constraints: BoxConstraints(minHeight: 120.h),
+      padding: EdgeInsets.all(18.r),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
+            blurRadius: 12.r,
+            offset: Offset(0, 6.h),
           ),
         ],
       ),
@@ -988,19 +991,19 @@ class SadaqaStatCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(stat.icon, color: AppColors.primary),
-          const SizedBox(height: 18),
+          SizedBox(height: 18.h),
           Text(
             stat.title,
-            style: TextStyle(color: mutedColor, fontSize: 14),
+            style: TextStyle(color: mutedColor, fontSize: 14.sp),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6.h),
           Text(
             stat.value,
             style: TextStyle(
               color: bodyColor,
-              fontSize: 18,
+              fontSize: 18.sp,
               fontWeight: FontWeight.w700,
             ),
             maxLines: 1,
@@ -1054,12 +1057,12 @@ class SadaqaCompanyPostsSection extends StatelessWidget {
               Text(
                 l10n.t('sadaqa.updates.title'),
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 20.sp,
                   fontWeight: FontWeight.w700,
                   color: bodyColor,
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               const Center(child: CircularProgressIndicator()),
             ],
           );
@@ -1072,12 +1075,12 @@ class SadaqaCompanyPostsSection extends StatelessWidget {
               Text(
                 l10n.t('sadaqa.updates.title'),
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 20.sp,
                   fontWeight: FontWeight.w700,
                   color: bodyColor,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               Text(
                 l10n.t('sadaqa.updates.error'),
                 style: TextStyle(color: bodyColor.withValues(alpha: 0.7)),
@@ -1095,22 +1098,22 @@ class SadaqaCompanyPostsSection extends StatelessWidget {
                   child: Text(
                     l10n.t('sadaqa.updates.title'),
                     style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 20.sp,
                       fontWeight: FontWeight.w700,
                       color: bodyColor,
                     ),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 12.w,
+                    vertical: 6.h,
                   ),
                   decoration: BoxDecoration(
                     color: Theme.of(
                       context,
                     ).colorScheme.primary.withValues(alpha: 0.18),
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(20.r),
                   ),
                   child: Text(
                     l10n.t(
@@ -1125,7 +1128,7 @@ class SadaqaCompanyPostsSection extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             if (posts.isEmpty)
               Text(
                 l10n.t('sadaqa.placeholder.subtitle'),
@@ -1134,7 +1137,7 @@ class SadaqaCompanyPostsSection extends StatelessWidget {
             else
               for (final post in posts) ...[
                 SadaqaPostCard(post: post, companyName: companyName),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
               ],
           ],
         );
@@ -1160,12 +1163,12 @@ class SadaqaPostCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 14,
-            offset: const Offset(0, 8),
+            blurRadius: 14.r,
+            offset: Offset(0, 8.h),
           ),
         ],
       ),
@@ -1173,21 +1176,21 @@ class SadaqaPostCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ClipRRect(
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
             child: Image.network(
               safeImage,
-              height: 180,
+              height: 180.h,
               width: double.infinity,
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) => Container(
-                height: 180,
+                height: 180.h,
                 color: Colors.grey.shade200,
                 child: const Center(child: Icon(Icons.image_not_supported)),
               ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16.r),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1199,22 +1202,22 @@ class SadaqaPostCard extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 6),
+                  SizedBox(height: 6.h),
                 ],
                 Text(
                   post.title,
-                  style: const TextStyle(
-                    fontSize: 18,
+                  style: TextStyle(
+                    fontSize: 18.sp,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF0F172A),
                   ),
                 ),
-                const SizedBox(height: 6),
+                SizedBox(height: 6.h),
                 Text(
                   post.content,
                   style: TextStyle(
                     color: mutedColor,
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     height: 1.5,
                   ),
                 ),
@@ -1234,10 +1237,10 @@ class SadaqaHeaderPatternPainter extends CustomPainter {
       ..color = Colors.white.withValues(alpha: 0.14)
       ..style = PaintingStyle.fill;
 
-    const step = 26.0;
+    final step = 26.r;
     for (double y = step / 2; y < size.height; y += step) {
       for (double x = step / 2; x < size.width; x += step) {
-        canvas.drawCircle(Offset(x, y), 2, paint);
+        canvas.drawCircle(Offset(x, y), 2.r, paint);
       }
     }
   }

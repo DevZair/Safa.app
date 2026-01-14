@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
 
 class SettingsTile extends StatelessWidget {
@@ -28,22 +29,22 @@ class SettingsTile extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(24.r),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 18.h),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: 48.r,
+                height: 48.r,
                 decoration: BoxDecoration(
                   color: iconColor.withValues(alpha: 0.18),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(icon, color: iconColor, size: 24),
+                child: Icon(icon, color: iconColor, size: 24.sp),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,7 +61,7 @@ class SettingsTile extends StatelessWidget {
                             color: colorScheme.onSurface,
                           ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4.h),
                     Text(
                       subtitle,
                       style: textTheme.bodyMedium?.copyWith(
@@ -72,11 +73,11 @@ class SettingsTile extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16.w),
               trailing ??
                   Container(
-                    width: 38,
-                    height: 38,
+                    width: 38.r,
+                    height: 38.r,
                     decoration: BoxDecoration(
                       color: colorScheme.surfaceContainerHighest
                           .withValues(alpha: 0.4),
@@ -193,20 +194,20 @@ class SettingsInputTile extends StatelessWidget {
         selectionHandleColor ?? resolvedFocused;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 48,
-            height: 48,
+            width: 48.r,
+            height: 48.r,
             decoration: BoxDecoration(
               color: iconColor.withValues(alpha: 0.18),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: iconColor, size: 24),
+            child: Icon(icon, color: iconColor, size: 24.sp),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -223,7 +224,7 @@ class SettingsInputTile extends StatelessWidget {
                       ),
                 ),
                 if (subtitle != null && subtitle!.isNotEmpty) ...[
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   Text(
                     subtitle!,
                     style: textTheme.bodySmall?.copyWith(
@@ -232,7 +233,7 @@ class SettingsInputTile extends StatelessWidget {
                         ),
                   ),
                 ],
-                const SizedBox(height: 10),
+                SizedBox(height: 10.h),
                 Theme(
                   data: theme.copyWith(
                     textSelectionTheme: TextSelectionThemeData(
@@ -254,39 +255,39 @@ class SettingsInputTile extends StatelessWidget {
                       ),
                       filled: true,
                       fillColor: resolvedFill,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 12,
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 14.w,
+                        vertical: 12.h,
                       ),
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: BorderRadius.circular(18.r),
                         borderSide: BorderSide(
                           color: resolvedBorder,
                         ),
                       ),
                       enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: BorderRadius.circular(18.r),
                         borderSide: BorderSide(
                           color: resolvedBorder,
                         ),
                       ),
                       focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: BorderRadius.circular(18.r),
                         borderSide: BorderSide(
                           color: resolvedFocused,
-                          width: 1.4,
+                          width: 1.4.w,
                         ),
                       ),
-                    disabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(18),
-                      borderSide: BorderSide(
-                        color: resolvedBorder,
+                      disabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18.r),
+                        borderSide: BorderSide(
+                          color: resolvedBorder,
+                        ),
                       ),
+                      suffixIcon: suffixIcon,
                     ),
-                    suffixIcon: suffixIcon,
+                    onChanged: onChanged,
                   ),
-                  onChanged: onChanged,
-                ),
                 ),
               ],
             ),

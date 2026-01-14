@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_company.dart';
 import 'package:safa_app/features/settings/presentation/pages/admin_sadaqa/admin_company_profile_page.dart';
@@ -63,12 +64,12 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
         ),
         actions: [
           Padding(
-            padding: const EdgeInsets.only(right: 6),
+            padding: EdgeInsets.only(right: 6.w),
             child: IconButton(
               tooltip: 'Профиль компании',
               onPressed: _openCompanyProfile,
               icon: CircleAvatar(
-                radius: 18,
+                radius: 18.r,
                 backgroundColor: const Color(0xFFE8EEF5),
                 child: const Icon(
                   Icons.account_circle_outlined,
@@ -80,9 +81,9 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
         ],
         bottom: _companyName?.isNotEmpty == true
             ? PreferredSize(
-                preferredSize: const Size.fromHeight(36),
+                preferredSize: Size.fromHeight(36.h),
                 child: Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
+                  padding: EdgeInsets.only(bottom: 12.h),
                   child: Text(
                     _companyName!,
                     style: theme.textTheme.bodyMedium?.copyWith(
@@ -98,7 +99,7 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 24.h),
           child: Column(
             children: [
               Expanded(
@@ -107,11 +108,11 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
                     final item = items[index];
                     return _AdminCard(item: item);
                   },
-                  separatorBuilder: (context, _) => const SizedBox(height: 12),
+                  separatorBuilder: (context, _) => SizedBox(height: 12.h),
                   itemCount: items.length,
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
@@ -120,10 +121,10 @@ class _AdminPanelPageState extends State<AdminPanelPage> {
                   label: const Text('Выйти'),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: const Color(0xFFE53935),
-                    side: const BorderSide(color: Color(0xFFE53935)),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    side: BorderSide(color: const Color(0xFFE53935), width: 1.w),
+                    padding: EdgeInsets.symmetric(vertical: 14.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(18.r),
                     ),
                   ),
                 ),
@@ -173,31 +174,31 @@ class _AdminCard extends StatelessWidget {
     final theme = Theme.of(context);
     return Material(
       color: item.color.withValues(alpha: 0.08),
-      borderRadius: BorderRadius.circular(22),
+      borderRadius: BorderRadius.circular(22.r),
       child: InkWell(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(22.r),
         onTap: item.onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
           child: Row(
             children: [
               Container(
-                width: 52,
-                height: 52,
+                width: 52.r,
+                height: 52.r,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
                       color: item.color.withValues(alpha: 0.22),
-                      blurRadius: 14,
-                      offset: const Offset(0, 8),
+                      blurRadius: 14.r,
+                      offset: Offset(0, 8.h),
                     ),
                   ],
                 ),
-                child: Icon(item.icon, color: item.color, size: 26),
+                child: Icon(item.icon, color: item.color, size: 26.sp),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16.w),
               Expanded(
                 child: Text(
                   item.title,
@@ -207,7 +208,7 @@ class _AdminCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const Icon(Icons.chevron_right),
+              Icon(Icons.chevron_right, size: 20.sp),
             ],
           ),
         ),

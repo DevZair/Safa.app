@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:safa_app/core/utils/error_messages.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/features/sadaqa/data/repositories/sadaqa_repository_impl.dart';
 import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_post.dart';
@@ -64,27 +66,29 @@ class _AdminNotesPageState extends State<AdminNotesPage> {
           centerTitle: true,
           bottom: PreferredSize(
             preferredSize: Size.fromHeight(
-              (widget.companyName?.isNotEmpty == true ? 32 : 0) + 48,
+              (widget.companyName?.isNotEmpty == true ? 32.h : 0.h) + 48.h,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (widget.companyName?.isNotEmpty == true)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
+                    padding: EdgeInsets.only(bottom: 8.h),
                     child: Text(
                       widget.companyName!,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color:
-                            theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.7,
+                        ),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
                 TabBar(
                   labelColor: theme.colorScheme.primary,
-                  unselectedLabelColor:
-                      theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  unselectedLabelColor: theme.colorScheme.onSurface.withValues(
+                    alpha: 0.6,
+                  ),
                   indicatorColor: theme.colorScheme.primary,
                   tabs: const [
                     Tab(text: 'Активные'),
@@ -137,14 +141,15 @@ class _AdminNotesPageState extends State<AdminNotesPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text('Не удалось загрузить', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             Text(
               _error!,
-              style: theme.textTheme.bodySmall
-                  ?.copyWith(color: Colors.red.withValues(alpha: 0.8)),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: Colors.red.withValues(alpha: 0.8),
+              ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             ElevatedButton(
               onPressed: _loadNotes,
               child: const Text('Повторить'),
@@ -165,13 +170,13 @@ class _AdminNotesPageState extends State<AdminNotesPage> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 24.h),
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: notes.length,
       itemBuilder: (context, index) {
         final note = notes[index];
         return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
+          padding: EdgeInsets.only(bottom: 12.h),
           child: _NoteCard(
             note: note,
             onEdit: _onEditNote,
@@ -183,15 +188,13 @@ class _AdminNotesPageState extends State<AdminNotesPage> {
   }
 
   Future<void> _onEditNote(SadaqaPost note) async {
-    final updated =
-        await Navigator.of(context, rootNavigator: true).push<SadaqaPost>(
-      MaterialPageRoute(
-        builder: (_) => AdminNoteEditPage(
-          note: note,
-          repository: _repository,
-        ),
-      ),
-    );
+    final updated = await Navigator.of(context, rootNavigator: true)
+        .push<SadaqaPost>(
+          MaterialPageRoute(
+            builder: (_) =>
+                AdminNoteEditPage(note: note, repository: _repository),
+          ),
+        );
     if (updated != null && mounted) {
       setState(() {
         _notes = _notes
@@ -202,12 +205,12 @@ class _AdminNotesPageState extends State<AdminNotesPage> {
   }
 
   Future<void> _onCreateNote() async {
-    final created =
-        await Navigator.of(context, rootNavigator: true).push<SadaqaPost>(
-      MaterialPageRoute(
-        builder: (_) => AdminNoteCreatePage(repository: _repository),
-      ),
-    );
+    final created = await Navigator.of(context, rootNavigator: true)
+        .push<SadaqaPost>(
+          MaterialPageRoute(
+            builder: (_) => AdminNoteCreatePage(repository: _repository),
+          ),
+        );
     if (created != null && mounted) {
       setState(() {
         _notes = [created, ..._notes];
@@ -245,14 +248,14 @@ class _AdminNotesPageState extends State<AdminNotesPage> {
       setState(() {
         _notes = _notes.where((n) => n.id != note.id).toList();
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Заметка удалена')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Заметка удалена')));
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ошибка удаления: $error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(friendlyError(error))));
     }
   }
 }
@@ -277,16 +280,16 @@ class _NoteCard extends StatelessWidget {
     final hasGoal = note.goal != null && note.goal! > 0;
     final progress = hasGoal
         ? ((note.collected ?? 0).toDouble() / note.goal!)
-            .clamp(0.0, 1.0)
-            .toDouble()
+              .clamp(0.0, 1.0)
+              .toDouble()
         : 0.0;
 
     return Material(
       color: theme.cardColor,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(20.r),
       elevation: 0,
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.all(14.r),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -294,19 +297,19 @@ class _NoteCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                   child: image.isNotEmpty
                       ? Image.network(
                           image,
-                          width: 76,
-                          height: 76,
+                          width: 76.r,
+                          height: 76.r,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) =>
                               _placeholder(),
                         )
                       : _placeholder(),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -318,35 +321,38 @@ class _NoteCard extends StatelessWidget {
                         ),
                       ),
                       if (subtitle.isNotEmpty) ...[
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4.h),
                         Text(
                           subtitle,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface
-                                .withValues(alpha: 0.7),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.7,
+                            ),
                           ),
                         ),
                       ],
                       if (hasGoal) ...[
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8.h),
                         LinearProgressIndicator(
                           value: progress,
-                          minHeight: 6.0,
-                          borderRadius: BorderRadius.circular(10),
-                          backgroundColor:
-                              theme.colorScheme.primary.withValues(alpha: 0.12),
+                          minHeight: 6.h,
+                          borderRadius: BorderRadius.circular(10.r),
+                          backgroundColor: theme.colorScheme.primary.withValues(
+                            alpha: 0.12,
+                          ),
                           valueColor: AlwaysStoppedAnimation<Color>(
                             theme.colorScheme.primary,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 4.h),
                         Text(
                           '${(progress * 100).toStringAsFixed(1)}% собрано',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: theme.colorScheme.onSurface
-                                .withValues(alpha: 0.7),
+                            color: theme.colorScheme.onSurface.withValues(
+                              alpha: 0.7,
+                            ),
                           ),
                         ),
                       ],
@@ -355,7 +361,7 @@ class _NoteCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             Row(
               children: [
                 Expanded(
@@ -365,12 +371,12 @@ class _NoteCard extends StatelessWidget {
                     label: const Text('Редактировать'),
                   ),
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: 10.w),
                 Expanded(
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,
-                      side: const BorderSide(color: Colors.red),
+                      side: BorderSide(color: Colors.red, width: 1.w),
                     ),
                     onPressed: () => onDelete(note),
                     icon: const Icon(Icons.delete_outline),
@@ -387,11 +393,11 @@ class _NoteCard extends StatelessWidget {
 
   Widget _placeholder() {
     return Container(
-      width: 76,
-      height: 76,
+      width: 76.r,
+      height: 76.r,
       decoration: BoxDecoration(
         color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: const Icon(Icons.image_outlined, color: Colors.grey),
     );

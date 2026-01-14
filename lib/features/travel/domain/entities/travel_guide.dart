@@ -4,6 +4,7 @@ class TravelGuide {
   final String lastName;
   final String about;
   final double rating;
+  final int? numericId;
 
   const TravelGuide({
     required this.id,
@@ -11,10 +12,14 @@ class TravelGuide {
     required this.lastName,
     required this.about,
     required this.rating,
+    this.numericId,
   });
 
   String get fullName {
-    final parts = [firstName.trim(), lastName.trim()].where((part) => part.isNotEmpty);
+    final parts = [
+      firstName.trim(),
+      lastName.trim(),
+    ].where((part) => part.isNotEmpty);
     final joined = parts.join(' ').trim();
     return joined.isNotEmpty ? joined : 'Гид';
   }
@@ -24,12 +29,15 @@ class TravelGuide {
     final rating = ratingRaw is num
         ? ratingRaw.toDouble()
         : double.tryParse('$ratingRaw') ?? 0.0;
+    final idRaw = json['id'];
+    final parsedNumeric = idRaw is num ? idRaw.toInt() : int.tryParse('$idRaw');
     return TravelGuide(
       id: '${json['id'] ?? ''}',
       firstName: '${json['name'] ?? json['first_name'] ?? ''}',
       lastName: '${json['surname'] ?? json['last_name'] ?? ''}',
       about: '${json['about_self'] ?? json['about'] ?? ''}',
       rating: rating,
+      numericId: parsedNumeric,
     );
   }
 }

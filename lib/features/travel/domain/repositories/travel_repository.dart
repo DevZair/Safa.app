@@ -9,4 +9,5 @@ abstract class TravelRepository {
   Future<List<TravelGuide>> fetchGuides();
   Future<List<TravelCategory>> fetchCategories();
   Future<int> fetchActiveToursCount();
+  Future<void> createBooking(Map<String, Object?> payload);
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/features/settings/presentation/widgets/settings_tile.dart';
 
@@ -23,25 +24,25 @@ Future<bool> showAdminSheet({
     builder: (sheetContext) {
       return Padding(
         padding: EdgeInsets.only(
-          left: 16,
-          right: 16,
-          bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 16,
-          top: 10,
+          left: 16.w,
+          right: 16.w,
+          bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 16.h,
+          top: 10.h,
         ),
         child: SafeArea(
           child: Container(
             decoration: BoxDecoration(
               color: theme.colorScheme.surface,
-              borderRadius: BorderRadius.circular(32),
-              boxShadow: const [
+              borderRadius: BorderRadius.circular(32.r),
+              boxShadow: [
                 BoxShadow(
                   color: Color(0x1A000000),
-                  blurRadius: 20,
-                  offset: Offset(0, 10),
+                  blurRadius: 20.r,
+                  offset: Offset(0, 10.h),
                 ),
               ],
             ),
-            padding: const EdgeInsets.fromLTRB(18, 14, 18, 22),
+            padding: EdgeInsets.fromLTRB(18.w, 14.h, 18.w, 22.h),
             child: SingleChildScrollView(
               child: StatefulBuilder(
                 builder: (context, setModalState) {
@@ -52,32 +53,33 @@ Future<bool> showAdminSheet({
                     children: [
                       Center(
                         child: Container(
-                          width: 44,
-                          height: 4,
+                          width: 44.w,
+                          height: 4.h,
                           decoration: BoxDecoration(
                             color: theme.colorScheme.onSurface.withValues(
                               alpha: 0.2,
                             ),
-                            borderRadius: BorderRadius.circular(2),
+                            borderRadius: BorderRadius.circular(2.r),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12.h),
                       Text(
                         l10n.t('settings.section.admin'),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4.h),
                       Text(
                         l10n.t('settings.admin.subtitle'),
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color:
-                              theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.7,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: 20.h),
                       SettingsInputTile(
                         icon: Icons.admin_panel_settings_outlined,
                         iconColor: const Color(0xFFF25F5C),
@@ -93,9 +95,9 @@ Future<bool> showAdminSheet({
                         selectionHandleColor: const Color(0xFF7B6AF5),
                         onChanged: onLoginChanged,
                       ),
-                      const Divider(
-                        height: 1,
-                        thickness: 0.8,
+                      Divider(
+                        height: 1.h,
+                        thickness: 0.8.w,
                         color: Color(0xFFE5E7EB),
                       ),
                       SettingsInputTile(
@@ -129,15 +131,15 @@ Future<bool> showAdminSheet({
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16.h),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF8D6BFF),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            padding: EdgeInsets.symmetric(vertical: 14.h),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(18),
+                              borderRadius: BorderRadius.circular(18.r),
                             ),
                             elevation: 0,
                           ),
@@ -155,11 +157,11 @@ Future<bool> showAdminSheet({
                                   setModalState(() => isSubmitting = false);
                                 },
                           child: isSubmitting
-                              ? const SizedBox(
-                                  height: 18,
-                                  width: 18,
+                              ? SizedBox(
+                                  height: 18.r,
+                                  width: 18.r,
                                   child: CircularProgressIndicator(
-                                    strokeWidth: 2,
+                                    strokeWidth: 2.w,
                                     valueColor: AlwaysStoppedAnimation<Color>(
                                       Colors.white,
                                     ),

@@ -29,7 +29,9 @@ class RequestHelpRepositoryImpl implements RequestHelpRepository {
     final paths = <String>{basePath, '$basePath/'};
     final formBodies = <FormData>[
       FormData.fromMap({'file': file}),
-      FormData.fromMap({'files': [file]}),
+      FormData.fromMap({
+        'files': [file],
+      }),
     ];
 
     Object? lastError;
@@ -99,11 +101,7 @@ class RequestHelpRepositoryImpl implements RequestHelpRepository {
 
   @override
   Future<List<CategoryItem>> fetchCategories({int? companyId}) async {
-    final paths = <String>{
-      ApiConstants.sadaqaCategories,
-      '/api/sadaqa/public/categories/',
-      '/sadaqa/public/categories/',
-    };
+    final paths = <String>{ApiConstants.sadaqaCategories};
     final normalized = <String>{};
     for (final path in paths) {
       normalized.add(path);
@@ -133,11 +131,24 @@ class RequestHelpRepositoryImpl implements RequestHelpRepository {
 
     if (data.isEmpty && lastError != null) throw lastError;
 
-    return data
+    final categories = data
         .whereType<Map<String, Object?>>()
         .map(CategoryItem.fromJson)
         .where((item) => item.id != 0 && item.title.isNotEmpty)
         .toList();
+
+    final hasOther = categories.any((item) => item.isOther);
+    if (!hasOther) {
+      categories.add(
+        const CategoryItem(
+          id: -1,
+          title: 'Другая категория',
+          isOther: true,
+        ),
+      );
+    }
+
+    return categories;
   }
 
   @override

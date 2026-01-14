@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:safa_app/core/utils/error_messages.dart';
 import 'package:safa_app/features/sadaqa/data/repositories/sadaqa_repository_impl.dart';
 import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_cause.dart';
 import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_company.dart';
@@ -126,7 +127,7 @@ class SadaqaCubit extends Cubit<SadaqaState> {
           causes: const [],
           companies: const [],
           isLoading: false,
-          errorMessage: error.toString(),
+          errorMessage: friendlyError(error),
         ),
       );
     }
@@ -169,14 +170,12 @@ class SadaqaCubit extends Cubit<SadaqaState> {
       if (company == null) return cause;
 
       return cause.copyWith(
-        companyName:
-            (cause.companyName?.trim().isNotEmpty ?? false)
-                ? cause.companyName
-                : company.title,
-        companyLogo:
-            (cause.companyLogo?.trim().isNotEmpty ?? false)
-                ? cause.companyLogo
-                : company.logo ?? company.cover ?? cause.companyLogo,
+        companyName: (cause.companyName?.trim().isNotEmpty ?? false)
+            ? cause.companyName
+            : company.title,
+        companyLogo: (cause.companyLogo?.trim().isNotEmpty ?? false)
+            ? cause.companyLogo
+            : company.logo ?? company.cover ?? cause.companyLogo,
       );
     }).toList();
   }

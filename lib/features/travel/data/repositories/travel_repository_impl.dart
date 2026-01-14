@@ -7,7 +7,7 @@ import 'package:safa_app/features/travel/domain/repositories/travel_repository.d
 
 class TravelRepositoryImpl implements TravelRepository {
   TravelRepositoryImpl({TravelRemoteDataSource? remoteDataSource})
-      : _remoteDataSource = remoteDataSource ?? TravelRemoteDataSource();
+    : _remoteDataSource = remoteDataSource ?? TravelRemoteDataSource();
 
   final TravelRemoteDataSource _remoteDataSource;
 
@@ -48,6 +48,11 @@ class TravelRepositoryImpl implements TravelRepository {
   Future<int> fetchActiveToursCount() async {
     final data = await _remoteDataSource.fetchActiveToursCountRaw();
     return _parseActiveToursCount(data);
+  }
+
+  @override
+  Future<void> createBooking(Map<String, Object?> payload) {
+    return _remoteDataSource.createBooking(payload);
   }
 
   static int _parseActiveToursCount(Object? raw) {

@@ -2,15 +2,20 @@ import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/core/settings/app_settings_cubit.dart';
 import 'package:safa_app/core/settings/app_settings_state.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
+import 'package:safa_app/core/service/db_service.dart';
+import 'package:safa_app/core/utils/error_messages.dart';
 import 'package:safa_app/features/settings/data/repositories/admin_auth_repository_impl.dart';
 import 'package:safa_app/features/settings/domain/repositories/admin_auth_repository.dart';
+import 'package:safa_app/features/settings/domain/entities/admin_login_result.dart';
 import 'package:safa_app/features/settings/presentation/pages/admin_sadaqa/admin_panel_page.dart';
+import 'package:safa_app/features/settings/presentation/pages/admin_tour/admin_panel_page.dart';
 import 'package:safa_app/features/settings/presentation/widgets/admin_sheet.dart';
 import 'package:safa_app/features/settings/presentation/widgets/settings_header.dart';
 import 'package:safa_app/features/settings/presentation/widgets/settings_section.dart';
 import 'package:safa_app/features/settings/presentation/widgets/settings_tile.dart';
 import 'package:safa_app/features/settings/presentation/widgets/settings_user_card.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/material.dart';
 
@@ -27,6 +32,7 @@ class _SettingsPageState extends State<SettingsPage> {
   late final TextEditingController _adminPasswordController;
   final AdminAuthRepository _adminRepository = AdminAuthRepositoryImpl();
   bool _isAdminSubmitting = false;
+  AdminLoginResult? _lastLoginResult;
 
   static const _languageFlags = {'ru': '🇷🇺', 'kk': '🇰🇿', 'uz': '🇺🇿'};
 
@@ -62,7 +68,7 @@ class _SettingsPageState extends State<SettingsPage> {
             'settings.language.option.${settingsState.locale.languageCode}',
           );
           return SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 32),
+            padding: EdgeInsets.only(bottom: 32.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -75,9 +81,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       subtitle: l10n.t('settings.header.subtitle'),
                     ),
                     Positioned(
-                      left: 24,
-                      right: 24,
-                      bottom: -48,
+                      left: 24.w,
+                      right: 24.w,
+                      bottom: -(48.h),
                       child: SettingsUserCard(
                         name: l10n.t('settings.user.name'),
                         email: l10n.t('settings.user.email'),
@@ -86,9 +92,9 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 72),
+                SizedBox(height: 72.h),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  padding: EdgeInsets.symmetric(horizontal: 24.w),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -109,7 +115,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 28),
+                      SizedBox(height: 28.h),
                       SettingsSection(
                         title: l10n.t('settings.section.preferences'),
                         children: [
@@ -145,7 +151,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                         fontWeight: FontWeight.w600,
                                       ),
                                 ),
-                                const SizedBox(width: 8),
+                                SizedBox(width: 8.w),
                                 const Icon(
                                   Icons.chevron_right,
                                   color: AppColors.iconColor,
@@ -155,7 +161,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 28),
+                      SizedBox(height: 28.h),
                       SettingsSection(
                         title: l10n.t('settings.section.admin'),
                         children: [
@@ -164,23 +170,14 @@ class _SettingsPageState extends State<SettingsPage> {
                             iconColor: const Color(0xFFF25F5C),
                             title: l10n.t('settings.section.admin'),
                             subtitle: l10n.t('settings.admin.subtitle'),
-                            onTap: () => _openAdminSheet(l10n),
+                            onTap: () => _handleAdminEntry(l10n),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 28),
+                      SizedBox(height: 28.h),
                       SettingsSection(
                         title: l10n.t('settings.section.account'),
                         children: [
-                          SettingsTile(
-                            icon: Icons.person_outline,
-                            iconColor: const Color(0xFF22C0A0),
-                            title: l10n.t('settings.account.profile.title'),
-                            subtitle: l10n.t(
-                              'settings.account.profile.subtitle',
-                            ),
-                            onTap: () {},
-                          ),
                           SettingsTile(
                             icon: Icons.lock_outline,
                             iconColor: const Color(0xFF2FC58C),
@@ -206,20 +203,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 28),
-                      SettingsSection(
-                        title: l10n.t('settings.section.support'),
-                        children: [
-                          SettingsTile(
-                            icon: Icons.help_outline,
-                            iconColor: const Color(0xFF50A6B8),
-                            title: l10n.t('settings.support.title'),
-                            subtitle: l10n.t('settings.support.subtitle'),
-                            onTap: () {},
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 28),
+                      SizedBox(height: 28.h),
                       _LogoutCard(
                         label: l10n.t('settings.logout'),
                         onPressed: () {},
@@ -258,11 +242,9 @@ class _SettingsPageState extends State<SettingsPage> {
           child: Container(
             decoration: BoxDecoration(
               color: surface,
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(32),
-              ),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(32.r)),
             ),
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 32),
+            padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 32.h),
             child: StatefulBuilder(
               builder: (context, setModalState) {
                 return Column(
@@ -271,17 +253,17 @@ class _SettingsPageState extends State<SettingsPage> {
                   children: [
                     Center(
                       child: Container(
-                        width: 42,
-                        height: 4,
+                        width: 42.w,
+                        height: 4.h,
                         decoration: BoxDecoration(
                           color: theme.colorScheme.onSurface.withValues(
                             alpha: 0.2,
                           ),
-                          borderRadius: BorderRadius.circular(2),
+                          borderRadius: BorderRadius.circular(2.r),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 18),
+                    SizedBox(height: 18.h),
                     Text(
                       l10n.t('settings.language.title'),
                       textAlign: TextAlign.center,
@@ -289,7 +271,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24.h),
                     for (final locale in locales) ...[
                       _LanguageOptionTile(
                         label: l10n.t(
@@ -302,15 +284,15 @@ class _SettingsPageState extends State<SettingsPage> {
                           setModalState(() => tempLocale = locale);
                         },
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12.h),
                     ],
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4.h),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: highlight,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        padding: EdgeInsets.symmetric(vertical: 14.h),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
+                          borderRadius: BorderRadius.circular(18.r),
                         ),
                       ),
                       onPressed: () {
@@ -346,6 +328,54 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  Future<void> _handleAdminEntry(AppLocalizations l10n) async {
+    final hasTokens =
+        DBService.accessToken.isNotEmpty ||
+        DBService.tourAccessToken.isNotEmpty;
+    if (hasTokens) {
+      final relogin = await _askReloginOrContinue();
+      if (relogin == true) {
+        DBService.accessToken = '';
+        DBService.refreshToken = '';
+        DBService.tourAccessToken = '';
+        DBService.tourRefreshToken = '';
+        await _openAdminSheet(l10n);
+      } else {
+        await _openAdminArea(
+          _adminLoginController.text.trim().isNotEmpty
+              ? _adminLoginController.text.trim()
+              : null,
+        );
+      }
+      return;
+    }
+    await _openAdminSheet(l10n);
+  }
+
+  Future<bool?> _askReloginOrContinue() {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Админка'),
+          content: const Text(
+            'Вы уже вошли. Продолжить с текущими данными или войти заново?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Продолжить'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Войти заново'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _openAdminSheet(AppLocalizations l10n) async {
     final loginSnapshot = _adminLoginController.text.trim();
     final success = await showAdminSheet(
@@ -360,8 +390,7 @@ class _SettingsPageState extends State<SettingsPage> {
       onSubmit: _handleAdminSubmit,
     );
     if (success && mounted) {
-      _clearAdminInputs();
-      await _openAdminPanel(l10n, loginSnapshot.isNotEmpty ? loginSnapshot : null);
+      await _openAdminArea(loginSnapshot.isNotEmpty ? loginSnapshot : null);
     }
   }
 
@@ -370,25 +399,28 @@ class _SettingsPageState extends State<SettingsPage> {
     final login = _adminLoginController.text.trim();
     final password = _adminPasswordController.text.trim();
     if (login.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Введите логин и пароль')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Введите логин и пароль')));
       return false;
     }
     setState(() => _isAdminSubmitting = true);
     try {
-      await _adminRepository.login(login: login, password: password);
-      if (!mounted) return true;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Успешный вход')),
+      final result = await _adminRepository.login(
+        login: login,
+        password: password,
       );
-      
-      return true;
+      _lastLoginResult = result;
+      if (!mounted) return true;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Успешный вход')));
+      return result.hasAnySuccess;
     } catch (error) {
       if (!mounted) return false;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ошибка входа: $error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(friendlyError(error))));
       return false;
     } finally {
       if (mounted) {
@@ -405,14 +437,33 @@ class _SettingsPageState extends State<SettingsPage> {
       ..updateAdminPassword('');
   }
 
-  Future<void> _openAdminPanel(AppLocalizations l10n, String? companyName) {
-    return Navigator.of(context, rootNavigator: true).push(
-      MaterialPageRoute(
-        builder: (_) => AdminPanelPage(
-          companyName: companyName,
+  Future<void> _openAdminArea(String? companyName) async {
+    final result = _lastLoginResult;
+    final hasSadaqa =
+        result?.sadaqaSuccess == true || DBService.accessToken.isNotEmpty;
+    final hasTour =
+        result?.tourSuccess == true || DBService.tourAccessToken.isNotEmpty;
+
+    if (!hasSadaqa && !hasTour) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Сначала выполните вход')));
+      return;
+    }
+
+    if (hasSadaqa) {
+      await Navigator.of(context, rootNavigator: true).push(
+        MaterialPageRoute(
+          builder: (_) => AdminPanelPage(companyName: companyName),
         ),
-      ),
-    );
+      );
+      return;
+    }
+
+    await Navigator.of(
+      context,
+      rootNavigator: true,
+    ).push(MaterialPageRoute(builder: (_) => const TourAdminPanelPage()));
   }
 }
 
@@ -430,18 +481,18 @@ class _LogoutCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: BorderRadius.circular(26.r),
         child: Ink(
-          padding: const EdgeInsets.symmetric(vertical: 18),
+          padding: EdgeInsets.symmetric(vertical: 18.h),
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(26),
+            borderRadius: BorderRadius.circular(26.r),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(Icons.logout, color: Color(0xFFE53935)),
-              const SizedBox(width: 10),
+              SizedBox(width: 10.w),
               Text(
                 label,
                 style: textTheme.titleMedium?.copyWith(
@@ -484,25 +535,25 @@ class _LanguageOptionTile extends StatelessWidget {
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         decoration: BoxDecoration(
           color: background,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: borderColor, width: 2),
+          borderRadius: BorderRadius.circular(24.r),
+          border: Border.all(color: borderColor, width: 2.w),
           boxShadow: selected
               ? [
                   BoxShadow(
                     color: theme.colorScheme.primary.withValues(alpha: 0.3),
-                    blurRadius: 18,
-                    offset: const Offset(0, 10),
+                    blurRadius: 18.r,
+                    offset: Offset(0, 10.h),
                   ),
                 ]
               : null,
         ),
         child: Row(
           children: [
-            Text(flag, style: const TextStyle(fontSize: 24)),
-            const SizedBox(width: 12),
+            Text(flag, style: TextStyle(fontSize: 24.sp)),
+            SizedBox(width: 12.w),
             Expanded(
               child: Text(
                 label,

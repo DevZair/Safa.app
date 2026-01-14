@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/core/constants/api_constants.dart';
@@ -287,15 +288,15 @@ class _SadaqaDetailState extends State<SadaqaDetail> {
             : const Color(0xFF0D9488);
 
         // Keep stack tall enough for the overlaid card so taps remain hit-testable.
-        const cardTopOffset = 270.0;
-        const cardMinHeight = 470.0;
-        const stackHeight = cardTopOffset + cardMinHeight + 40;
-        const headerHeight = 360.0;
+        final cardTopOffset = 270.h;
+        final cardMinHeight = 470.h;
+        final stackHeight = cardTopOffset + cardMinHeight + 40.h;
+        final headerHeight = 360.h;
 
         return Scaffold(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           body: SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 24),
+            padding: EdgeInsets.only(bottom: 24.h),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -321,8 +322,8 @@ class _SadaqaDetailState extends State<SadaqaDetail> {
                         ),
                       ),
                       Positioned(
-                        left: 24,
-                        right: 24,
+                        left: 24.w,
+                        right: 24.w,
                         top: cardTopOffset,
                         child: SadaqaBeneficiaryOverviewCard(
                           imagePath: effectiveCause.imagePath,
@@ -347,14 +348,14 @@ class _SadaqaDetailState extends State<SadaqaDetail> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 24),
+                SizedBox(height: 24.h),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  padding: EdgeInsets.symmetric(horizontal: 24.w),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SadaqaQuickStatsRow(),
-                      const SizedBox(height: 32),
+                      SizedBox(height: 32.h),
                       SadaqaCompanyPostsSection(
                         futurePosts: _postsFuture,
                         companyName: displayCompanyName,

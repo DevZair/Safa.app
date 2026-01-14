@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/features/sadaqa/domain/entities/help_request.dart';
 
@@ -108,12 +109,12 @@ class HelpRequestStatusChip extends StatelessWidget {
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOut,
       padding: EdgeInsets.symmetric(
-        horizontal: dense ? 8 : 10,
-        vertical: dense ? 4 : 6,
+        horizontal: dense ? 8.w : 10.w,
+        vertical: dense ? 4.h : 6.h,
       ),
       decoration: BoxDecoration(
         color: style.background,
-        borderRadius: BorderRadius.circular(dense ? 10 : 12),
+        borderRadius: BorderRadius.circular(dense ? 10.r : 12.r),
         border: Border.all(color: style.borderColor),
       ),
       child: AnimatedSwitcher(
@@ -123,9 +124,9 @@ class HelpRequestStatusChip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: dense ? 8 : 10,
-              height: dense ? 8 : 10,
-              margin: EdgeInsets.only(right: dense ? 6 : 8),
+              width: dense ? 8.r : 10.r,
+              height: dense ? 8.r : 10.r,
+              margin: EdgeInsets.only(right: dense ? 6.w : 8.w),
               decoration: BoxDecoration(
                 color: style.textColor,
                 shape: BoxShape.circle,
@@ -136,7 +137,7 @@ class HelpRequestStatusChip extends StatelessWidget {
               style: TextStyle(
                 color: style.textColor,
                 fontWeight: FontWeight.w700,
-                fontSize: dense ? 12 : 13,
+                fontSize: dense ? 12.sp : 13.sp,
               ),
             ),
           ],

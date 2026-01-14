@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
+import 'package:safa_app/core/utils/error_messages.dart';
 import 'package:safa_app/features/sadaqa/data/repositories/sadaqa_repository_impl.dart';
 import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_post.dart';
 import 'package:safa_app/features/sadaqa/domain/repositories/sadaqa_repository.dart';
@@ -62,14 +64,13 @@ class _AdminPostsPageState extends State<AdminPostsPage> {
         ),
         bottom: widget.companyName?.isNotEmpty == true
             ? PreferredSize(
-                preferredSize: const Size.fromHeight(32),
+                preferredSize: Size.fromHeight(32.h),
                 child: Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
+                  padding: EdgeInsets.only(bottom: 10.h),
                   child: Text(
                     widget.companyName!,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color:
-                          theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -77,10 +78,7 @@ class _AdminPostsPageState extends State<AdminPostsPage> {
               )
             : null,
       ),
-      body: RefreshIndicator(
-        onRefresh: _loadPosts,
-        child: _buildBody(theme),
-      ),
+      body: RefreshIndicator(onRefresh: _loadPosts, child: _buildBody(theme)),
       floatingActionButton: FloatingActionButton(
         onPressed: _onCreatePost,
         child: const Icon(Icons.add),
@@ -96,14 +94,15 @@ class _AdminPostsPageState extends State<AdminPostsPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text('Не удалось загрузить', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             Text(
               _error!,
-              style: theme.textTheme.bodySmall
-                  ?.copyWith(color: Colors.red.withValues(alpha: 0.8)),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: Colors.red.withValues(alpha: 0.8),
+              ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             ElevatedButton(
               onPressed: _loadPosts,
               child: const Text('Повторить'),
@@ -124,12 +123,12 @@ class _AdminPostsPageState extends State<AdminPostsPage> {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 24.h),
       itemCount: _posts.length,
       itemBuilder: (context, index) {
         final post = _posts[index];
         return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
+          padding: EdgeInsets.only(bottom: 12.h),
           child: _PostCard(
             post: post,
             onEdit: _onEditPost,
@@ -141,12 +140,13 @@ class _AdminPostsPageState extends State<AdminPostsPage> {
   }
 
   Future<void> _onEditPost(SadaqaPost post) async {
-    final updated =
-        await Navigator.of(context, rootNavigator: true).push<SadaqaPost>(
-      MaterialPageRoute(
-        builder: (_) => AdminPostEditPage(post: post, repository: _repository),
-      ),
-    );
+    final updated = await Navigator.of(context, rootNavigator: true)
+        .push<SadaqaPost>(
+          MaterialPageRoute(
+            builder: (_) =>
+                AdminPostEditPage(post: post, repository: _repository),
+          ),
+        );
     if (updated != null && mounted) {
       setState(() {
         _posts = _posts
@@ -186,24 +186,24 @@ class _AdminPostsPageState extends State<AdminPostsPage> {
       setState(() {
         _posts = _posts.where((p) => p.id != post.id).toList();
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Пост удалён')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Пост удалён')));
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ошибка удаления: $error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(friendlyError(error))));
     }
   }
 
   Future<void> _onCreatePost() async {
-    final created =
-        await Navigator.of(context, rootNavigator: true).push<SadaqaPost>(
-      MaterialPageRoute(
-        builder: (_) => AdminPostCreatePage(repository: _repository),
-      ),
-    );
+    final created = await Navigator.of(context, rootNavigator: true)
+        .push<SadaqaPost>(
+          MaterialPageRoute(
+            builder: (_) => AdminPostCreatePage(repository: _repository),
+          ),
+        );
     if (created != null && mounted) {
       setState(() {
         _posts = [created, ..._posts];
@@ -233,19 +233,19 @@ class _PostCard extends StatelessWidget {
 
     return Material(
       color: theme.cardColor,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(20.r),
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.all(14.r),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (image.isNotEmpty)
               ClipRRect(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
                 child: Image.network(
                   image,
                   width: double.infinity,
-                  height: 180,
+                  height: 180.h,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) =>
                       _placeholderImage(),
@@ -253,33 +253,31 @@ class _PostCard extends StatelessWidget {
               )
             else
               _placeholderImage(),
-            const SizedBox(height: 10),
+            SizedBox(height: 10.h),
             Text(
               post.title.isNotEmpty ? post.title : 'Без названия',
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: 6.h),
             Text(
               post.content,
               maxLines: 3,
               overflow: TextOverflow.ellipsis,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color:
-                    theme.colorScheme.onSurface.withValues(alpha: 0.75),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             if (dateText.isNotEmpty)
               Text(
                 dateText,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color:
-                      theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             Row(
               children: [
                 Expanded(
@@ -289,12 +287,12 @@ class _PostCard extends StatelessWidget {
                     label: const Text('Редактировать'),
                   ),
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: 10.w),
                 Expanded(
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,
-                      side: const BorderSide(color: Colors.red),
+                      side: BorderSide(color: Colors.red, width: 1.w),
                     ),
                     onPressed: () => onDelete(post),
                     icon: const Icon(Icons.delete_outline),
@@ -312,10 +310,10 @@ class _PostCard extends StatelessWidget {
   Widget _placeholderImage() {
     return Container(
       width: double.infinity,
-      height: 180,
+      height: 180.h,
       decoration: BoxDecoration(
         color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: const Icon(Icons.image_outlined, color: Colors.grey),
     );

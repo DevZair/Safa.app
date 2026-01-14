@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
 import 'package:safa_app/features/sadaqa/domain/utils/media_resolver.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -38,15 +39,15 @@ class CauseCard extends StatelessWidget {
     return GestureDetector(
       onTap: onDonate,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 12),
+        margin: EdgeInsets.symmetric(vertical: 12.h),
         decoration: BoxDecoration(
           color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(20.r),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
+              blurRadius: 12.r,
+              offset: Offset(0, 6.h),
             ),
           ],
         ),
@@ -56,43 +57,43 @@ class CauseCard extends StatelessWidget {
             Stack(
               children: [
                 _ImageCarousel(
-                  height: 200,
+                  height: 200.h,
                   images: (gallery.isNotEmpty ? gallery : [imagePath]),
                 ),
                 if (companyName?.isNotEmpty == true)
                   Positioned(
-                    left: 12,
-                    top: 12,
+                    left: 12.w,
+                    top: 12.h,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 6,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10.w,
+                        vertical: 6.h,
                       ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.92),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.r),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.08),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
+                            blurRadius: 8.r,
+                            offset: Offset(0, 4.h),
                           ),
                         ],
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(
+                          Icon(
                             Icons.handshake_rounded,
-                            size: 16,
+                            size: 16.sp,
                             color: AppColors.primary,
                           ),
-                          const SizedBox(width: 6),
+                          SizedBox(width: 6.w),
                           Text(
                             companyName!,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w700,
-                              fontSize: 13,
+                              fontSize: 13.sp,
                               color: AppColors.primary,
                             ),
                           ),
@@ -101,20 +102,20 @@ class CauseCard extends StatelessWidget {
                     ),
                   ),
                 Positioned(
-                  top: 12,
-                  right: 12,
+                  top: 12.h,
+                  right: 12.w,
                   child: GestureDetector(
                     onTap: onFavoriteToggle,
                     child: Container(
-                      padding: const EdgeInsets.all(10),
+                      padding: EdgeInsets.all(10.r),
                       decoration: BoxDecoration(
                         color: Theme.of(context).cardColor,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.14),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
+                            blurRadius: 8.r,
+                            offset: Offset(0, 4.h),
                           ),
                         ],
                       ),
@@ -132,9 +133,9 @@ class CauseCard extends StatelessWidget {
               ],
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 14.0,
+              padding: EdgeInsets.symmetric(
+                horizontal: 16.w,
+                vertical: 14.h,
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,21 +146,21 @@ class CauseCard extends StatelessWidget {
                         Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ) ??
-                        const TextStyle(
-                          fontSize: 16,
+                        TextStyle(
+                          fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
                         ),
                   ),
-                  const SizedBox(height: 6),
+                  SizedBox(height: 6.h),
                   Text(
                     subtitle,
                     style:
                         Theme.of(
                           context,
                         ).textTheme.bodyMedium?.copyWith(color: Colors.grey) ??
-                        const TextStyle(fontSize: 14, color: Colors.grey),
+                        TextStyle(fontSize: 14.sp, color: Colors.grey),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -169,7 +170,7 @@ class CauseCard extends StatelessWidget {
                           Text(
                             recommendedLabel,
                             style: TextStyle(
-                              fontSize: 13,
+                              fontSize: 13.sp,
                               color: Theme.of(context)
                                   .textTheme
                                   .bodySmall
@@ -179,8 +180,8 @@ class CauseCard extends StatelessWidget {
                           ),
                           Text(
                             '$amount₸',
-                            style: const TextStyle(
-                              fontSize: 16,
+                            style: TextStyle(
+                              fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
                               color: Color(0xFF2F855A),
                             ),
@@ -191,11 +192,11 @@ class CauseCard extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
+                            borderRadius: BorderRadius.circular(30.r),
                           ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 22,
-                            vertical: 10,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 22.w,
+                            vertical: 10.h,
                           ),
                         ),
                         onPressed: onDonate,
@@ -265,7 +266,7 @@ class _ImageCarouselState extends State<_ImageCarousel> {
   Widget build(BuildContext context) {
     final images = widget.images;
     return ClipRRect(
-      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       child: Stack(
         children: [
           SizedBox(
@@ -285,7 +286,7 @@ class _ImageCarouselState extends State<_ImageCarousel> {
           ),
           if (images.length > 1)
             Positioned(
-              bottom: 10,
+              bottom: 10.h,
               left: 0,
               right: 0,
               child: Row(
@@ -294,14 +295,14 @@ class _ImageCarouselState extends State<_ImageCarousel> {
                   images.length,
                   (index) => AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    width: _current == index ? 10 : 6,
-                    height: 6,
+                    margin: EdgeInsets.symmetric(horizontal: 4.w),
+                    width: _current == index ? 10.w : 6.w,
+                    height: 6.h,
                     decoration: BoxDecoration(
                       color: _current == index
                           ? Colors.white
                           : Colors.white.withValues(alpha: 0.6),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(4.r),
                     ),
                   ),
                 ),
@@ -316,7 +317,7 @@ class _ImageCarouselState extends State<_ImageCarousel> {
     return Container(
       color: Colors.grey.shade200,
       alignment: Alignment.center,
-      child: const Icon(Icons.image_not_supported_outlined, size: 28),
+      child: Icon(Icons.image_not_supported_outlined, size: 28.sp),
     );
   }
 

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:safa_app/core/utils/error_messages.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/features/sadaqa/domain/entities/help_request.dart';
 import 'package:safa_app/features/sadaqa/domain/repositories/sadaqa_repository.dart';
@@ -56,7 +58,11 @@ class _AdminHelpRequestDetailPageState
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${l10n.t('admin.helpRequests.error')}: $error')),
+        SnackBar(
+          content: Text(
+            '${l10n.t('admin.helpRequests.error')}: ${friendlyError(error)}',
+          ),
+        ),
       );
     } finally {
       if (mounted) {
@@ -116,12 +122,13 @@ class _AdminHelpRequestDetailPageState
               ? PreferredSize(
                   preferredSize: const Size.fromHeight(30),
                   child: Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
+                    padding: EdgeInsets.only(bottom: 10.h),
                     child: Text(
                       widget.companyName!,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color:
-                            theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.7,
+                        ),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -130,7 +137,7 @@ class _AdminHelpRequestDetailPageState
               : null,
         ),
         body: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 24.h),
           children: [
             Wrap(
               spacing: 8,
@@ -150,7 +157,7 @@ class _AdminHelpRequestDetailPageState
                 ),
               ],
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: 14.h),
             _InfoSection(
               title: 'Контакты',
               children: [
@@ -170,13 +177,14 @@ class _AdminHelpRequestDetailPageState
                   _InfoRow(label: 'Город', value: _request.city!),
               ],
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: 14.h),
             _InfoSection(
               title: 'Детали заявки',
               children: [
                 _InfoRow(
                   label: 'Категория',
-                  value: _request.helpCategoryTitle ??
+                  value:
+                      _request.helpCategoryTitle ??
                       l10n.t('admin.helpRequests.notProvided'),
                 ),
                 _InfoRow(
@@ -190,7 +198,8 @@ class _AdminHelpRequestDetailPageState
                 ),
                 _InfoRow(
                   label: 'Материальное положение',
-                  value: _request.materialStatusTitle ??
+                  value:
+                      _request.materialStatusTitle ??
                       l10n.t('admin.helpRequests.notProvided'),
                 ),
                 if (_request.money != null)
@@ -230,22 +239,18 @@ class _AdminHelpRequestDetailPageState
               ],
             ),
             if (_request.address != null && _request.address!.isNotEmpty) ...[
-              const SizedBox(height: 14),
+              SizedBox(height: 14.h),
               _InfoSection(
                 title: 'Адрес',
-                children: [
-                  _InfoRow(label: '', value: _request.address!),
-                ],
+                children: [_InfoRow(label: '', value: _request.address!)],
               ),
             ],
             if (_request.helpReason != null &&
                 _request.helpReason!.trim().isNotEmpty) ...[
-              const SizedBox(height: 14),
+              SizedBox(height: 14.h),
               _InfoSection(
                 title: 'Причина обращения',
-                children: [
-                  _InfoRow(label: '', value: _request.helpReason!),
-                ],
+                children: [_InfoRow(label: '', value: _request.helpReason!)],
               ),
             ],
           ],
@@ -287,10 +292,7 @@ String _safeL10n(AppLocalizations l10n, String key, String fallback) {
 }
 
 class _InfoSection extends StatelessWidget {
-  const _InfoSection({
-    required this.title,
-    required this.children,
-  });
+  const _InfoSection({required this.title, required this.children});
 
   final String title;
   final List<Widget> children;
@@ -299,15 +301,15 @@ class _InfoSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(14.r),
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 6),
+            blurRadius: 10.r,
+            offset: Offset(0, 6.h),
           ),
         ],
       ),
@@ -320,7 +322,7 @@ class _InfoSection extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10.h),
           ...children,
         ],
       ),
@@ -329,11 +331,7 @@ class _InfoSection extends StatelessWidget {
 }
 
 class _InfoRow extends StatelessWidget {
-  const _InfoRow({
-    required this.label,
-    required this.value,
-    this.valueWidget,
-  });
+  const _InfoRow({required this.label, required this.value, this.valueWidget});
 
   final String label;
   final String value;
@@ -343,7 +341,7 @@ class _InfoRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: EdgeInsets.symmetric(vertical: 6.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -354,15 +352,16 @@ class _InfoRow extends StatelessWidget {
                 label,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.textTheme.bodySmall?.color?.withValues(
-                        alpha: 0.7,
-                      ),
+                    alpha: 0.7,
+                  ),
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ),
           Expanded(
             flex: 3,
-            child: valueWidget ??
+            child:
+                valueWidget ??
                 Text(
                   value.isNotEmpty ? value : '—',
                   style: theme.textTheme.bodyMedium?.copyWith(
@@ -394,38 +393,38 @@ class _StatusMenu extends StatelessWidget {
       tooltip: '',
       onSelected: onSelected,
       itemBuilder: (context) {
-        return HelpRequestStatus.values.map((status) {
-          return PopupMenuItem<HelpRequestStatus>(
-            value: status,
-            child: Row(
-              children: [
-                if (status == current)
-                  const Icon(Icons.check, size: 18)
-                else
-                  const SizedBox(width: 18),
-                const SizedBox(width: 6),
-                Text(
-                  helpRequestStatusLabel(context.l10n, status),
-                  style: TextStyle(
-                    fontWeight:
-                        status == current ? FontWeight.w700 : FontWeight.w500,
-                  ),
+        return HelpRequestStatus.values
+            .map((status) {
+              return PopupMenuItem<HelpRequestStatus>(
+                value: status,
+                child: Row(
+                  children: [
+                    if (status == current)
+                      Icon(Icons.check, size: 18.sp)
+                    else
+                      SizedBox(width: 18.w),
+                    SizedBox(width: 6.w),
+                    Text(
+                      helpRequestStatusLabel(context.l10n, status),
+                      style: TextStyle(
+                        fontWeight: status == current
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          );
-        }).toList(growable: false);
+              );
+            })
+            .toList(growable: false);
       },
       child: isUpdating
-          ? const SizedBox(
-              width: 22,
-              height: 22,
-              child: CircularProgressIndicator(strokeWidth: 2),
+          ? SizedBox(
+              width: 22.r,
+              height: 22.r,
+              child: CircularProgressIndicator(strokeWidth: 2.w),
             )
-          : const Padding(
-              padding: EdgeInsets.all(4),
-              child: Icon(Icons.more_vert),
-            ),
+          : Padding(padding: EdgeInsets.all(4.r), child: Icon(Icons.more_vert)),
     );
   }
 }

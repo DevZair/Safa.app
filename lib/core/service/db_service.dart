@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 enum StorageKeys {
   accessToken('access_token'),
   refreshToken('refresh_token'),
+  tourAccessToken('tour_access_token'),
+  tourRefreshToken('tour_refresh_token'),
   languageCode('language_code'),
   fcmToken('fcm_token'),
   baseUrl('base_url'),
@@ -33,6 +35,22 @@ class DBService {
 
   static set refreshToken(String token) {
     $storage.setString(StorageKeys.refreshToken.name, token);
+  }
+
+  static String get tourAccessToken {
+    return $storage.getString(StorageKeys.tourAccessToken.name) ?? '';
+  }
+
+  static set tourAccessToken(String token) {
+    $storage.setString(StorageKeys.tourAccessToken.name, token);
+  }
+
+  static String get tourRefreshToken {
+    return $storage.getString(StorageKeys.tourRefreshToken.name) ?? '';
+  }
+
+  static set tourRefreshToken(String token) {
+    $storage.setString(StorageKeys.tourRefreshToken.name, token);
   }
 
   static String get languageCode {

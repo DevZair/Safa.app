@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
 
 class SettingsUserCard extends StatelessWidget {
@@ -23,19 +24,19 @@ class SettingsUserCard extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onPressed,
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: BorderRadius.circular(26.r),
         child: Ink(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(20.r),
           decoration: BoxDecoration(
             color: cardColor,
-            borderRadius: BorderRadius.circular(26),
+            borderRadius: BorderRadius.circular(26.r),
             boxShadow: const [],
           ),
           child: Row(
             children: [
               Container(
-                width: 56,
-                height: 56,
+                width: 56.r,
+                height: 56.r,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
@@ -44,9 +45,13 @@ class SettingsUserCard extends StatelessWidget {
                     colors: [Color(0xFF35C3A7), Color(0xFF1A9CD1)],
                   ),
                 ),
-                child: const Icon(Icons.person_outline, color: Colors.white),
+                child: Icon(
+                  Icons.person_outline,
+                  color: Colors.white,
+                  size: 24.sp,
+                ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,7 +64,7 @@ class SettingsUserCard extends StatelessWidget {
                             color: onSurface,
                           ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4.h),
                     Text(
                       email,
                       style: textTheme.bodyMedium?.copyWith(
@@ -70,8 +75,8 @@ class SettingsUserCard extends StatelessWidget {
                 ),
               ),
               Container(
-                width: 38,
-                height: 38,
+                width: 38.r,
+                height: 38.r,
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.12),
                   shape: BoxShape.circle,

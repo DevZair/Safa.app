@@ -3,6 +3,7 @@ import 'package:safa_app/features/sadaqa/domain/utils/media_resolver.dart';
 import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_company.dart';
 import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_cause.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
+import 'package:safa_app/core/utils/error_messages.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safa_app/core/navigation/app_router.dart';
 import 'package:safa_app/features/sadaqa/presentation/pages/sadaqa_detail.dart';
@@ -67,7 +68,7 @@ class SadaqaPage extends StatelessWidget {
                         Padding(
                           padding: EdgeInsets.only(bottom: 12.h),
                           child: _ErrorBanner(
-                            message: errorMessage,
+                            message: friendlyError(errorMessage),
                             onRetry: cubit.loadCauses,
                           ),
                         ),
@@ -250,10 +251,7 @@ List<_CompanyGroup> _buildCompanyGroups({
   var list = grouped.values.toList();
   if (favoriteIds != null) {
     list = list
-        .where(
-          (group) =>
-              group.causes.any((c) => favoriteIds.contains(c.id)),
-        )
+        .where((group) => group.causes.any((c) => favoriteIds.contains(c.id)))
         .toList();
   }
   list.sort((a, b) {
@@ -507,7 +505,7 @@ class _EmptyCausesPlaceholder extends StatelessWidget {
         children: [
           Icon(
             isFavorites ? Icons.favorite_border : Icons.cloud_off_outlined,
-            size: 40,
+            size: 40.sp,
             color: theme.colorScheme.primary.withValues(alpha: 0.5),
           ),
           SizedBox(height: 14.h),

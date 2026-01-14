@@ -36,7 +36,7 @@ class RequestHelpPayload {
   });
 
   Map<String, Object?> toJson() {
-    return <String, Object?>{
+    final map = <String, Object?>{
       'name': name,
       'surname': surname,
       'age': age ?? 0,
@@ -49,10 +49,13 @@ class RequestHelpPayload {
       'received_other_help': receivedOtherHelp,
       'company_name': companyName,
       'company_id': companyId,
-      'status': status,
       'materials_status_id': materialStatus ?? 0,
       'help_category_id': helpCategory,
       'money': money,
     };
+    if (status != null) {
+      map['status'] = status;
+    }
+    return map;
   }
 }

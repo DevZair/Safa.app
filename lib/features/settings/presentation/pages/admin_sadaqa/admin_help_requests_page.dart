@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:safa_app/core/utils/error_messages.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/features/sadaqa/data/repositories/sadaqa_repository_impl.dart';
 import 'package:safa_app/features/sadaqa/domain/entities/help_request.dart';
@@ -121,7 +123,11 @@ class _AdminHelpRequestsPageState extends State<AdminHelpRequestsPage>
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${l10n.t('admin.helpRequests.error')}: $error')),
+        SnackBar(
+          content: Text(
+            '${l10n.t('admin.helpRequests.error')}: ${friendlyError(error)}',
+          ),
+        ),
       );
     } finally {
       if (mounted) {
@@ -131,16 +137,16 @@ class _AdminHelpRequestsPageState extends State<AdminHelpRequestsPage>
   }
 
   Future<void> _openDetail(HelpRequest request) async {
-    final updated =
-        await Navigator.of(context, rootNavigator: true).push<HelpRequest>(
-      MaterialPageRoute(
-        builder: (_) => AdminHelpRequestDetailPage(
-          request: request,
-          repository: _repository,
-          companyName: widget.companyName,
-        ),
-      ),
-    );
+    final updated = await Navigator.of(context, rootNavigator: true)
+        .push<HelpRequest>(
+          MaterialPageRoute(
+            builder: (_) => AdminHelpRequestDetailPage(
+              request: request,
+              repository: _repository,
+              companyName: widget.companyName,
+            ),
+          ),
+        );
 
     if (updated != null && mounted) {
       setState(() {
@@ -180,18 +186,19 @@ class _AdminHelpRequestsPageState extends State<AdminHelpRequestsPage>
           ),
           bottom: PreferredSize(
             preferredSize: Size.fromHeight(
-              widget.companyName?.isNotEmpty == true ? 72 : 48,
+              widget.companyName?.isNotEmpty == true ? 72.h : 48.h,
             ),
             child: Column(
               children: [
                 if (widget.companyName?.isNotEmpty == true)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
+                    padding: EdgeInsets.only(bottom: 6.h),
                     child: Text(
                       widget.companyName!,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color:
-                            theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                        color: theme.colorScheme.onSurface.withValues(
+                          alpha: 0.7,
+                        ),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -237,11 +244,8 @@ class _AdminHelpRequestsPageState extends State<AdminHelpRequestsPage>
               ),
               onDelete: (_) {},
               showStatusToggle: true,
-              onToggleStatus: (item, active) => _updateMaterialStatus(
-                item.id,
-                item.title,
-                isActive: active,
-              ),
+              onToggleStatus: (item, active) =>
+                  _updateMaterialStatus(item.id, item.title, isActive: active),
             ),
             _LookupTab(
               title: 'Категория',
@@ -272,14 +276,20 @@ class _AdminHelpRequestsPageState extends State<AdminHelpRequestsPage>
     );
   }
 
-  Future<void> _createMaterialStatus(String title, {bool isActive = true}) async {
-    final created =
-        await _repository.createMaterialStatus(title, isActive: isActive);
+  Future<void> _createMaterialStatus(
+    String title, {
+    bool isActive = true,
+  }) async {
+    final created = await _repository.createMaterialStatus(
+      title,
+      isActive: isActive,
+    );
     if (created == null) throw Exception('Не удалось создать статус');
     setState(() {
-      _materialStatuses = [..._materialStatuses, created]..sort(
-          (a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()),
-        );
+      _materialStatuses = [
+        ..._materialStatuses,
+        created,
+      ]..sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
     });
   }
 
@@ -305,9 +315,10 @@ class _AdminHelpRequestsPageState extends State<AdminHelpRequestsPage>
     final created = await _repository.createHelpCategory(title);
     if (created == null) throw Exception('Не удалось создать категорию');
     setState(() {
-      _categories = [..._categories, created]..sort(
-          (a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()),
-        );
+      _categories = [
+        ..._categories,
+        created,
+      ]..sort((a, b) => a.title.toLowerCase().compareTo(b.title.toLowerCase()));
     });
   }
 
@@ -325,8 +336,9 @@ class _AdminHelpRequestsPageState extends State<AdminHelpRequestsPage>
     final ok = await _repository.deleteHelpCategory(id);
     if (!ok) throw Exception('Не удалось удалить категорию');
     setState(() {
-      _categories =
-          _categories.where((e) => e.id != id).toList(growable: false);
+      _categories = _categories
+          .where((e) => e.id != id)
+          .toList(growable: false);
     });
   }
 
@@ -382,7 +394,7 @@ class _AdminHelpRequestsPageState extends State<AdminHelpRequestsPage>
       if (!mounted) return;
       messenger.showSnackBar(
         SnackBar(
-          content: Text('Ошибка: $error'),
+          content: Text(friendlyError(error)),
           backgroundColor: theme.colorScheme.error,
         ),
       );
@@ -421,14 +433,12 @@ class _AdminHelpRequestsPageState extends State<AdminHelpRequestsPage>
     try {
       await onConfirm();
       if (!mounted) return;
-      messenger.showSnackBar(
-        SnackBar(content: const Text('Удалено')),
-      );
+      messenger.showSnackBar(SnackBar(content: const Text('Удалено')));
     } catch (error) {
       if (!mounted) return;
       messenger.showSnackBar(
         SnackBar(
-          content: Text('Ошибка: $error'),
+          content: Text(friendlyError(error)),
           backgroundColor: theme.colorScheme.error,
         ),
       );
@@ -459,11 +469,12 @@ class _AdminHelpRequestsPageState extends State<AdminHelpRequestsPage>
                 children: [
                   TextField(
                     controller: controller,
-                    decoration:
-                        const InputDecoration(hintText: 'Введите название'),
+                    decoration: const InputDecoration(
+                      hintText: 'Введите название',
+                    ),
                     autofocus: true,
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8.h),
                   SwitchListTile(
                     title: const Text('Статус (показывать)'),
                     value: isActive,
@@ -482,10 +493,9 @@ class _AdminHelpRequestsPageState extends State<AdminHelpRequestsPage>
                   onPressed: () {
                     final text = controller.text.trim();
                     if (text.isEmpty) return;
-                    Navigator.of(context).pop({
-                      'text': text,
-                      'isActive': isActive,
-                    });
+                    Navigator.of(
+                      context,
+                    ).pop({'text': text, 'isActive': isActive});
                   },
                   child: const Text('Сохранить'),
                 ),
@@ -498,8 +508,9 @@ class _AdminHelpRequestsPageState extends State<AdminHelpRequestsPage>
 
     if (result == null) return;
     final text = result['text']?.toString().trim() ?? '';
-    final active =
-        result['isActive'] is bool ? result['isActive'] as bool : true;
+    final active = result['isActive'] is bool
+        ? result['isActive'] as bool
+        : true;
     if (text.isEmpty) return;
     try {
       await onSubmit(text, active);
@@ -514,7 +525,7 @@ class _AdminHelpRequestsPageState extends State<AdminHelpRequestsPage>
       if (!mounted) return;
       messenger.showSnackBar(
         SnackBar(
-          content: Text('Ошибка: $error'),
+          content: Text(friendlyError(error)),
           backgroundColor: theme.colorScheme.error,
         ),
       );
@@ -529,7 +540,7 @@ class _AdminHelpRequestsPageState extends State<AdminHelpRequestsPage>
     if (_error != null) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -538,7 +549,7 @@ class _AdminHelpRequestsPageState extends State<AdminHelpRequestsPage>
                 style: theme.textTheme.titleMedium,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               Text(
                 _error!,
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -546,7 +557,7 @@ class _AdminHelpRequestsPageState extends State<AdminHelpRequestsPage>
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               ElevatedButton(
                 onPressed: _loadRequests,
                 child: Text(l10n.t('sadaqa.actions.retry')),
@@ -570,12 +581,12 @@ class _AdminHelpRequestsPageState extends State<AdminHelpRequestsPage>
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 24.h),
       itemCount: _requests.length,
       itemBuilder: (context, index) {
         final request = _requests[index];
         return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
+          padding: EdgeInsets.only(bottom: 12.h),
           child: _HelpRequestCard(
             request: request,
             l10n: l10n,
@@ -624,7 +635,7 @@ class _LookupTab extends StatelessWidget {
     if (error != null) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -633,7 +644,7 @@ class _LookupTab extends StatelessWidget {
                 style: theme.textTheme.titleMedium,
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               Text(
                 error!,
                 style: theme.textTheme.bodySmall?.copyWith(
@@ -641,7 +652,7 @@ class _LookupTab extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               ElevatedButton(
                 onPressed: onRefresh,
                 child: const Text('Повторить'),
@@ -655,7 +666,7 @@ class _LookupTab extends StatelessWidget {
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 24.h),
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -673,21 +684,21 @@ class _LookupTab extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           if (items.isEmpty)
             Text(
               'Пусто. Добавьте первый элемент.',
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: theme.textTheme.bodyMedium?.color?.withValues(
-                      alpha: 0.7,
-                    ),
+                  alpha: 0.7,
+                ),
               ),
             ),
           ...items.map(
             (item) => Card(
-              margin: const EdgeInsets.symmetric(vertical: 6),
+              margin: EdgeInsets.symmetric(vertical: 6.h),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
               ),
               child: ListTile(
                 title: Text(item.title),
@@ -698,8 +709,7 @@ class _LookupTab extends StatelessWidget {
                     if (showStatusToggle && onToggleStatus != null)
                       Switch(
                         value: item.isActive,
-                        onChanged: (value) =>
-                            onToggleStatus?.call(item, value),
+                        onChanged: (value) => onToggleStatus?.call(item, value),
                       ),
                     IconButton(
                       icon: const Icon(Icons.edit_outlined),
@@ -756,15 +766,15 @@ class _HelpRequestCard extends StatelessWidget {
 
         return Material(
           color: theme.cardColor,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(18.r),
           elevation: 1.5,
           shadowColor: Colors.black.withValues(alpha: 0.04),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(18.r),
             child: Padding(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16.r),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -783,22 +793,20 @@ class _HelpRequestCard extends StatelessWidget {
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 4),
+                            SizedBox(height: 4.h),
                             Text(
                               request.phoneNumber.isNotEmpty
                                   ? request.phoneNumber
                                   : l10n.t('admin.helpRequests.notProvided'),
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color:
-                                    theme.textTheme.bodySmall?.color?.withValues(
-                                          alpha: 0.75,
-                                        ),
+                                color: theme.textTheme.bodySmall?.color
+                                    ?.withValues(alpha: 0.75),
                               ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12.w),
                       Column(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -807,7 +815,7 @@ class _HelpRequestCard extends StatelessWidget {
                             status: request.status,
                             l10n: l10n,
                           ),
-                          const SizedBox(height: 6),
+                          SizedBox(height: 6.h),
                           _StatusMenu(
                             current: request.status,
                             onSelected: onChangeStatus,
@@ -817,21 +825,21 @@ class _HelpRequestCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   Text(
                     reason,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.textTheme.bodyMedium?.color?.withValues(
-                            alpha: 0.82,
-                          ),
+                        alpha: 0.82,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                    spacing: 8.w,
+                    runSpacing: 8.h,
                     children: [
                       _MetaBadge(
                         icon: Icons.category_outlined,
@@ -866,16 +874,16 @@ class _MetaBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final content = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
       decoration: BoxDecoration(
         color: theme.colorScheme.primary.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: theme.colorScheme.primary),
-          const SizedBox(width: 6),
+          Icon(icon, size: 16.sp, color: theme.colorScheme.primary),
+          SizedBox(width: 6.w),
           Flexible(
             child: Text(
               label,
@@ -917,41 +925,44 @@ class _StatusMenu extends StatelessWidget {
       tooltip: '',
       onSelected: onSelected,
       itemBuilder: (context) {
-        return HelpRequestStatus.values.map((status) {
-          return PopupMenuItem<HelpRequestStatus>(
-            value: status,
-            child: Row(
-              children: [
-                if (status == current)
-                  const Icon(Icons.check, size: 18)
-                else
-                  const SizedBox(width: 18),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    helpRequestStatusLabel(context.l10n, status),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontWeight:
-                          status == current ? FontWeight.w700 : FontWeight.w500,
+        return HelpRequestStatus.values
+            .map((status) {
+              return PopupMenuItem<HelpRequestStatus>(
+                value: status,
+                child: Row(
+                  children: [
+                    if (status == current)
+                      Icon(Icons.check, size: 18.sp)
+                    else
+                      SizedBox(width: 18.w),
+                    SizedBox(width: 6.w),
+                    Expanded(
+                      child: Text(
+                        helpRequestStatusLabel(context.l10n, status),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontWeight: status == current
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-              ],
-            ),
-          );
-        }).toList(growable: false);
+              );
+            })
+            .toList(growable: false);
       },
       child: isUpdating
-          ? const SizedBox(
-              width: 22,
-              height: 22,
-              child: CircularProgressIndicator(strokeWidth: 2),
+          ? SizedBox(
+              width: 22.r,
+              height: 22.r,
+              child: CircularProgressIndicator(strokeWidth: 2.w),
             )
-          : const Padding(
-              padding: EdgeInsets.all(4),
-              child: Icon(Icons.more_vert),
+          : Padding(
+              padding: EdgeInsets.all(4.r),
+              child: Icon(Icons.more_vert, size: 20.sp),
             ),
     );
   }

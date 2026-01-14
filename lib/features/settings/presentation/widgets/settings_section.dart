@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class SettingsSection extends StatelessWidget {
   final String title;
@@ -33,16 +34,16 @@ class SettingsSection extends StatelessWidget {
                     .withValues(alpha: 0.64),
               ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
         Container(
           decoration: BoxDecoration(
             color: cardColor,
-            borderRadius: BorderRadius.circular(26),
-            boxShadow: const [
+            borderRadius: BorderRadius.circular(26.r),
+            boxShadow: [
               BoxShadow(
                 color: Color(0x14000000),
-                blurRadius: 20,
-                offset: Offset(0, 10),
+                blurRadius: 20.r,
+                offset: Offset(0, 10.h),
               ),
             ],
           ),
@@ -50,12 +51,12 @@ class SettingsSection extends StatelessWidget {
             children: [
               for (int i = 0; i < children.length; i++) ...[
                 if (i > 0)
-                  const Divider(
-                    height: 1,
-                    thickness: 0.5,
+                  Divider(
+                    height: 1.h,
+                    thickness: 0.5.w,
                     color: Color(0xFFE5E7EB),
-                    indent: 72,
-                    endIndent: 20,
+                    indent: 72.w,
+                    endIndent: 20.w,
                   ),
                 children[i],
               ],

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
 import 'package:safa_app/features/travel/domain/entities/travel_package.dart';
+import 'package:safa_app/features/travel/presentation/pages/booking_page.dart';
 import 'package:safa_app/features/travel/presentation/widgets/travel_badge.dart';
 import 'package:safa_app/features/travel/presentation/widgets/travel_meta_item.dart';
 
@@ -206,7 +207,13 @@ class TravelPackageCard extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => BookingPage(package: package),
+                        ),
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       shape: RoundedRectangleBorder(

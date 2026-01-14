@@ -1,5 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:safa_app/core/utils/error_messages.dart';
 import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_post.dart';
 import 'package:safa_app/features/sadaqa/domain/repositories/sadaqa_repository.dart';
 import 'package:safa_app/features/sadaqa/domain/utils/media_resolver.dart';
@@ -40,8 +42,9 @@ class _AdminNoteEditPageState extends State<AdminNoteEditPage> {
     _status = widget.note.status;
     _noteType = widget.note.noteType;
     _addressController.text = widget.note.address ?? '';
-    _goalController.text =
-        widget.note.goalMoney != null ? '${widget.note.goalMoney}' : '';
+    _goalController.text = widget.note.goalMoney != null
+        ? '${widget.note.goalMoney}'
+        : '';
     _collectedController.text = widget.note.collectedMoney != null
         ? '${widget.note.collectedMoney}'
         : '';
@@ -69,10 +72,10 @@ class _AdminNoteEditPageState extends State<AdminNoteEditPage> {
           TextButton(
             onPressed: _isSaving ? null : _onSave,
             child: _isSaving
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                ? SizedBox(
+                    width: 16.r,
+                    height: 16.r,
+                    child: CircularProgressIndicator(strokeWidth: 2.w),
                   )
                 : const Text('Сохранить'),
           ),
@@ -84,19 +87,19 @@ class _AdminNoteEditPageState extends State<AdminNoteEditPage> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16.r),
               child: ConstrainedBox(
                 constraints: BoxConstraints(minHeight: constraints.maxHeight),
                 child: Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16.r),
                   decoration: BoxDecoration(
                     color: theme.cardColor,
-                    borderRadius: BorderRadius.circular(18),
-                    boxShadow: const [
+                    borderRadius: BorderRadius.circular(18.r),
+                    boxShadow: [
                       BoxShadow(
                         color: Color(0x12000000),
-                        blurRadius: 22,
-                        offset: Offset(0, 10),
+                        blurRadius: 22.r,
+                        offset: Offset(0, 10.h),
                       ),
                     ],
                   ),
@@ -109,85 +112,88 @@ class _AdminNoteEditPageState extends State<AdminNoteEditPage> {
                         uploadError: _uploadError,
                         onPick: _pickAndUploadImage,
                       ),
-                      const SizedBox(height: 18),
+                      SizedBox(height: 18.h),
                       Text(
                         'Детали заметки',
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12.h),
                       _buildInputField(
                         label: 'Заголовок',
                         hint: 'Название заметки',
                         controller: _titleController,
                       ),
-                      const SizedBox(height: 12),
-              _buildInputField(
-                label: 'Контент',
-                hint: 'Подробности, которые нужно сохранить',
-                controller: _contentController,
-                minLines: 4,
-                maxLines: 10,
-              ),
-              const SizedBox(height: 12),
-              _StatusSelector(
-                value: _status,
-                onChanged: (value) => setState(() => _status = value),
-              ),
-              const SizedBox(height: 12),
-              _NoteTypeSelector(
-                value: _noteType,
-                onChanged: (value) => setState(() => _noteType = value),
-              ),
-              const SizedBox(height: 12),
-              _buildInputField(
-                label: 'Адрес',
-                hint: 'Адрес/местоположение',
-                controller: _addressController,
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildInputField(
-                      label: 'Цель (goal_money)',
-                      hint: 'Напр. 100000',
-                      controller: _goalController,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildInputField(
-                      label: 'Собрано (collected_money)',
-                      hint: 'Напр. 40000',
-                      controller: _collectedController,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _isSaving ? null : _onSave,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                      SizedBox(height: 12.h),
+                      _buildInputField(
+                        label: 'Контент',
+                        hint: 'Подробности, которые нужно сохранить',
+                        controller: _contentController,
+                        minLines: 4,
+                        maxLines: 10,
+                      ),
+                      SizedBox(height: 12.h),
+                      _StatusSelector(
+                        value: _status,
+                        onChanged: (value) => setState(() => _status = value),
+                      ),
+                      SizedBox(height: 12.h),
+                      _NoteTypeSelector(
+                        value: _noteType,
+                        onChanged: (value) => setState(() => _noteType = value),
+                      ),
+                      SizedBox(height: 12.h),
+                      _buildInputField(
+                        label: 'Адрес',
+                        hint: 'Адрес/местоположение',
+                        controller: _addressController,
+                      ),
+                      SizedBox(height: 12.h),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildInputField(
+                              label: 'Цель (goal_money)',
+                              hint: 'Напр. 100000',
+                              controller: _goalController,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                            ),
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: _buildInputField(
+                              label: 'Собрано (collected_money)',
+                              hint: 'Напр. 40000',
+                              controller: _collectedController,
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                  ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20.h),
+                      ElevatedButton(
+                        onPressed: _isSaving ? null : _onSave,
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(vertical: 14.h),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                            borderRadius: BorderRadius.circular(14.r),
                           ),
                           elevation: 0,
                         ),
                         child: _isSaving
-                            ? const SizedBox(
-                                width: 18,
-                                height: 18,
+                            ? SizedBox(
+                                width: 18.r,
+                                height: 18.r,
                                 child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor:
-                                      AlwaysStoppedAnimation<Color>(
+                                  strokeWidth: 2.w,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
                                     Colors.white,
                                   ),
                                 ),
@@ -243,7 +249,7 @@ class _AdminNoteEditPageState extends State<AdminNoteEditPage> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('Ошибка: $error')));
+      ).showSnackBar(SnackBar(content: Text(friendlyError(error))));
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -308,10 +314,10 @@ class _AdminNoteEditPageState extends State<AdminNoteEditPage> {
   }) {
     final theme = Theme.of(context);
     final baseBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(14.r),
       borderSide: BorderSide(
         color: theme.colorScheme.outline.withValues(alpha: 0.14),
-        width: 1,
+        width: 1.w,
       ),
     );
 
@@ -325,7 +331,7 @@ class _AdminNoteEditPageState extends State<AdminNoteEditPage> {
             color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
           ),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: 6.h),
         TextField(
           controller: controller,
           keyboardType: keyboardType,
@@ -334,11 +340,12 @@ class _AdminNoteEditPageState extends State<AdminNoteEditPage> {
           decoration: InputDecoration(
             hintText: hint,
             filled: true,
-            fillColor:
-                theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.55),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 14,
+            fillColor: theme.colorScheme.surfaceContainerHighest.withValues(
+              alpha: 0.55,
+            ),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 14.w,
+              vertical: 14.h,
             ),
             prefixIcon: icon == null
                 ? null
@@ -351,7 +358,7 @@ class _AdminNoteEditPageState extends State<AdminNoteEditPage> {
             focusedBorder: baseBorder.copyWith(
               borderSide: BorderSide(
                 color: theme.colorScheme.primary.withValues(alpha: 0.8),
-                width: 1.6,
+                width: 1.6.w,
               ),
             ),
           ),
@@ -362,10 +369,7 @@ class _AdminNoteEditPageState extends State<AdminNoteEditPage> {
 }
 
 class _StatusSelector extends StatelessWidget {
-  const _StatusSelector({
-    required this.value,
-    required this.onChanged,
-  });
+  const _StatusSelector({required this.value, required this.onChanged});
 
   final int value;
   final ValueChanged<int> onChanged;
@@ -389,10 +393,10 @@ class _StatusSelector extends StatelessWidget {
             color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         Wrap(
-          spacing: 10,
-          runSpacing: 10,
+          spacing: 10.w,
+          runSpacing: 10.h,
           children: _options.map((option) {
             final selected = option.value == value;
             return ChoiceChip(
@@ -415,10 +419,7 @@ class _StatusOption {
 }
 
 class _NoteTypeSelector extends StatelessWidget {
-  const _NoteTypeSelector({
-    required this.value,
-    required this.onChanged,
-  });
+  const _NoteTypeSelector({required this.value, required this.onChanged});
 
   final String? value;
   final ValueChanged<String> onChanged;
@@ -438,10 +439,10 @@ class _NoteTypeSelector extends StatelessWidget {
             color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         Wrap(
-          spacing: 10,
-          runSpacing: 10,
+          spacing: 10.w,
+          runSpacing: 10.h,
           children: _options.map((option) {
             final selected = value == option;
             return ChoiceChip(
@@ -474,10 +475,10 @@ class _ImagePreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final placeholder = Container(
       width: double.infinity,
-      height: 220,
+      height: 220.h,
       decoration: BoxDecoration(
         color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(18.r),
         border: Border.all(color: Colors.grey.shade300),
       ),
       child: Column(
@@ -488,14 +489,10 @@ class _ImagePreview extends StatelessWidget {
               color: Colors.grey.shade200,
               shape: BoxShape.circle,
             ),
-            padding: const EdgeInsets.all(12),
-            child: const Icon(
-              Icons.image_outlined,
-              color: Colors.grey,
-              size: 36,
-            ),
+            padding: EdgeInsets.all(12.r),
+            child: Icon(Icons.image_outlined, color: Colors.grey, size: 36.sp),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: 10.h),
           const Text('Добавить изображение'),
         ],
       ),
@@ -504,10 +501,10 @@ class _ImagePreview extends StatelessWidget {
     final content = imageUrl.isEmpty
         ? placeholder
         : ClipRRect(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(18.r),
             child: Image.network(
               imageUrl,
-              height: 220,
+              height: 220.h,
               width: double.infinity,
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) => placeholder,
@@ -523,32 +520,32 @@ class _ImagePreview extends StatelessWidget {
             children: [
               content,
               Positioned(
-                right: 12,
-                bottom: 12,
+                right: 12.w,
+                bottom: 12.h,
                 child: ElevatedButton.icon(
                   onPressed: isUploading ? null : onPick,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.black.withValues(alpha: 0.7),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 8.h,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                   ),
                   icon: isUploading
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
+                      ? SizedBox(
+                          width: 16.r,
+                          height: 16.r,
                           child: CircularProgressIndicator(
-                            strokeWidth: 2,
+                            strokeWidth: 2.w,
                             valueColor: AlwaysStoppedAnimation<Color>(
                               Colors.white,
                             ),
                           ),
                         )
-                      : const Icon(Icons.upload, size: 18, color: Colors.white),
+                      : Icon(Icons.upload, size: 18.sp, color: Colors.white),
                   label: Text(
                     isUploading ? 'Загрузка...' : 'Загрузить',
                     style: const TextStyle(color: Colors.white),
@@ -559,10 +556,10 @@ class _ImagePreview extends StatelessWidget {
           ),
         ),
         if (uploadError != null) ...[
-          const SizedBox(height: 6),
+          SizedBox(height: 6.h),
           Text(
             uploadError!,
-            style: const TextStyle(color: Colors.red, fontSize: 12),
+            style: TextStyle(color: Colors.red, fontSize: 12.sp),
           ),
         ],
       ],

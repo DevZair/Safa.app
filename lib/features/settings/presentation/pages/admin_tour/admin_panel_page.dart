@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
+import 'package:safa_app/features/settings/presentation/pages/admin_tour/manage_categories_page.dart';
 import 'package:safa_app/features/settings/presentation/pages/admin_tour/manage_tours_page.dart';
+import 'package:safa_app/features/settings/presentation/pages/admin_tour/manage_guides_page.dart';
 import 'package:safa_app/features/settings/presentation/pages/admin_tour/tour_requests_page.dart';
 
 class TourAdminPanelPage extends StatefulWidget {
@@ -32,9 +35,7 @@ class _TourAdminPanelPageState extends State<TourAdminPanelPage> {
         title: l10n.t('tourAdminPanel.menu.requests'),
         onTap: () {
           Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const TourRequestsPage(),
-            ),
+            MaterialPageRoute(builder: (context) => const TourRequestsPage()),
           );
         },
       ),
@@ -44,9 +45,7 @@ class _TourAdminPanelPageState extends State<TourAdminPanelPage> {
         title: l10n.t('tourAdminPanel.menu.tours'),
         onTap: () {
           Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => const ManageToursPage(),
-            ),
+            MaterialPageRoute(builder: (context) => const ManageToursPage()),
           );
         },
       ),
@@ -55,9 +54,8 @@ class _TourAdminPanelPageState extends State<TourAdminPanelPage> {
         color: const Color(0xFF8D6BFF),
         title: l10n.t('tourAdminPanel.menu.guides'),
         onTap: () {
-          // TODO: Implement navigation to manage guides page
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Manage Guides coming soon!')),
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const ManageGuidesPage()),
           );
         },
       ),
@@ -66,9 +64,10 @@ class _TourAdminPanelPageState extends State<TourAdminPanelPage> {
         color: const Color(0xFF22B573),
         title: l10n.t('tourAdminPanel.menu.categories'),
         onTap: () {
-          // TODO: Implement navigation to manage categories page
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Manage Categories coming soon!')),
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const ManageCategoriesPage(),
+            ),
           );
         },
       ),
@@ -80,6 +79,16 @@ class _TourAdminPanelPageState extends State<TourAdminPanelPage> {
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            } else {
+              Navigator.of(context, rootNavigator: true).maybePop();
+            }
+          },
+        ),
         title: Text(
           l10n.t('tourAdminPanel.title'),
           style: theme.textTheme.titleMedium?.copyWith(
@@ -88,15 +97,13 @@ class _TourAdminPanelPageState extends State<TourAdminPanelPage> {
         ),
         bottom: _companyName?.isNotEmpty == true
             ? PreferredSize(
-                preferredSize: const Size.fromHeight(36),
+                preferredSize: Size.fromHeight(36.h),
                 child: Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
+                  padding: EdgeInsets.only(bottom: 12.h),
                   child: Text(
                     _companyName!,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurface.withValues(
-                        alpha: 0.7,
-                      ),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -106,7 +113,7 @@ class _TourAdminPanelPageState extends State<TourAdminPanelPage> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 24.h),
           child: Column(
             children: [
               Expanded(
@@ -115,11 +122,11 @@ class _TourAdminPanelPageState extends State<TourAdminPanelPage> {
                     final item = items[index];
                     return _AdminCard(item: item);
                   },
-                  separatorBuilder: (context, _) => const SizedBox(height: 12),
+                  separatorBuilder: (context, _) => SizedBox(height: 12.h),
                   itemCount: items.length,
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
@@ -128,10 +135,13 @@ class _TourAdminPanelPageState extends State<TourAdminPanelPage> {
                   label: Text(l10n.t('settings.logout')),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: const Color(0xFFE53935),
-                    side: const BorderSide(color: Color(0xFFE53935)),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    side: BorderSide(
+                      color: const Color(0xFFE53935),
+                      width: 1.w,
+                    ),
+                    padding: EdgeInsets.symmetric(vertical: 14.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(18.r),
                     ),
                   ),
                 ),
@@ -193,31 +203,31 @@ class _AdminCard extends StatelessWidget {
     final theme = Theme.of(context);
     return Material(
       color: item.color.withValues(alpha: 0.08),
-      borderRadius: BorderRadius.circular(22),
+      borderRadius: BorderRadius.circular(22.r),
       child: InkWell(
-        borderRadius: BorderRadius.circular(22),
+        borderRadius: BorderRadius.circular(22.r),
         onTap: item.onTap,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
           child: Row(
             children: [
               Container(
-                width: 52,
-                height: 52,
+                width: 52.r,
+                height: 52.r,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
                       color: item.color.withValues(alpha: 0.22),
-                      blurRadius: 14,
-                      offset: const Offset(0, 8),
+                      blurRadius: 14.r,
+                      offset: Offset(0, 8.h),
                     ),
                   ],
                 ),
-                child: Icon(item.icon, color: item.color, size: 26),
+                child: Icon(item.icon, color: item.color, size: 26.sp),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16.w),
               Expanded(
                 child: Text(
                   item.title,
@@ -227,7 +237,7 @@ class _AdminCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const Icon(Icons.chevron_right),
+              Icon(Icons.chevron_right, size: 20.sp),
             ],
           ),
         ),

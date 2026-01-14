@@ -138,8 +138,8 @@ class _CompanyHeader extends StatelessWidget {
                     style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                         ) ??
-                        const TextStyle(
-                          fontSize: 18,
+                        TextStyle(
+                          fontSize: 18.sp,
                           fontWeight: FontWeight.w700,
                         ),
                   ),

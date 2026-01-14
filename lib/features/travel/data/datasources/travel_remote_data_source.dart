@@ -41,6 +41,15 @@ class TravelRemoteDataSource {
     );
   }
 
+  Future<void> createBooking(Map<String, Object?> payload) async {
+    await ApiService.request<Object?>(
+      ApiConstants.travelBookings,
+      method: Method.post,
+      data: payload,
+      followRedirects: true,
+    );
+  }
+
   List<Map<String, Object?>> _unwrapList(Object? data) {
     if (data is List) {
       return data.whereType<Map<String, Object?>>().toList();

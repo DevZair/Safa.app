@@ -1,9 +1,11 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safa_app/features/sadaqa/data/repositories/sadaqa_repository_impl.dart';
 import 'package:safa_app/features/sadaqa/domain/entities/sadaqa_company.dart';
 import 'package:safa_app/features/sadaqa/domain/repositories/sadaqa_repository.dart';
 import 'package:safa_app/features/sadaqa/domain/utils/media_resolver.dart';
+import 'package:safa_app/core/utils/error_messages.dart';
 
 class AdminCompanyProfilePage extends StatefulWidget {
   const AdminCompanyProfilePage({super.key, this.companyName});
@@ -51,27 +53,27 @@ class _AdminCompanyProfilePageState extends State<AdminCompanyProfilePage> {
           TextButton(
             onPressed: _isSaving ? null : _save,
             child: _isSaving
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                ? SizedBox(
+                    width: 16.r,
+                    height: 16.r,
+                    child: CircularProgressIndicator(strokeWidth: 2.w),
                   )
                 : const Text('Сохранить'),
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.r),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16.r),
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(18),
-            boxShadow: const [
+            borderRadius: BorderRadius.circular(18.r),
+            boxShadow: [
               BoxShadow(
                 color: Color(0x14000000),
-                blurRadius: 18,
-                offset: Offset(0, 10),
+                blurRadius: 18.r,
+                offset: Offset(0, 10.h),
               ),
             ],
           ),
@@ -85,28 +87,27 @@ class _AdminCompanyProfilePageState extends State<AdminCompanyProfilePage> {
                     isUploading: _isUploadingLogo,
                     fallback: _nameController.text.trim(),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12.w),
                   Expanded(
                     child: Text(
                       'Обновите название, логотип и обложку компании. '
                       'Эти данные будут использоваться в карточках и админке.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.7),
-                          ),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.7),
+                      ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               _LabeledField(
                 controller: _nameController,
                 label: 'Название компании',
                 hint: 'Введите название компании',
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               _ImageField(
                 label: 'Логотип',
                 controller: _logoController,
@@ -114,7 +115,7 @@ class _AdminCompanyProfilePageState extends State<AdminCompanyProfilePage> {
                 isUploading: _isUploadingLogo,
                 onUpload: () => _pickImage(isLogo: true),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               _ImageField(
                 label: 'Обложка',
                 controller: _coverController,
@@ -122,23 +123,24 @@ class _AdminCompanyProfilePageState extends State<AdminCompanyProfilePage> {
                 isUploading: _isUploadingCover,
                 onUpload: () => _pickImage(isLogo: false),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
               ElevatedButton(
                 onPressed: _isSaving ? null : _save,
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  padding: EdgeInsets.symmetric(vertical: 14.h),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(14.r),
                   ),
                 ),
                 child: _isSaving
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
+                    ? SizedBox(
+                        width: 18.r,
+                        height: 18.r,
                         child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white),
+                          strokeWidth: 2.w,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
                         ),
                       )
                     : const Text('Сохранить изменения'),
@@ -182,7 +184,9 @@ class _AdminCompanyProfilePageState extends State<AdminCompanyProfilePage> {
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Не удалось загрузить файл: $error')),
+        SnackBar(
+          content: Text('Не удалось загрузить файл: ${friendlyError(error)}'),
+        ),
       );
     } finally {
       if (!mounted) return;
@@ -223,9 +227,9 @@ class _AdminCompanyProfilePageState extends State<AdminCompanyProfilePage> {
       Navigator.of(context).pop<SadaqaCompany>(company);
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ошибка: $error')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(friendlyError(error))));
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -250,15 +254,12 @@ class _LabeledField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          decoration: _decoration(hint),
-        ),
+        SizedBox(height: 8.h),
+        TextField(controller: controller, decoration: _decoration(hint)),
       ],
     );
   }
@@ -286,34 +287,35 @@ class _ImageField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         Row(
           children: [
             _ImagePreview(imageUrl: imageUrl),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Expanded(
               child: TextField(
                 controller: controller,
                 decoration: _decoration('Вставьте ссылку или загрузите файл')
                     .copyWith(
-                  suffixIcon: IconButton(
-                    splashColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    onPressed: isUploading ? null : onUpload,
-                    icon: isUploading
-                        ? const SizedBox(
-                            width: 16,
-                            height: 16,
-                            child:
-                                CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(Icons.file_upload_outlined),
-                  ),
-                ),
+                      suffixIcon: IconButton(
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        onPressed: isUploading ? null : onUpload,
+                        icon: isUploading
+                            ? SizedBox(
+                                width: 16.r,
+                                height: 16.r,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.w,
+                                ),
+                              )
+                            : const Icon(Icons.file_upload_outlined),
+                      ),
+                    ),
               ),
             ),
           ],
@@ -332,11 +334,11 @@ class _ImagePreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasImage = imageUrl != null && imageUrl!.isNotEmpty;
     return Container(
-      width: 72,
-      height: 72,
+      width: 72.r,
+      height: 72.r,
       decoration: BoxDecoration(
         color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14.r),
         border: Border.all(color: const Color(0xFFE5E7EB)),
         image: hasImage
             ? DecorationImage(
@@ -374,25 +376,25 @@ class _LogoPreview extends StatelessWidget {
       alignment: Alignment.center,
       children: [
         CircleAvatar(
-          radius: 36,
+          radius: 36.r,
           backgroundColor: const Color(0xFFE8EEF5),
           backgroundImage: hasImage ? NetworkImage(imageUrl!) : null,
           child: !hasImage
               ? Text(
                   initials,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    fontSize: 18,
+                    fontSize: 18.sp,
                     color: Color(0xFF3B82F6),
                   ),
                 )
               : null,
         ),
         if (isUploading)
-          const SizedBox(
-            width: 28,
-            height: 28,
-            child: CircularProgressIndicator(strokeWidth: 2),
+          SizedBox(
+            width: 28.r,
+            height: 28.r,
+            child: CircularProgressIndicator(strokeWidth: 2.w),
           ),
       ],
     );
@@ -405,20 +407,17 @@ InputDecoration _decoration(String hint) {
     filled: true,
     fillColor: const Color(0xFFF3F4F6),
     border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(12.r),
       borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
     ),
     enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(12.r),
       borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
     ),
     focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(12.r),
       borderSide: const BorderSide(color: Color(0xFF8D6BFF)),
     ),
-    contentPadding: const EdgeInsets.symmetric(
-      horizontal: 14,
-      vertical: 12,
-    ),
+    contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
   );
 }

@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safa_app/features/sadaqa/data/repositories/request_help_repository_impl.dart';
 import 'package:safa_app/features/sadaqa/domain/entities/reference_item.dart';
 import 'package:safa_app/features/sadaqa/domain/entities/request_help_payload.dart';
@@ -113,7 +114,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
               ),
             ),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20.h),
           _SectionCard(
             title: 'Личные данные',
             subtitle:
@@ -140,7 +141,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 _ResponsiveFieldsRow(
                   children: [
                     _LabeledField(
@@ -156,7 +157,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 _ResponsiveFieldsRow(
                   children: [
                     _LabeledField(
@@ -179,7 +180,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 _ResponsiveFieldsRow(
                   children: [
                     _LabeledField(
@@ -212,7 +213,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20.h),
           _SectionCard(
             title: 'Местоположение',
             subtitle:
@@ -228,7 +229,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
                     prefixIcon: Icons.location_on_outlined,
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 _LabeledField(
                   label: 'Полный адрес *',
                   child: _RequestTextField(
@@ -241,7 +242,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20.h),
           _SectionCard(
             title: 'Детали запроса',
             subtitle:
@@ -277,7 +278,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
                         ),
                 ),
                 if (_isOtherCategory) ...[
-                  const SizedBox(height: 12),
+                  SizedBox(height: 12.h),
                   _LabeledField(
                     label: 'Другая категория *',
                     child: _RequestTextField(
@@ -287,7 +288,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
                     ),
                   ),
                 ],
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 _LabeledField(
                   label: 'Необходимая сумма (ТГ)',
                   child: _RequestTextField(
@@ -298,7 +299,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
                     prefixIcon: null,
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 _LabeledField(
                   label: 'Ваша история *',
                   child: Column(
@@ -311,7 +312,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
                         maxLength: 600,
                         validator: _requiredValidator,
                       ),
-                      const SizedBox(height: 6),
+                      SizedBox(height: 6.h),
                       Text(
                         '$_storyLength / 600 символов',
                         style: theme.textTheme.bodySmall?.copyWith(
@@ -321,7 +322,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 _LabeledField(
                   label: 'Загрузите фото (необязательно)',
                   child: _UploadTile(
@@ -335,9 +336,9 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
               ],
             ),
           ),
-          const SizedBox(height: 28),
+          SizedBox(height: 28.h),
           _SubmitButton(onPressed: () => _submit(), isLoading: _isSubmitting),
-          const SizedBox(height: 18),
+          SizedBox(height: 18.h),
           const _FooterNote(),
         ],
       ),
@@ -348,7 +349,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        titleSpacing: 24,
+        titleSpacing: 24.w,
         foregroundColor: const Color(0xFF1A2B4F),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -360,7 +361,7 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 2),
+            SizedBox(height: 2.h),
             Text(
               'Расскажите нам больше о вашей ситуации',
               style: theme.textTheme.bodySmall?.copyWith(
@@ -378,21 +379,23 @@ class _RequestHelpPageState extends State<RequestHelpPage> {
           child: LayoutBuilder(
             builder: (context, constraints) {
               return SingleChildScrollView(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 24.w,
+                  vertical: 18.h,
+                ),
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1100),
+                    constraints: BoxConstraints(maxWidth: 1100.w),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         if (_submitError != null) ...[
                           _SubmitError(message: _submitError!),
-                          const SizedBox(height: 16),
+                          SizedBox(height: 16.h),
                         ],
                         const _HeroCard(),
-                        const SizedBox(height: 16),
-                        const SizedBox(height: 24),
+                        SizedBox(height: 16.h),
+                        SizedBox(height: 24.h),
                         form,
                       ],
                     ),
@@ -758,19 +761,19 @@ class _HeroCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(24.r),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(28.r),
         gradient: const LinearGradient(
           colors: [Color(0xFF2EC8A6), Color(0xFF5BC8FF)],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: Color.fromRGBO(41, 158, 135, 0.25),
-            offset: Offset(0, 16),
-            blurRadius: 36,
+            offset: Offset(0, 16.h),
+            blurRadius: 36.r,
           ),
         ],
       ),
@@ -778,19 +781,19 @@ class _HeroCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 48,
-            height: 48,
+            width: 48.r,
+            height: 48.r,
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(16.r),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.favorite_border,
               color: Colors.white,
-              size: 28,
+              size: 28.sp,
             ),
           ),
-          const SizedBox(width: 18),
+          SizedBox(width: 18.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -802,7 +805,7 @@ class _HeroCard extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 6),
+                SizedBox(height: 6.h),
                 Text(
                   'Опишите вашу ситуацию ясно, чтобы получить помощь быстрее.',
                   style: theme.textTheme.bodyMedium?.copyWith(
@@ -841,26 +844,26 @@ class _UploadTile extends StatelessWidget {
 
     return InkWell(
       onTap: isLoading ? null : onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(20.r),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 18),
+        padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 18.w),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(20.r),
           border: Border.all(
             color: hasFile ? const Color(0xFF2EC8A6) : const Color(0xFFE0E6F1),
-            width: hasFile ? 1.6 : 1.2,
+            width: hasFile ? 1.6.w : 1.2.w,
           ),
           color: hasFile ? const Color(0xFFE6F8F3) : const Color(0xFFF4F7FC),
         ),
         child: Row(
           children: [
             Container(
-              width: 44,
-              height: 44,
+              width: 44.r,
+              height: 44.r,
               decoration: BoxDecoration(
                 color: hasFile ? const Color(0xFF2EC8A6) : Colors.white,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(14.r),
               ),
               child: Icon(
                 hasFile
@@ -869,7 +872,7 @@ class _UploadTile extends StatelessWidget {
                 color: hasFile ? Colors.white : const Color(0xFF2EC8A6),
               ),
             ),
-            const SizedBox(width: 16),
+            SizedBox(width: 16.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -881,22 +884,22 @@ class _UploadTile extends StatelessWidget {
                       color: Color(0xFF1A2B4F),
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   Text(
                     subtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Color(0xFF6B7A90),
-                      fontSize: 13,
+                      fontSize: 13.sp,
                     ),
                   ),
                 ],
               ),
             ),
             if (isLoading)
-              const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(strokeWidth: 2),
+              SizedBox(
+                width: 24.r,
+                height: 24.r,
+                child: CircularProgressIndicator(strokeWidth: 2.w),
               )
             else if (hasFile && onRemove != null)
               IconButton(
@@ -923,24 +926,24 @@ class _SubmitButton extends StatelessWidget {
       onPressed: isLoading ? null : onPressed,
       style: FilledButton.styleFrom(
         backgroundColor: const Color(0xFF1EBE92),
-        minimumSize: const Size.fromHeight(56),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        minimumSize: Size.fromHeight(56.h),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18.r)),
         shadowColor: const Color.fromRGBO(30, 190, 146, 0.4),
         elevation: 6,
       ),
       child: isLoading
-          ? const SizedBox(
-              width: 22,
-              height: 22,
+          ? SizedBox(
+              width: 22.r,
+              height: 22.r,
               child: CircularProgressIndicator(
-                strokeWidth: 2.4,
+                strokeWidth: 2.4.w,
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
             )
-          : const Text(
+          : Text(
               'Отправить запрос',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
               ),
@@ -1081,20 +1084,20 @@ class _SubmitError extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFFFFEEF0), Color(0xFFFFF5F7)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: const Color(0xFFFF9CA0).withValues(alpha: 0.6)),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
             color: Color(0x22FF5F6D),
-            blurRadius: 18,
-            offset: Offset(0, 10),
+            blurRadius: 18.r,
+            offset: Offset(0, 10.h),
           ),
         ],
       ),
@@ -1102,8 +1105,8 @@ class _SubmitError extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: 36.r,
+            height: 36.r,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: const Color(0xFFFF5F6D).withValues(alpha: 0.1),
@@ -1113,7 +1116,7 @@ class _SubmitError extends StatelessWidget {
               color: Color(0xFFFF5F6D),
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1125,18 +1128,18 @@ class _SubmitError extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4.h),
                 Text(
                   message,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: const Color(0xFFB0252D),
-                    fontSize: 13,
+                    fontSize: 13.sp,
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
           const Icon(Icons.chevron_right, color: Color(0xFFB0252D)),
         ],
       ),
@@ -1160,15 +1163,15 @@ class _SectionCard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(24.r),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: const [
+        borderRadius: BorderRadius.circular(24.r),
+        boxShadow: [
           BoxShadow(
             color: Color.fromRGBO(26, 43, 79, 0.08),
-            offset: Offset(0, 12),
-            blurRadius: 24,
+            offset: Offset(0, 12.h),
+            blurRadius: 24.r,
           ),
         ],
       ),
@@ -1182,14 +1185,14 @@ class _SectionCard extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: 6.h),
           Text(
             subtitle,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: const Color(0xFF6B7A90),
             ),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20.h),
           child,
         ],
       ),
@@ -1215,7 +1218,7 @@ class _LabeledField extends StatelessWidget {
             color: Color(0xFF1A2B4F),
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         child,
       ],
     );
@@ -1230,23 +1233,23 @@ class _LookupGuard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.r),
       decoration: BoxDecoration(
         color: const Color(0xFFE8F5FF),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(18.r),
         border: Border.all(color: const Color(0xFFCDE5FF)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Icon(Icons.info_outline, color: Color(0xFF2A5B9C)),
-          const SizedBox(width: 10),
+          SizedBox(width: 10.w),
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(
+              style: TextStyle(
                 color: Color(0xFF1A2B4F),
-                fontSize: 13,
+                fontSize: 13.sp,
                 height: 1.35,
               ),
             ),
@@ -1296,24 +1299,24 @@ class _RequestTextField extends StatelessWidget {
         prefixIcon: prefixIcon != null
             ? Icon(prefixIcon, color: const Color(0xFF1A2B4F))
             : null,
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 18,
-          horizontal: 16,
+        contentPadding: EdgeInsets.symmetric(
+          vertical: 18.h,
+          horizontal: 16.w,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(18.r),
           borderSide: const BorderSide(color: Color(0xFFE0E6F1)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: Color(0xFF2EC8A6), width: 1.6),
+          borderRadius: BorderRadius.circular(18.r),
+          borderSide: BorderSide(color: const Color(0xFF2EC8A6), width: 1.6.w),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(18.r),
           borderSide: const BorderSide(color: Color(0xFFE57373)),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(18.r),
           borderSide: const BorderSide(color: Color(0xFFE57373)),
         ),
       ),
@@ -1338,20 +1341,20 @@ class _MaterialStatusDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     if (isLoading) {
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         decoration: BoxDecoration(
           color: const Color(0xFFF4F7FC),
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(18.r),
           border: Border.all(color: const Color(0xFFE0E6F1)),
         ),
         child: Row(
-          children: const [
+          children: [
             SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              width: 18.r,
+              height: 18.r,
+              child: CircularProgressIndicator(strokeWidth: 2.w),
             ),
-            SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Text('Загружаем статусы из бэкенда...'),
           ],
         ),
@@ -1360,16 +1363,20 @@ class _MaterialStatusDropdown extends StatelessWidget {
 
     if (statuses.isEmpty) {
       return Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.r),
         decoration: BoxDecoration(
           color: const Color(0xFFFFF5E8),
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(18.r),
           border: Border.all(color: const Color(0xFFF5D7A8)),
         ),
-        child: const Text(
+        child: Text(
           'Для выбранного фонда статусы не загружены. '
           'Попробуйте обновить или выбрать другой фонд.',
-          style: TextStyle(color: Color(0xFF9A6B1B), fontSize: 13, height: 1.35),
+          style: TextStyle(
+            color: Color(0xFF9A6B1B),
+            fontSize: 13.sp,
+            height: 1.35,
+          ),
         ),
       );
     }
@@ -1389,17 +1396,17 @@ class _MaterialStatusDropdown extends StatelessWidget {
         hintText: 'Выберите статус',
         filled: true,
         fillColor: const Color(0xFFF4F7FC),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 18,
-          horizontal: 16,
+        contentPadding: EdgeInsets.symmetric(
+          vertical: 18.h,
+          horizontal: 16.w,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(18.r),
           borderSide: const BorderSide(color: Color(0xFFE0E6F1)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: Color(0xFF2EC8A6), width: 1.6),
+          borderRadius: BorderRadius.circular(18.r),
+          borderSide: BorderSide(color: const Color(0xFF2EC8A6), width: 1.6.w),
         ),
       ),
       icon: const Icon(
@@ -1407,7 +1414,7 @@ class _MaterialStatusDropdown extends StatelessWidget {
         color: Color(0xFF1A2B4F),
       ),
       dropdownColor: Colors.white,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(18.r),
     );
   }
 }
@@ -1429,20 +1436,20 @@ class _CategoryDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     if (isLoading) {
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         decoration: BoxDecoration(
           color: const Color(0xFFF4F7FC),
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(18.r),
           border: Border.all(color: const Color(0xFFE0E6F1)),
         ),
         child: Row(
-          children: const [
+          children: [
             SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              width: 18.r,
+              height: 18.r,
+              child: CircularProgressIndicator(strokeWidth: 2.w),
             ),
-            SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Text('Загружаем категории...'),
           ],
         ),
@@ -1451,16 +1458,16 @@ class _CategoryDropdown extends StatelessWidget {
 
     if (categories.isEmpty) {
       return Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.r),
         decoration: BoxDecoration(
           color: const Color(0xFFFFF5E8),
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(18.r),
           border: Border.all(color: const Color(0xFFF5D7A8)),
         ),
-        child: const Text(
+        child: Text(
           'Нет категорий из бэкенда. '
           'Попробуйте обновить позже.',
-          style: TextStyle(color: Color(0xFF9A6B1B), fontSize: 13),
+          style: TextStyle(color: Color(0xFF9A6B1B), fontSize: 13.sp),
         ),
       );
     }
@@ -1479,24 +1486,24 @@ class _CategoryDropdown extends StatelessWidget {
         hintText: 'Выберите категорию',
         filled: true,
         fillColor: const Color(0xFFF4F7FC),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 18,
-          horizontal: 16,
+        contentPadding: EdgeInsets.symmetric(
+          vertical: 18.h,
+          horizontal: 16.w,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(18.r),
           borderSide: const BorderSide(color: Color(0xFFE0E6F1)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: Color(0xFF2EC8A6), width: 1.6),
+          borderRadius: BorderRadius.circular(18.r),
+          borderSide: BorderSide(color: const Color(0xFF2EC8A6), width: 1.6.w),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(18.r),
           borderSide: const BorderSide(color: Color(0xFFE57373)),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(18.r),
           borderSide: const BorderSide(color: Color(0xFFE57373)),
         ),
       ),
@@ -1505,7 +1512,7 @@ class _CategoryDropdown extends StatelessWidget {
         color: Color(0xFF1A2B4F),
       ),
       dropdownColor: Colors.white,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(18.r),
     );
   }
 }
@@ -1527,20 +1534,20 @@ class _CompanyDropdown extends StatelessWidget {
   Widget build(BuildContext context) {
     if (isLoading) {
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
         decoration: BoxDecoration(
           color: const Color(0xFFF4F7FC),
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(18.r),
           border: Border.all(color: const Color(0xFFE0E6F1)),
         ),
         child: Row(
-          children: const [
+          children: [
             SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
+              width: 18.r,
+              height: 18.r,
+              child: CircularProgressIndicator(strokeWidth: 2.w),
             ),
-            SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Text('Загружаем фонды...'),
           ],
         ),
@@ -1549,16 +1556,16 @@ class _CompanyDropdown extends StatelessWidget {
 
     if (companies.isEmpty) {
       return Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.r),
         decoration: BoxDecoration(
           color: const Color(0xFFFFF5E8),
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(18.r),
           border: Border.all(color: const Color(0xFFF5D7A8)),
         ),
-        child: const Text(
+        child: Text(
           'Нет компаний из бэкенда. '
           'Вы можете продолжить без выбора.',
-          style: TextStyle(color: Color(0xFF9A6B1B), fontSize: 13),
+          style: TextStyle(color: Color(0xFF9A6B1B), fontSize: 13.sp),
         ),
       );
     }
@@ -1578,24 +1585,24 @@ class _CompanyDropdown extends StatelessWidget {
         hintText: 'Выберите фонд или компанию',
         filled: true,
         fillColor: const Color(0xFFF4F7FC),
-        contentPadding: const EdgeInsets.symmetric(
-          vertical: 18,
-          horizontal: 16,
+        contentPadding: EdgeInsets.symmetric(
+          vertical: 18.h,
+          horizontal: 16.w,
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(18.r),
           borderSide: const BorderSide(color: Color(0xFFE0E6F1)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: Color(0xFF2EC8A6), width: 1.6),
+          borderRadius: BorderRadius.circular(18.r),
+          borderSide: BorderSide(color: const Color(0xFF2EC8A6), width: 1.6.w),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(18.r),
           borderSide: const BorderSide(color: Color(0xFFE57373)),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(18.r),
           borderSide: const BorderSide(color: Color(0xFFE57373)),
         ),
       ),
@@ -1604,7 +1611,7 @@ class _CompanyDropdown extends StatelessWidget {
         color: Color(0xFF1A2B4F),
       ),
       dropdownColor: Colors.white,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(18.r),
     );
   }
 }
@@ -1616,8 +1623,8 @@ class _ResponsiveFieldsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const spacing = 16.0;
     const breakpoint = 600.0;
+    final spacing = 16.r;
 
     return LayoutBuilder(
       builder: (context, constraints) {

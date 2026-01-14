@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
 
 class UnderDevelopmentPage extends StatelessWidget {
@@ -20,14 +21,14 @@ class UnderDevelopmentPage extends StatelessWidget {
       body: SafeArea(
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0),
+            padding: EdgeInsets.symmetric(horizontal: 32.w),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // 🔹 Иконка с мягким градиентом
                 Container(
-                  width: 120,
-                  height: 120,
+                  width: 120.r,
+                  height: 120.r,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: const LinearGradient(
@@ -38,42 +39,40 @@ class UnderDevelopmentPage extends StatelessWidget {
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
+                        blurRadius: 10.r,
+                        offset: Offset(0, 5.h),
                       ),
                     ],
                   ),
-                  child: Icon(icon, size: 60, color: Colors.white),
+                  child: Icon(icon, size: 60.sp, color: Colors.white),
                 ),
-                const SizedBox(height: 32),
+                SizedBox(height: 32.h),
 
                 // 🔹 Заголовок
                 Text(
                   title,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 22,
+                  style: TextStyle(
+                    fontSize: 22.sp,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF2D3748),
-                    fontFamily: 'SF',
                   ),
                 ),
 
-                const SizedBox(height: 12),
+                SizedBox(height: 12.h),
 
                 // 🔹 Подзаголовок
                 Text(
                   subtitle,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 15.sp,
                     color: Colors.grey[600],
                     height: 1.5,
-                    fontFamily: 'SF',
                   ),
                 ),
 
-                const SizedBox(height: 40),
+                SizedBox(height: 40.h),
 
                 // 🔹 Кнопка “Назад” или “Главная”
                 ElevatedButton.icon(
@@ -81,11 +80,11 @@ class UnderDevelopmentPage extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(30.r),
                     ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 28,
-                      vertical: 14,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 28.w,
+                      vertical: 14.h,
                     ),
                   ),
                   icon: const Icon(Icons.arrow_back, color: Colors.white),

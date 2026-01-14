@@ -1,3 +1,4 @@
+import 'package:safa_app/core/styles/app_colors.dart';
 import 'package:safa_app/features/travel/data/repositories/tour_repository_impl.dart';
 import 'package:safa_app/features/travel/domain/repositories/tour_repository.dart';
 import 'package:safa_app/features/travel/domain/entities/tour_category.dart';
@@ -6,9 +7,11 @@ import 'package:safa_app/features/travel/domain/entities/tour.dart';
 import 'package:safa_app/core/constants/api_constants.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
+import 'package:safa_app/core/utils/error_messages.dart';
 
 class CreateEditTourPage extends StatefulWidget {
   final Tour? tour;
@@ -60,11 +63,21 @@ class _CreateEditTourPageState extends State<CreateEditTourPage> {
 
     final tour = widget.tour;
     _locationController = TextEditingController(text: tour?.location ?? '');
-    _priceController = TextEditingController(text: tour?.price.toString() ?? '');
-    _departureDateController = TextEditingController(text: tour?.departureDate.split('T').first ?? '');
-    _returnDateController = TextEditingController(text: tour?.returnDate.split('T').first ?? '');
-    _durationController = TextEditingController(text: tour?.duration.toString() ?? '');
-    _maxPeopleController = TextEditingController(text: tour?.maxPeople.toString() ?? '');
+    _priceController = TextEditingController(
+      text: tour?.price.toString() ?? '',
+    );
+    _departureDateController = TextEditingController(
+      text: tour?.departureDate.split('T').first ?? '',
+    );
+    _returnDateController = TextEditingController(
+      text: tour?.returnDate.split('T').first ?? '',
+    );
+    _durationController = TextEditingController(
+      text: tour?.duration.toString() ?? '',
+    );
+    _maxPeopleController = TextEditingController(
+      text: tour?.maxPeople.toString() ?? '',
+    );
     _isNew = tour?.isNew ?? true;
 
     _selectedCategoryId = tour?.tourCategoryId;
@@ -108,6 +121,25 @@ class _CreateEditTourPageState extends State<CreateEditTourPage> {
 
   Future<void> _saveTour() async {
     if (!_formKey.currentState!.validate()) {
+      return;
+    }
+    if (_selectedCategoryId == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Выберите категорию')));
+      return;
+    }
+    if (_selectedGuideId == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Выберите гида')));
+      return;
+    }
+    if (_departureDateController.text.isEmpty ||
+        _returnDateController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Укажите даты вылета и возврата')),
+      );
       return;
     }
     setState(() => _isLoading = true);
@@ -157,7 +189,7 @@ class _CreateEditTourPageState extends State<CreateEditTourPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error saving tour: $e'),
+            content: Text(friendlyError(e)),
             backgroundColor: Colors.red,
           ),
         );
@@ -172,9 +204,7 @@ class _CreateEditTourPageState extends State<CreateEditTourPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEditMode ? 'Edit Tour' : 'Create Tour'),
-      ),
+      appBar: AppBar(title: Text(_isEditMode ? 'Edit Tour' : 'Create Tour')),
       body: FutureBuilder<List<dynamic>>(
         future: Future.wait([_categoriesFuture, _guidesFuture]),
         builder: (context, snapshot) {
@@ -182,7 +212,19 @@ class _CreateEditTourPageState extends State<CreateEditTourPage> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Error loading data: ${snapshot.error}'));
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Не удалось загрузить данные'),
+                  SizedBox(height: 8.h),
+                  Text(
+                    friendlyError(snapshot.error),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            );
           }
           if (!snapshot.hasData) {
             return const Center(child: Text('No data available.'));
@@ -201,31 +243,42 @@ class _CreateEditTourPageState extends State<CreateEditTourPage> {
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.r),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             // Image Picker
             _buildImagePicker(),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             // General Info
             _buildTextField(_locationController, 'Location'),
             _buildTextField(
               _priceController,
               'Price',
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
             ),
             // Dropdowns
             _buildDropdown(
               'Category',
               _selectedCategoryId,
-              categories.map((c) => DropdownMenuItem(value: c.id, child: Text(c.title))).toList(),
+              categories
+                  .map(
+                    (c) => DropdownMenuItem(value: c.id, child: Text(c.title)),
+                  )
+                  .toList(),
               (value) => setState(() => _selectedCategoryId = value),
             ),
             _buildDropdown(
               'Guide',
               _selectedGuideId,
-              guides.map((g) => DropdownMenuItem(value: g.id, child: Text(g.fullName))).toList(),
+              guides
+                  .map(
+                    (g) =>
+                        DropdownMenuItem(value: g.id, child: Text(g.fullName)),
+                  )
+                  .toList(),
               (value) => setState(() => _selectedGuideId = value),
             ),
             _buildDropdown<int>(
@@ -257,19 +310,24 @@ class _CreateEditTourPageState extends State<CreateEditTourPage> {
               title: const Text('Is New?'),
               value: _isNew,
               onChanged: (bool value) => setState(() => _isNew = value),
-              contentPadding: const EdgeInsets.symmetric(vertical: 8),
+              contentPadding: EdgeInsets.symmetric(vertical: 8.h),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: 32.h),
             if (_isLoading)
               const Center(child: CircularProgressIndicator())
             else
               ElevatedButton(
                 onPressed: _saveTour,
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
+                  backgroundColor: AppColors.primary,
                 ),
-                child: const Text('Save Tour'),
+                child: const Text(
+                  'Save Tour',
+                  style: TextStyle(color: AppColors.badgeLightBackground),
+                ),
               ),
+            SizedBox(height: 20.h),
           ],
         ),
       ),
@@ -280,24 +338,24 @@ class _CreateEditTourPageState extends State<CreateEditTourPage> {
     return Column(
       children: [
         Container(
-          height: 200,
+          height: 200.h,
           width: double.infinity,
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey, width: 1.w),
+            borderRadius: BorderRadius.circular(8.r),
           ),
           child: _selectedImage != null
               ? Image.file(_selectedImage!, fit: BoxFit.cover)
               : (_existingImageUrl != null && _existingImageUrl!.isNotEmpty
-                  ? Image.network(
-                      _existingImageUrl!.startsWith('http')
-                          ? _existingImageUrl!
-                          : ApiConstants.baseUrl + _existingImageUrl!,
-                      fit: BoxFit.cover,
-                    )
-                  : const Center(child: Text('No Image Selected'))),
+                    ? Image.network(
+                        _existingImageUrl!.startsWith('http')
+                            ? _existingImageUrl!
+                            : ApiConstants.baseUrl + _existingImageUrl!,
+                        fit: BoxFit.cover,
+                      )
+                    : const Center(child: Text('No Image Selected'))),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         OutlinedButton.icon(
           onPressed: _pickImage,
           icon: const Icon(Icons.camera_alt),
@@ -313,7 +371,7 @@ class _CreateEditTourPageState extends State<CreateEditTourPage> {
     TextInputType keyboardType = TextInputType.text,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: EdgeInsets.symmetric(vertical: 8.h),
       child: TextFormField(
         controller: controller,
         decoration: InputDecoration(
@@ -322,7 +380,8 @@ class _CreateEditTourPageState extends State<CreateEditTourPage> {
         ),
         keyboardType: keyboardType,
         validator: (value) {
-          if (value == null || value.isEmpty) return 'Please enter a value for $label';
+          if (value == null || value.isEmpty)
+            return 'Please enter a value for $label';
           return null;
         },
       ),
@@ -331,7 +390,7 @@ class _CreateEditTourPageState extends State<CreateEditTourPage> {
 
   Widget _buildDateField(TextEditingController controller, String label) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: EdgeInsets.symmetric(vertical: 8.h),
       child: TextFormField(
         controller: controller,
         decoration: InputDecoration(
@@ -342,7 +401,8 @@ class _CreateEditTourPageState extends State<CreateEditTourPage> {
         readOnly: true,
         onTap: () => _pickDate(controller),
         validator: (value) {
-          if (value == null || value.isEmpty) return 'Please select a date for $label';
+          if (value == null || value.isEmpty)
+            return 'Please select a date for $label';
           return null;
         },
       ),
@@ -356,7 +416,7 @@ class _CreateEditTourPageState extends State<CreateEditTourPage> {
     void Function(T?)? onChanged,
   ) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: EdgeInsets.symmetric(vertical: 8.h),
       child: DropdownButtonFormField<T>(
         value: value,
         items: items,

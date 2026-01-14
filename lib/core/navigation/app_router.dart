@@ -78,6 +78,7 @@ class AppRouter {
                   GoRoute(
                     path: 'request-help',
                     name: AppRoute.requestHelp.name,
+                    parentNavigatorKey: _rootNavigatorKey,
                     builder: (context, state) => const RequestHelpPage(),
                   ),
                 ],

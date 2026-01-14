@@ -3,7 +3,7 @@ final class ApiConstants {
 
   static const String baseUrl = String.fromEnvironment(
     'BASE_URL',
-    defaultValue: 'https://safa-production.up.railway.app',
+    defaultValue: 'https://safa.jahongir.asia',
   );
   static const String apiToken = String.fromEnvironment(
     'API_TOKEN',
@@ -16,9 +16,12 @@ final class ApiConstants {
   static const String travelGuides = '/api/tour/public/guides/';
   static const String travelActiveToursCount =
       '/api/tour/public/companies/active-tours-count';
+  static const String travelBookings = '/api/tour/public/bookings/';
   static const String tourPrivateTours = '/api/tour/private/tours/';
   static const String tourPrivateCategories = '/api/tour/private/categories/';
   static const String tourPrivateGuides = '/api/tour/private/guides/';
+  static const String tourPrivateBookings = '/api/tour/private/bookings/';
+  static const String tourAdminLogin = '/api/tour/private/company/login';
   static const String sadaqaCauses = '/api/sadaqa/public/notes/';
   static const String sadaqaAdminLogin = '/api/sadaqa/private/company/login';
   static const String sadaqaAdminPosts = '/api/sadaqa/private/posts';

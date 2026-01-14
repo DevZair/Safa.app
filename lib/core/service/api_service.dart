@@ -44,17 +44,17 @@ class ApiService {
     Map<String, Object?>? queryParams,
     FormData? formData,
     bool followRedirects = false,
+    bool includeAuthHeader = true,
   }) async {
-    final rawToken = DBService.accessToken.isNotEmpty
-        ? DBService.accessToken
+    final resolvedToken = _tokenForPath(path);
+    final rawToken = resolvedToken.isNotEmpty
+        ? resolvedToken
         : ApiConstants.apiToken;
 
     final isMultipart = formData != null;
-    final newHeaders = <String, Object?>{
-      'lang': DBService.languageCode,
-    };
+    final newHeaders = <String, Object?>{'lang': DBService.languageCode};
 
-    if (rawToken.isNotEmpty) {
+    if (includeAuthHeader && rawToken.isNotEmpty) {
       newHeaders['Authorization'] = 'Bearer $rawToken';
     }
 
@@ -74,6 +74,7 @@ class ApiService {
               ? Headers.multipartFormDataContentType
               : Headers.jsonContentType,
           followRedirects: followRedirects,
+          maxRedirects: followRedirects ? 5 : 0,
         ),
       );
 
@@ -159,6 +160,23 @@ class ApiService {
       stackTrace.toString();
       rethrow;
     }
+  }
+
+  static String _tokenForPath(String path) {
+    final normalized = path.toLowerCase();
+    // Never attach existing tokens to login endpoints to avoid 401.
+    if (normalized.contains('/company/login')) return '';
+    final isTourPath = normalized.contains('/tour/');
+
+    if (isTourPath && DBService.tourAccessToken.isNotEmpty) {
+      return DBService.tourAccessToken;
+    }
+
+    if (DBService.accessToken.isNotEmpty) {
+      return DBService.accessToken;
+    }
+
+    return '';
   }
 
   static Never throwError() => throw Error.throwWithStackTrace(

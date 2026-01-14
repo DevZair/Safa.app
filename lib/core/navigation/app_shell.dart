@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:safa_app/core/styles/app_colors.dart';
@@ -19,8 +20,7 @@ class AppShell extends StatelessWidget {
   List<NavigationDestination> _buildDestinations(BuildContext context) {
     final l10n = context.l10n;
     final theme = Theme.of(context);
-    final mutedIcon =
-        theme.colorScheme.onSurface.withValues(alpha: 0.6);
+    final mutedIcon = theme.colorScheme.onSurface.withValues(alpha: 0.6);
     return [
       NavigationDestination(
         icon: Icon(Icons.favorite_outline, color: mutedIcon),
@@ -47,14 +47,14 @@ class AppShell extends StatelessWidget {
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
-          border: const Border(
-            top: BorderSide(color: Color(0xFFE0E0E0), width: 1),
+          border: Border(
+            top: BorderSide(color: const Color(0xFFE0E0E0), width: 1.w),
           ),
         ),
         child: NavigationBarTheme(
           data: NavigationBarThemeData(
             labelTextStyle: WidgetStateProperty.all(
-              const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+              TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w500),
             ),
           ),
           child: NavigationBar(
