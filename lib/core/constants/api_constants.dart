@@ -21,6 +21,12 @@ final class ApiConstants {
   static const String tourPrivateCategories = '/api/tour/private/categories/';
   static const String tourPrivateGuides = '/api/tour/private/guides/';
   static const String tourPrivateBookings = '/api/tour/private/bookings/';
+  static const String superAdminLogin = '/api/auth/admin/login';
+  static const String superAdminCreateTourCompany =
+      '/api/auth/admin/tour-companies';
+  static const String superAdminCreateSadaqaCompany =
+      '/api/auth/admin/sadaqa-companies';
+  static const String superAdminCreateLanguage = '/api/auth/admin/languages';
   static const String tourAdminLogin = '/api/tour/private/company/login';
   static const String sadaqaCauses = '/api/sadaqa/public/notes/';
   static const String sadaqaAdminLogin = '/api/sadaqa/private/company/login';

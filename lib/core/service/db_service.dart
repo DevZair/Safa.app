@@ -5,6 +5,8 @@ enum StorageKeys {
   refreshToken('refresh_token'),
   tourAccessToken('tour_access_token'),
   tourRefreshToken('tour_refresh_token'),
+  superAdminAccessToken('super_admin_access_token'),
+  superAdminRefreshToken('super_admin_refresh_token'),
   languageCode('language_code'),
   fcmToken('fcm_token'),
   baseUrl('base_url'),
@@ -51,6 +53,22 @@ class DBService {
 
   static set tourRefreshToken(String token) {
     $storage.setString(StorageKeys.tourRefreshToken.name, token);
+  }
+
+  static String get superAdminAccessToken {
+    return $storage.getString(StorageKeys.superAdminAccessToken.name) ?? '';
+  }
+
+  static set superAdminAccessToken(String token) {
+    $storage.setString(StorageKeys.superAdminAccessToken.name, token);
+  }
+
+  static String get superAdminRefreshToken {
+    return $storage.getString(StorageKeys.superAdminRefreshToken.name) ?? '';
+  }
+
+  static set superAdminRefreshToken(String token) {
+    $storage.setString(StorageKeys.superAdminRefreshToken.name, token);
   }
 
   static String get languageCode {

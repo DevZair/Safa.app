@@ -9,7 +9,6 @@ final class AppColors {
   static const Color black = Color(0xFF000000);
   static const Color surfaceMuted = Color(0xFFF4F6FA);
 
-  // Travel palette
   static const Color backgroundSoft = Color(0xFFF3F5F9);
   static const Color textPrimary = Color(0xFF0F172A);
   static const Color textSecondary = Color(0xFF465062);
@@ -52,7 +51,6 @@ final class AppColors {
   static const Color ratingStar = Color(0xFFF59E0B);
   static const Color tabInactive = Color(0xFF4A5568);
 
-  // Dark palette
   static const Color darkScaffold = Color(0xFF060F1F);
   static const Color darkCard = Color(0xFF0F1F33);
   static const Color darkElevated = Color(0xFF162840);

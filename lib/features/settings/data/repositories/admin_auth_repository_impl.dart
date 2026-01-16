@@ -12,9 +12,11 @@ class AdminAuthRepositoryImpl implements AdminAuthRepository {
   }) async {
     _clearSadaqaTokens();
     _clearTourTokens();
+    _clearSuperAdminTokens();
 
     AdminAuthTokens? sadaqaTokens;
     AdminAuthTokens? tourTokens;
+    AdminAuthTokens? superAdminTokens;
     final errors = <String>[];
 
     try {
@@ -41,17 +43,32 @@ class AdminAuthRepositoryImpl implements AdminAuthRepository {
       errors.add('tour: ${Error.safeToString(error)}');
     }
 
-    if (sadaqaTokens == null && tourTokens == null) {
+    try {
+      superAdminTokens = await _loginAndExtract(
+        path: ApiConstants.superAdminLogin,
+        login: login,
+        password: password,
+      );
+      _storeSuperAdminTokens(superAdminTokens);
+    } catch (error) {
+      _clearSuperAdminTokens();
+      errors.add('superAdmin: ${Error.safeToString(error)}');
+    }
+
+    if (sadaqaTokens == null &&
+        tourTokens == null &&
+        superAdminTokens == null) {
       throw Exception(
         errors.isNotEmpty
             ? errors.join(' | ')
-            : 'Login failed for both services',
+            : 'Login failed for all admin services',
       );
     }
 
     return AdminLoginResult(
       sadaqaSuccess: sadaqaTokens != null,
       tourSuccess: tourTokens != null,
+      superAdminSuccess: superAdminTokens != null,
     );
   }
 
@@ -100,6 +117,13 @@ class AdminAuthRepositoryImpl implements AdminAuthRepository {
     }
   }
 
+  void _storeSuperAdminTokens(AdminAuthTokens tokens) {
+    DBService.superAdminAccessToken = tokens.accessToken;
+    if (tokens.refreshToken?.isNotEmpty == true) {
+      DBService.superAdminRefreshToken = tokens.refreshToken!;
+    }
+  }
+
   void _clearTourTokens() {
     DBService.tourAccessToken = '';
     DBService.tourRefreshToken = '';
@@ -108,5 +132,10 @@ class AdminAuthRepositoryImpl implements AdminAuthRepository {
   void _clearSadaqaTokens() {
     DBService.accessToken = '';
     DBService.refreshToken = '';
+  }
+
+  void _clearSuperAdminTokens() {
+    DBService.superAdminAccessToken = '';
+    DBService.superAdminRefreshToken = '';
   }
 }

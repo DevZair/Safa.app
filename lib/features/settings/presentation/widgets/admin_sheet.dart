@@ -8,9 +8,16 @@ Future<bool> showAdminSheet({
   required AppLocalizations l10n,
   required TextEditingController loginController,
   required TextEditingController passwordController,
-  required ValueChanged<String> onLoginChanged,
-  required ValueChanged<String> onPasswordChanged,
+  ValueChanged<String>? onLoginChanged,
+  ValueChanged<String>? onPasswordChanged,
   required Future<bool> Function() onSubmit,
+  String? sheetTitle,
+  String? sheetSubtitle,
+  String? loginLabel,
+  String? loginHint,
+  String? passwordLabel,
+  String? passwordHint,
+  String? submitLabel,
 }) async {
   final theme = Theme.of(context);
   bool obscurePassword = true;
@@ -65,14 +72,14 @@ Future<bool> showAdminSheet({
                       ),
                       SizedBox(height: 12.h),
                       Text(
-                        l10n.t('settings.section.admin'),
+                        sheetTitle ?? l10n.t('settings.section.admin'),
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       SizedBox(height: 4.h),
                       Text(
-                        l10n.t('settings.admin.subtitle'),
+                        sheetSubtitle ?? l10n.t('settings.admin.subtitle'),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurface.withValues(
                             alpha: 0.7,
@@ -83,9 +90,11 @@ Future<bool> showAdminSheet({
                       SettingsInputTile(
                         icon: Icons.admin_panel_settings_outlined,
                         iconColor: const Color(0xFFF25F5C),
-                        title: l10n.t('settings.admin.login.title'),
+                        title:
+                            loginLabel ?? l10n.t('settings.admin.login.title'),
                         controller: loginController,
-                        hintText: l10n.t('settings.admin.login.hint'),
+                        hintText:
+                            loginHint ?? l10n.t('settings.admin.login.hint'),
                         autofillHints: const [AutofillHints.username],
                         fillColor: const Color(0xFFF3F4F6),
                         borderColor: const Color(0xFFE1E4EA),
@@ -103,9 +112,13 @@ Future<bool> showAdminSheet({
                       SettingsInputTile(
                         icon: Icons.vpn_key_outlined,
                         iconColor: const Color(0xFF8D6BFF),
-                        title: l10n.t('settings.admin.password.title'),
+                        title:
+                            passwordLabel ??
+                            l10n.t('settings.admin.password.title'),
                         controller: passwordController,
-                        hintText: l10n.t('settings.admin.password.hint'),
+                        hintText:
+                            passwordHint ??
+                            l10n.t('settings.admin.password.hint'),
                         obscureText: obscurePassword,
                         autofillHints: const [AutofillHints.password],
                         fillColor: const Color(0xFFF3F4F6),
@@ -168,7 +181,8 @@ Future<bool> showAdminSheet({
                                   ),
                                 )
                               : Text(
-                                  l10n.t('settings.admin.submit'),
+                                  submitLabel ??
+                                      l10n.t('settings.admin.submit'),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.w700,

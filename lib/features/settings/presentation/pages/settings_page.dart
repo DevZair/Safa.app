@@ -9,6 +9,7 @@ import 'package:safa_app/features/settings/domain/repositories/admin_auth_reposi
 import 'package:safa_app/features/settings/domain/entities/admin_login_result.dart';
 import 'package:safa_app/features/settings/presentation/pages/admin_sadaqa/admin_panel_page.dart';
 import 'package:safa_app/features/settings/presentation/pages/admin_tour/admin_panel_page.dart';
+import 'package:safa_app/features/settings/presentation/pages/super_admin/super_admin_panel_page.dart';
 import 'package:safa_app/features/settings/presentation/widgets/admin_sheet.dart';
 import 'package:safa_app/features/settings/presentation/widgets/settings_header.dart';
 import 'package:safa_app/features/settings/presentation/widgets/settings_section.dart';
@@ -331,7 +332,8 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _handleAdminEntry(AppLocalizations l10n) async {
     final hasTokens =
         DBService.accessToken.isNotEmpty ||
-        DBService.tourAccessToken.isNotEmpty;
+        DBService.tourAccessToken.isNotEmpty ||
+        DBService.superAdminAccessToken.isNotEmpty;
     if (hasTokens) {
       final relogin = await _askReloginOrContinue();
       if (relogin == true) {
@@ -339,6 +341,7 @@ class _SettingsPageState extends State<SettingsPage> {
         DBService.refreshToken = '';
         DBService.tourAccessToken = '';
         DBService.tourRefreshToken = '';
+        _clearSuperAdminTokens();
         await _openAdminSheet(l10n);
       } else {
         await _openAdminArea(
@@ -429,12 +432,9 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
-  void _clearAdminInputs() {
-    _adminLoginController.clear();
-    _adminPasswordController.clear();
-    context.read<AppSettingsCubit>()
-      ..updateAdminLogin('')
-      ..updateAdminPassword('');
+  void _clearSuperAdminTokens() {
+    DBService.superAdminAccessToken = '';
+    DBService.superAdminRefreshToken = '';
   }
 
   Future<void> _openAdminArea(String? companyName) async {
@@ -443,11 +443,24 @@ class _SettingsPageState extends State<SettingsPage> {
         result?.sadaqaSuccess == true || DBService.accessToken.isNotEmpty;
     final hasTour =
         result?.tourSuccess == true || DBService.tourAccessToken.isNotEmpty;
+    final hasSuperAdmin =
+        result?.superAdminSuccess == true ||
+        DBService.superAdminAccessToken.isNotEmpty;
 
-    if (!hasSadaqa && !hasTour) {
+    if (!hasSadaqa && !hasTour && !hasSuperAdmin) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Сначала выполните вход')));
+      return;
+    }
+
+    if (hasSuperAdmin && (hasSadaqa || hasTour)) {
+      await _chooseAdminDestination(companyName);
+      return;
+    }
+
+    if (hasSuperAdmin) {
+      await _openSuperAdminPanel();
       return;
     }
 
@@ -464,6 +477,89 @@ class _SettingsPageState extends State<SettingsPage> {
       context,
       rootNavigator: true,
     ).push(MaterialPageRoute(builder: (_) => const TourAdminPanelPage()));
+  }
+
+  Future<void> _chooseAdminDestination(String? companyName) async {
+    final l10n = context.l10n;
+    await showModalBottomSheet<void>(
+      context: context,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        final theme = Theme.of(context);
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom + 16.h,
+            left: 16.w,
+            right: 16.w,
+          ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              borderRadius: BorderRadius.circular(24.r),
+            ),
+            padding: EdgeInsets.all(16.w),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  l10n.t('settings.section.admin'),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                SizedBox(height: 12.h),
+                ListTile(
+                  leading: const Icon(Icons.stars_outlined),
+                  title: Text(l10n.t('settings.superAdmin.title')),
+                  subtitle: Text(l10n.t('settings.superAdmin.subtitle')),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    await _openSuperAdminPanel();
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.admin_panel_settings_outlined),
+                  title: Text(l10n.t('settings.admin.company.title')),
+                  subtitle: Text(l10n.t('settings.admin.company.subtitle')),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    await _openCompanyAdmin(companyName);
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _openCompanyAdmin(String? companyName) async {
+    final result = _lastLoginResult;
+    final hasSadaqa =
+        result?.sadaqaSuccess == true || DBService.accessToken.isNotEmpty;
+
+    if (hasSadaqa) {
+      await Navigator.of(context, rootNavigator: true).push(
+        MaterialPageRoute(
+          builder: (_) => AdminPanelPage(companyName: companyName),
+        ),
+      );
+      return;
+    }
+
+    await Navigator.of(
+      context,
+      rootNavigator: true,
+    ).push(MaterialPageRoute(builder: (_) => const TourAdminPanelPage()));
+  }
+
+  Future<void> _openSuperAdminPanel() async {
+    await Navigator.of(
+      context,
+      rootNavigator: true,
+    ).push(MaterialPageRoute(builder: (_) => const SuperAdminPanelPage()));
   }
 }
 

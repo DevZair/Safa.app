@@ -1,8 +1,10 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
 import 'package:flutter/material.dart';
 
 import 'package:safa_app/core/constants/api_constants.dart';
@@ -34,7 +36,25 @@ class ApiService {
       sendTimeout: const Duration(seconds: 30),
       maxRedirects: 5,
     )
+    ..httpClientAdapter = _buildHttpAdapter()
     ..interceptors.add(CustomInterceptor());
+
+  static HttpClientAdapter _buildHttpAdapter() {
+    final adapter = IOHttpClientAdapter();
+    adapter.onHttpClientCreate = (client) {
+      final allowedHost = Uri.tryParse(_resolvedBaseUrl)?.host;
+      client.badCertificateCallback = (cert, host, port) {
+        // Allow self-signed/invalid cert for our API host to prevent TLS handshake issues
+        // on emulators and some Android/iOS devices.
+        if (allowedHost != null && allowedHost.isNotEmpty) {
+          return host == allowedHost;
+        }
+        return true;
+      };
+      return client;
+    };
+    return adapter;
+  }
 
   static FutureOr<T> request<T>(
     String path, {
@@ -165,7 +185,15 @@ class ApiService {
   static String _tokenForPath(String path) {
     final normalized = path.toLowerCase();
     // Never attach existing tokens to login endpoints to avoid 401.
-    if (normalized.contains('/company/login')) return '';
+    if (normalized.contains('/company/login') ||
+        normalized.contains('/auth/admin/login')) {
+      return '';
+    }
+
+    if (normalized.contains('/auth/admin/')) {
+      return DBService.superAdminAccessToken;
+    }
+
     final isTourPath = normalized.contains('/tour/');
 
     if (isTourPath && DBService.tourAccessToken.isNotEmpty) {

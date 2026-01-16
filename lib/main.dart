@@ -3,11 +3,12 @@ import 'package:safa_app/features/travel/domain/repositories/travel_repository.d
 import 'package:safa_app/features/travel/presentation/cubit/travel_cubit.dart';
 import 'package:safa_app/core/localization/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:safa_app/core/settings/app_settings_state.dart';
 import 'package:safa_app/core/settings/app_settings_cubit.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:safa_app/core/settings/app_settings_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:safa_app/core/constants/api_constants.dart';
 import 'package:safa_app/core/navigation/app_router.dart';
 import 'package:safa_app/core/service/db_service.dart';
 import 'package:safa_app/core/styles/app_theme.dart';
@@ -18,6 +19,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
+import 'dart:io';
+
 
 const Size _designSize = Size(440, 956);
 
@@ -49,6 +52,7 @@ void _installKeyEventGuard(WidgetsBinding binding) {
 Future<void> main() async {
   final binding = WidgetsFlutterBinding.ensureInitialized();
   _installKeyEventGuard(binding);
+  HttpOverrides.global = _ApiHttpOverrides();
 
   const enableMessaging = !kIsWeb;
 
@@ -72,6 +76,21 @@ Future<void> main() async {
       child: SafaApp(prefs: preferences, enableMessaging: enableMessaging),
     ),
   );
+}
+
+class _ApiHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    final client = super.createHttpClient(context);
+    final host = Uri.tryParse(ApiConstants.baseUrl)?.host;
+    client.badCertificateCallback = (cert, hostName, port) {
+      if (host != null && host.isNotEmpty) {
+        return hostName == host;
+      }
+      return true;
+    };
+    return client;
+  }
 }
 
 class SafaApp extends StatefulWidget {
