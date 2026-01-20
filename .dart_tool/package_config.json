@@ -80,6 +80,12 @@
       "languageVersion": "3.4"
     },
     {
+      "name": "csslib",
+      "rootUri": "file:///Users/macbookpro/.pub-cache/hosted/pub.dev/csslib-1.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
       "name": "cupertino_icons",
       "rootUri": "file:///Users/macbookpro/.pub-cache/hosted/pub.dev/cupertino_icons-1.0.8",
       "packageUri": "lib/",
@@ -228,6 +234,12 @@
       "rootUri": "file:///Users/macbookpro/.pub-cache/hosted/pub.dev/go_router-17.0.0",
       "packageUri": "lib/",
       "languageVersion": "3.7"
+    },
+    {
+      "name": "html",
+      "rootUri": "file:///Users/macbookpro/.pub-cache/hosted/pub.dev/html-0.15.6",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
     },
     {
       "name": "http",
@@ -542,6 +554,36 @@
       "languageVersion": "3.1"
     },
     {
+      "name": "video_player",
+      "rootUri": "file:///Users/macbookpro/.pub-cache/hosted/pub.dev/video_player-2.10.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
+    },
+    {
+      "name": "video_player_android",
+      "rootUri": "file:///Users/macbookpro/.pub-cache/hosted/pub.dev/video_player_android-2.9.1",
+      "packageUri": "lib/",
+      "languageVersion": "3.9"
+    },
+    {
+      "name": "video_player_avfoundation",
+      "rootUri": "file:///Users/macbookpro/.pub-cache/hosted/pub.dev/video_player_avfoundation-2.8.10",
+      "packageUri": "lib/",
+      "languageVersion": "3.10"
+    },
+    {
+      "name": "video_player_platform_interface",
+      "rootUri": "file:///Users/macbookpro/.pub-cache/hosted/pub.dev/video_player_platform_interface-6.6.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.7"
+    },
+    {
+      "name": "video_player_web",
+      "rootUri": "file:///Users/macbookpro/.pub-cache/hosted/pub.dev/video_player_web-2.4.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.6"
+    },
+    {
       "name": "vm_service",
       "rootUri": "file:///Users/macbookpro/.pub-cache/hosted/pub.dev/vm_service-15.0.2",
       "packageUri": "lib/",
@@ -585,8 +627,8 @@
     }
   ],
   "generator": "pub",
-  "generatorVersion": "3.10.0",
+  "generatorVersion": "3.10.7",
   "flutterRoot": "file:///opt/homebrew/share/flutter",
-  "flutterVersion": "3.38.1",
+  "flutterVersion": "3.38.7",
   "pubCache": "file:///Users/macbookpro/.pub-cache"
 }

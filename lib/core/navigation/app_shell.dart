@@ -44,8 +44,8 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isIOS = theme.platform == TargetPlatform.iOS;
-    final barHeight = isIOS ? 80.h : 70.h;
-    final radius = 25.r;
+    final barHeight = isIOS ? 65.h : 70.h;
+    final radius = 40.r;
     final bottomOffset = isIOS ? 12.h : 26.h;
 
     return Scaffold(

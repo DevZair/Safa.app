@@ -14,6 +14,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   flutter_svg: ^2.2.1
+  video_player: ^2.8.6
   flutter_bloc: ^9.0.0
   go_router: ^17.0.0
   flutter_screenutil: ^5.9.3
@@ -41,6 +42,7 @@ flutter:
     - assets/icons/
     - assets/images/
     - assets/lotties/loading_plane.json
+    - assets/videos/splash.mp4
 
   fonts:
     - family: Poppins

@@ -21,7 +21,6 @@ import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 import 'dart:io';
 
-
 const Size _designSize = Size(440, 956);
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {

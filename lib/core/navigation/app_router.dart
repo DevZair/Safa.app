@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:safa_app/core/navigation/app_shell.dart';
+import 'package:safa_app/core/navigation/splash_video_screen.dart';
 import 'package:safa_app/features/sadaqa/presentation/pages/request_help.dart';
 import 'package:safa_app/features/sadaqa/presentation/pages/sadaqa_detail.dart';
 import 'package:safa_app/features/sadaqa/presentation/pages/sadaqa_company_page.dart';
@@ -10,6 +11,7 @@ import 'package:safa_app/features/travel/presentation/pages/travel_company_page.
 import 'package:safa_app/features/travel/presentation/pages/travel_page.dart';
 
 enum AppRoute {
+  splash,
   sadaqa,
   sadaqaCompany,
   sadaqaDetail,
@@ -31,8 +33,18 @@ class AppRouter {
 
   late final GoRouter router = GoRouter(
     navigatorKey: _rootNavigatorKey,
-    initialLocation: '/sadaqa',
+
+    // ✅ app ochilganda birinchi video chiqadi
+    initialLocation: '/splash',
+
     routes: [
+      // ✅ Splash route (video)
+      GoRoute(
+        path: '/splash',
+        name: AppRoute.splash.name,
+        builder: (context, state) => const SplashVideoScreen(),
+      ),
+
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             AppShell(navigationShell: navigationShell),
