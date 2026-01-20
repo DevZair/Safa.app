@@ -63,10 +63,6 @@ class SadaqaDetailHeader extends StatelessWidget {
                       onTap: onFavorite ?? () {},
                     ),
                     SizedBox(width: 12.w),
-                    SadaqaCircleAction(
-                      icon: Icons.share_outlined,
-                      onTap: onShare ?? () {},
-                    ),
                   ],
                 ),
                 SizedBox(height: 16.h),
@@ -194,21 +190,21 @@ class _CompanyAvatar extends StatelessWidget {
         borderRadius: radius,
         child: isNetwork
             ? Image.network(
-          resolvedLogo,
-          width: 52.r,
-          height: 52.r,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) =>
-              _FallbackAvatar(fallback),
-        )
-      : Image.asset(
-          resolvedLogo,
-          width: 52.r,
-          height: 52.r,
-          fit: BoxFit.cover,
-        ),
-    );
-  } else {
+                resolvedLogo,
+                width: 52.r,
+                height: 52.r,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    _FallbackAvatar(fallback),
+              )
+            : Image.asset(
+                resolvedLogo,
+                width: 52.r,
+                height: 52.r,
+                fit: BoxFit.cover,
+              ),
+      );
+    } else {
       avatar = _FallbackAvatar(fallback);
     }
 
@@ -733,10 +729,7 @@ class SadaqaBeneficiaryOverviewCard extends StatelessWidget {
                       'sadaqa.detail.donors',
                       params: {'count': '$donors'},
                     ),
-                    style: TextStyle(
-                      color: Color(0xFF94A3B8),
-                      fontSize: 13.sp,
-                    ),
+                    style: TextStyle(color: Color(0xFF94A3B8), fontSize: 13.sp),
                   ),
                 ],
               ),
@@ -745,8 +738,7 @@ class SadaqaBeneficiaryOverviewCard extends StatelessWidget {
           SizedBox(height: 12.h),
           SadaqaPrimaryButton(
             label: donateLabel,
-            onPressed:
-                onDonate == null ? null : () => onDonate!(paymentUrl),
+            onPressed: onDonate == null ? null : () => onDonate!(paymentUrl),
           ),
         ],
       ),
@@ -865,10 +857,7 @@ class SadaqaPinnedFundCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 10.w,
-                  vertical: 6.h,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                 decoration: BoxDecoration(
                   color: const Color(0xFFF0F9FF),
                   borderRadius: BorderRadius.circular(12.r),

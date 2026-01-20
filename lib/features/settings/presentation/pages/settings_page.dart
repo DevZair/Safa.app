@@ -100,24 +100,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SettingsSection(
-                        title: l10n.t('settings.section.appearance'),
-                        children: [
-                          SettingsSwitchTile(
-                            icon: Icons.dark_mode_outlined,
-                            iconColor: const Color(0xFF4C6EF5),
-                            title: l10n.t('settings.theme.title'),
-                            subtitle: l10n.t('settings.theme.subtitle'),
-                            value: settingsState.isDarkMode,
-                            onChanged: (value) {
-                              context.read<AppSettingsCubit>().toggleDarkMode(
-                                value,
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 28.h),
-                      SettingsSection(
                         title: l10n.t('settings.section.preferences'),
                         children: [
                           SettingsSwitchTile(
@@ -203,11 +185,6 @@ class _SettingsPageState extends State<SettingsPage> {
                             },
                           ),
                         ],
-                      ),
-                      SizedBox(height: 28.h),
-                      _LogoutCard(
-                        label: l10n.t('settings.logout'),
-                        onPressed: () {},
                       ),
                     ],
                   ),
@@ -560,47 +537,6 @@ class _SettingsPageState extends State<SettingsPage> {
       context,
       rootNavigator: true,
     ).push(MaterialPageRoute(builder: (_) => const SuperAdminPanelPage()));
-  }
-}
-
-class _LogoutCard extends StatelessWidget {
-  final VoidCallback onPressed;
-  final String label;
-
-  const _LogoutCard({required this.onPressed, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(26.r),
-        child: Ink(
-          padding: EdgeInsets.symmetric(vertical: 18.h),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(26.r),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.logout, color: Color(0xFFE53935)),
-              SizedBox(width: 10.w),
-              Text(
-                label,
-                style: textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFFE53935),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
 

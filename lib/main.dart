@@ -18,6 +18,7 @@ import 'package:safa_app/firebase_options.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:ui' as ui;
 import 'dart:io';
 
@@ -51,6 +52,10 @@ void _installKeyEventGuard(WidgetsBinding binding) {
 Future<void> main() async {
   final binding = WidgetsFlutterBinding.ensureInitialized();
   _installKeyEventGuard(binding);
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   HttpOverrides.global = _ApiHttpOverrides();
 
   const enableMessaging = !kIsWeb;

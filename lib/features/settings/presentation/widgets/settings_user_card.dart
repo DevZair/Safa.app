@@ -23,7 +23,6 @@ class SettingsUserCard extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onPressed,
         borderRadius: BorderRadius.circular(26.r),
         child: Ink(
           padding: EdgeInsets.all(20.r),
@@ -60,30 +59,18 @@ class SettingsUserCard extends StatelessWidget {
                     Text(
                       name,
                       style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: onSurface,
-                          ),
+                        fontWeight: FontWeight.w600,
+                        color: onSurface,
+                      ),
                     ),
                     SizedBox(height: 4.h),
                     Text(
                       email,
                       style: textTheme.bodyMedium?.copyWith(
-                            color: onSurface.withValues(alpha: 0.65),
-                          ),
+                        color: onSurface.withValues(alpha: 0.65),
+                      ),
                     ),
                   ],
-                ),
-              ),
-              Container(
-                width: 38.r,
-                height: 38.r,
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.chevron_right,
-                  color: AppColors.primary,
                 ),
               ),
             ],
