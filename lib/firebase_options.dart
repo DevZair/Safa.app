@@ -55,16 +55,16 @@ class DefaultFirebaseOptions {
     apiKey: 'AIzaSyBJEp3_jZ-TgfFrMoR1JYgG9o6l1SIcrQk',
     appId: '1:889199537687:android:3578cff1b656725e613652',
     messagingSenderId: '889199537687',
-    projectId: 'safa-az-app',
-    storageBucket: 'safa-az-app.firebasestorage.app',
+    projectId: 'kz.safa.app',
+    storageBucket: 'kz.safa.app.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyDAgALsyTOssM_RCsW9Wn2uhjcNFihvp0o',
     appId: '1:889199537687:ios:6e94e58c07524aef613652',
     messagingSenderId: '889199537687',
-    projectId: 'safa-az-app',
-    storageBucket: 'safa-az-app.firebasestorage.app',
-    iosBundleId: 'com.example.safaApp',
+    projectId: 'kz.safa.app',
+    storageBucket: 'kz.safa.app.firebasestorage.app',
+    iosBundleId: 'kz.safa.app',
   );
 }

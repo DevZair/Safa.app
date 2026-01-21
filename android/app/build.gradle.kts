@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.safa_app"
+    namespace = "kz.safa.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -20,9 +20,8 @@ android {
     }
 
     defaultConfig {
-        // ✅ O‘zingizning package ID’ingiz
-        applicationId = "com.example.safa_app"
-        minSdk = flutter.minSdkVersion  // Firebase uchun kamida 21 bo‘lishi kerak!
+        applicationId = "kz.safa.app"
+        minSdk = flutter.minSdkVersion 
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

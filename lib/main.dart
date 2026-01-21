@@ -25,7 +25,11 @@ import 'dart:io';
 const Size _designSize = Size(440, 956);
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  if (Firebase.apps.isEmpty) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
   debugPrint("📩 Background message: ${message.notification?.title}");
 }
 
@@ -52,6 +56,7 @@ void _installKeyEventGuard(WidgetsBinding binding) {
 Future<void> main() async {
   final binding = WidgetsFlutterBinding.ensureInitialized();
   _installKeyEventGuard(binding);
+
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -61,9 +66,6 @@ Future<void> main() async {
   const enableMessaging = !kIsWeb;
 
   if (enableMessaging) {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
   await DBService.initialize();
