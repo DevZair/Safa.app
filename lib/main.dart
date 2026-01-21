@@ -65,9 +65,9 @@ Future<void> main() async {
 
   const enableMessaging = !kIsWeb;
 
-  if (enableMessaging) {
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  }
+if (enableMessaging) {
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+}
   await DBService.initialize();
 
   final preferences = await SharedPreferences.getInstance();
