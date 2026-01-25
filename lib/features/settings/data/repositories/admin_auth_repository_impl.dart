@@ -6,6 +6,7 @@ import 'package:safa_app/features/settings/domain/entities/admin_login_result.da
 import 'package:safa_app/features/settings/domain/repositories/admin_auth_repository.dart';
 
 class AdminAuthRepositoryImpl implements AdminAuthRepository {
+  @override
   Future<AdminLoginResult> login({
     required String login,
     required String password,

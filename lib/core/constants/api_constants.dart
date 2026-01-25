@@ -45,4 +45,8 @@ final class ApiConstants {
       '/api/sadaqa/private/materials-status/';
   static const String sadaqaPrivateHelpCategories =
       '/api/sadaqa/private/help-categories/';
+  static const String sadaqaAdminRefresh =
+      '/api/sadaqa/private/company/refresh';
+  static const String tourAdminRefresh = '/api/tour/private/company/refresh';
+  static const String superAdminRefresh = '/api/auth/admin/refresh';
 }

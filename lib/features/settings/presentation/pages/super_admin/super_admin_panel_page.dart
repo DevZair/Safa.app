@@ -77,7 +77,7 @@ class SuperAdminPanelPage extends StatelessWidget {
                       child: _SectionCard(section: s),
                     ),
                   )
-                  .toList(),
+                  ,
             ],
           ),
         ),

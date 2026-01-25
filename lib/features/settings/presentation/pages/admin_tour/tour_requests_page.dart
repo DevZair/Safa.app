@@ -120,7 +120,7 @@ class _BookingTile extends StatelessWidget {
       child: ListTile(
         title: Text('${booking.surname} ${booking.name}'),
         subtitle: Text(
-          'Тур ID: ${booking.tourId}\nТел: ${booking.phone}\n${dateLabel}',
+          'Тур ID: ${booking.tourId}\nТел: ${booking.phone}\n$dateLabel',
         ),
         isThreeLine: true,
         trailing: Icon(Icons.chevron_right, size: 20.sp),

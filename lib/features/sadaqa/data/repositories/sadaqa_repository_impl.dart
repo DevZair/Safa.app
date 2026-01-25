@@ -18,6 +18,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
   static const _notesCacheKey = 'cache_sadaqa_notes';
   static const _activeNoteCacheKey = 'cache_sadaqa_active_note';
 
+  @override
   Future<List<SadaqaCause>> fetchCauses() async {
     final basePaths = <String>{
       ApiConstants.sadaqaCauses,
@@ -94,6 +95,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
     return null;
   }
 
+  @override
   Future<List<SadaqaCompany>> fetchCompanies() async {
     final basePaths = <String>{
       ApiConstants.sadaqaCompanies,
@@ -131,6 +133,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
         .toList();
   }
 
+  @override
   Future<SadaqaCompany?> fetchCompanyDetail(String companyId) async {
     if (companyId.isEmpty) return null;
 
@@ -173,6 +176,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
     return null;
   }
 
+  @override
   Future<List<SadaqaPost>> fetchPosts({String? companyId}) async {
     final cacheKey = _cacheKey(_postsCacheKey, companyId);
     final cached = _readCachedPosts(cacheKey);
@@ -218,6 +222,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
     }
   }
 
+  @override
   Future<List<SadaqaPost>> fetchAdminPosts() async {
     final basePaths = <String>{
       ApiConstants.sadaqaAdminPosts,
@@ -251,6 +256,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
         .toList();
   }
 
+  @override
   Future<List<SadaqaPost>> fetchAdminNotes() async {
     final basePaths = <String>{
       ApiConstants.sadaqaAdminNotes,
@@ -284,6 +290,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
         .toList();
   }
 
+  @override
   Future<List<HelpRequest>> fetchHelpRequests() async {
     final basePaths = <String>{
       ApiConstants.sadaqaHelpRequests,
@@ -362,6 +369,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
     }).toList(growable: false);
   }
 
+  @override
   Future<HelpRequest?> updateHelpRequestStatus({
     required String id,
     required HelpRequestStatus status,
@@ -402,14 +410,17 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
     return null;
   }
 
+  @override
   Future<List<ReferenceItem>> fetchPrivateMaterialStatusList() async {
     return _fetchPrivateMaterialStatuses();
   }
 
+  @override
   Future<List<ReferenceItem>> fetchPrivateHelpCategoryList() async {
     return _fetchPrivateHelpCategories();
   }
 
+  @override
   Future<ReferenceItem?> createMaterialStatus(String title,
       {bool isActive = true}) async {
     final created = await _createLookup(
@@ -428,6 +439,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
     return created;
   }
 
+  @override
   Future<bool> deleteMaterialStatus(int id) async {
     final deleted = await _deleteLookup(
       basePath: ApiConstants.sadaqaPrivateMaterialStatuses,
@@ -439,6 +451,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
     return deleted;
   }
 
+  @override
   Future<ReferenceItem?> updateMaterialStatus({
     required int id,
     required String title,
@@ -461,6 +474,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
     return updated;
   }
 
+  @override
   Future<ReferenceItem?> createHelpCategory(
     String title, {
     bool isOther = false,
@@ -475,6 +489,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
     );
   }
 
+  @override
   Future<bool> deleteHelpCategory(int id) async {
     return _deleteLookup(
       basePath: ApiConstants.sadaqaPrivateHelpCategories,
@@ -482,6 +497,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
     );
   }
 
+  @override
   Future<ReferenceItem?> updateHelpCategory({
     required int id,
     required String title,
@@ -734,6 +750,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
     return false;
   }
 
+  @override
   Future<List<SadaqaPost>> fetchNotes({String? companyId}) async {
     final cacheKey = _cacheKey(_notesCacheKey, companyId);
     final cached = _readCachedPosts(cacheKey);
@@ -790,6 +807,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
     }
   }
 
+  @override
   Future<SadaqaPost?> fetchActiveNote({String? companyId}) async {
     final basePaths = <String>{
       '/api/sadaqa/public/notes/active',
@@ -831,11 +849,13 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
     return '$base:$companyId';
   }
 
+  @override
   List<SadaqaPost>? readCachedPosts({String? companyId}) {
     final cacheKey = _cacheKey(_postsCacheKey, companyId);
     return _readCachedPosts(cacheKey);
   }
 
+  @override
   SadaqaPost? readCachedActiveNote({String? companyId}) {
     final cacheKey = _cacheKey(_activeNoteCacheKey, companyId);
     final cached = _readCachedPosts(cacheKey);
@@ -968,6 +988,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
     return 1;
   }
 
+  @override
   Future<SadaqaCompany> updateCompanyProfile({
     String? title,
     String? image,
@@ -1023,6 +1044,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
     });
   }
 
+  @override
   Future<SadaqaPost> updatePost({
     required String postId,
     String? title,
@@ -1075,6 +1097,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
     });
   }
 
+  @override
   Future<SadaqaPost> createPost({
     String? title,
     String? content,
@@ -1144,6 +1167,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
     });
   }
 
+  @override
   Future<String> uploadImage(String path) async {
     final fileName = path.split('/').last;
     final formData = FormData.fromMap({
@@ -1189,6 +1213,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
     return '${baseUri.scheme}://${baseUri.authority}$sanitizedPath$query';
   }
 
+  @override
   Future<void> deletePost(String postId) async {
     final basePath =
         '${ApiConstants.sadaqaAdminPosts}${postId.startsWith('/') ? '' : '/'}$postId';
@@ -1213,6 +1238,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
     if (lastError != null) throw lastError;
   }
 
+  @override
   Future<void> deleteNote(String noteId) async {
     final basePath =
         '${ApiConstants.sadaqaAdminNotes}${noteId.startsWith('/') ? '' : '/'}$noteId';
@@ -1237,6 +1263,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
     if (lastError != null) throw lastError;
   }
 
+  @override
   Future<SadaqaPost> updateNote({
     required String noteId,
     String? title,
@@ -1285,6 +1312,7 @@ class SadaqaRepositoryImpl implements SadaqaRepository {
     });
   }
 
+  @override
   Future<SadaqaPost> createNote({
     String? title,
     String? content,

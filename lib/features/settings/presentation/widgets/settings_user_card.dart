@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:safa_app/core/styles/app_colors.dart';
 
 class SettingsUserCard extends StatelessWidget {
   final String name;

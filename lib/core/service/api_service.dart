@@ -1,7 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
@@ -117,7 +116,8 @@ class ApiService {
         }
       }
 
-      if (response.statusCode == null || response.statusCode! > 204) {
+      // Check for error status codes (>= 300) or null status code
+      if (response.statusCode == null || response.statusCode! >= 300) {
         final convert = const JsonEncoder().cast<Object?, String?>().convert(
           response.data ?? {},
         );
@@ -150,6 +150,24 @@ class ApiService {
         jsonEncode(response.data ?? {}),
       );
     } on DioException catch (error, stackTrace) {
+      // Try to refresh token if we got 401 and have a refresh token
+      if (error.response?.statusCode == 401 && includeAuthHeader) {
+        final refreshed = await _tryRefreshToken(path);
+        if (refreshed) {
+          // Retry the original request with new token
+          return await request<T>(
+            path,
+            method: method,
+            data: data,
+            headers: headers,
+            queryParams: queryParams,
+            formData: formData,
+            followRedirects: followRedirects,
+            includeAuthHeader: includeAuthHeader,
+          );
+        }
+      }
+
       final convert = const JsonEncoder().cast<Object?, String?>().convert(
         error.response?.data ?? {},
       );
@@ -186,7 +204,8 @@ class ApiService {
     final normalized = path.toLowerCase();
     // Never attach existing tokens to login endpoints to avoid 401.
     if (normalized.contains('/company/login') ||
-        normalized.contains('/auth/admin/login')) {
+        normalized.contains('/auth/admin/login') ||
+        normalized.contains('/refresh')) {
       return '';
     }
 
@@ -205,6 +224,89 @@ class ApiService {
     }
 
     return '';
+  }
+
+  static Future<bool> _tryRefreshToken(String path) async {
+    final normalized = path.toLowerCase();
+
+    // Determine which token to refresh based on path
+    String refreshToken;
+    String refreshEndpoint;
+
+    if (normalized.contains('/auth/admin/')) {
+      refreshToken = DBService.superAdminRefreshToken;
+      refreshEndpoint = ApiConstants.superAdminRefresh;
+    } else if (normalized.contains('/tour/')) {
+      refreshToken = DBService.tourRefreshToken;
+      refreshEndpoint = ApiConstants.tourAdminRefresh;
+    } else if (normalized.contains('/sadaqa/')) {
+      refreshToken = DBService.refreshToken;
+      refreshEndpoint = ApiConstants.sadaqaAdminRefresh;
+    } else {
+      return false;
+    }
+
+    if (refreshToken.isEmpty) {
+      return false;
+    }
+
+    // Try different formats for refresh token request
+    final formatsToTry = [
+      {'refresh': refreshToken}, // Common FastAPI/Django format
+      {'refresh_token': refreshToken}, // Alternative format
+    ];
+
+    for (final dataFormat in formatsToTry) {
+      try {
+        final response = await _dio.request<Object?>(
+          refreshEndpoint,
+          data: dataFormat,
+          options: Options(
+            method: 'POST',
+            headers: {
+              'lang': DBService.languageCode,
+              'content-type': Headers.jsonContentType,
+            },
+          ),
+        );
+
+        if (response.statusCode != null &&
+            response.statusCode! >= 200 &&
+            response.statusCode! < 300) {
+          final data = response.data;
+          if (data is Map<String, Object?>) {
+            final access = '${data['access_token'] ?? ''}'.trim();
+            final refresh = '${data['refresh_token'] ?? ''}'.trim();
+
+            if (access.isNotEmpty) {
+              // Update tokens based on path
+              if (normalized.contains('/auth/admin/')) {
+                DBService.superAdminAccessToken = access;
+                if (refresh.isNotEmpty) {
+                  DBService.superAdminRefreshToken = refresh;
+                }
+              } else if (normalized.contains('/tour/')) {
+                DBService.tourAccessToken = access;
+                if (refresh.isNotEmpty) {
+                  DBService.tourRefreshToken = refresh;
+                }
+              } else if (normalized.contains('/sadaqa/')) {
+                DBService.accessToken = access;
+                if (refresh.isNotEmpty) {
+                  DBService.refreshToken = refresh;
+                }
+              }
+              return true;
+            }
+          }
+        }
+      } catch (e) {
+        // Try next format
+        continue;
+      }
+    }
+
+    return false;
   }
 
   static Never throwError() => throw Error.throwWithStackTrace(

@@ -380,8 +380,9 @@ class _CreateEditTourPageState extends State<CreateEditTourPage> {
         ),
         keyboardType: keyboardType,
         validator: (value) {
-          if (value == null || value.isEmpty)
+          if (value == null || value.isEmpty) {
             return 'Please enter a value for $label';
+          }
           return null;
         },
       ),
@@ -401,8 +402,9 @@ class _CreateEditTourPageState extends State<CreateEditTourPage> {
         readOnly: true,
         onTap: () => _pickDate(controller),
         validator: (value) {
-          if (value == null || value.isEmpty)
+          if (value == null || value.isEmpty) {
             return 'Please select a date for $label';
+          }
           return null;
         },
       ),
@@ -418,7 +420,7 @@ class _CreateEditTourPageState extends State<CreateEditTourPage> {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.h),
       child: DropdownButtonFormField<T>(
-        value: value,
+        initialValue: value,
         items: items,
         onChanged: onChanged,
         decoration: InputDecoration(
